@@ -1,507 +1,255 @@
-# ETHER
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="logo/carousel-logo-dark.svg">
+    <img src="logo/carousel-logo.svg" alt="CAROUSEL" width="560">
+  </picture>
+</p>
 
-**Emerging Topic Horizon Engine for Research**
+<p align="center"><b>Discover the research that matters.</b></p>
 
-ETHER is an open-source literature intelligence platform that turns any
-research topic into a live literature radar. Users define a topic, choose
-literature sources, configure priority signals, and generate ranked dashboards
-to track emerging research across biomedical science and beyond.
+<p align="center">
+  <a href="https://github.com/aglucaci/Carousel/actions/workflows/ci.yml"><img src="https://github.com/aglucaci/Carousel/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/aglucaci/Carousel/actions/workflows/carousel-radar.yml"><img src="https://github.com/aglucaci/Carousel/actions/workflows/carousel-radar.yml/badge.svg" alt="CAROUSEL radar"></a>
+  <a href="https://aglucaci.github.io/Carousel/"><img src="https://img.shields.io/badge/dashboard-live-13A89E" alt="Live dashboard"></a>
+  <img src="https://img.shields.io/badge/status-v0.1%20in%20progress-E3A72F" alt="Status: v0.1 in progress">
+</p>
 
-## Why ETHER?
+CAROUSEL is an open-source platform for personalized scientific literature
+discovery. It monitors the research topics you define, ranks new papers with a
+transparent and reproducible scoring model, and tells you what has changed in
+your field since you last looked.
 
-Researchers are overwhelmed by new papers. Standard alerts return long lists of
-results, but they rarely explain which papers matter most or why.
+The question it answers is not *"What papers were published?"* but **"What
+changed in my field, why does it matter, and what should I read next?"**
 
-ETHER helps users:
+> **Status: early development (v0.1 in progress).** A daily PubMed radar,
+> its run history, and the radar config tooling work today. Multi-source
+> retrieval, the five-signal ranker, and Research Delta are being built. See
+> [What works today](#what-works-today) and the [roadmap](#roadmap).
+> CAROUSEL grew out of the ETHER prototype, so you will still see that name in
+> the manuscript drafts and the current dashboard.
 
-- track new papers across topics
-- prioritize papers using transparent scoring
-- create reusable radar configurations
-- monitor emerging research trends
-- export literature tables for grants, reviews, and journal clubs
-- share or clone dashboards
+---
 
-## How It Works
+## What works today
 
-```text
-Topic
-  |
-  v
-Search sources
-  |
-  v
-Extract metadata and abstracts
-  |
-  v
-Apply signal profile
-  |
-  v
-Calculate Research Relevance Score
-  |
-  v
-Generate dashboard and exports
-```
+| Capability | Where | Notes |
+| --- | --- | --- |
+| **Daily literature radar** | [Live dashboard](https://aglucaci.github.io/Carousel/) | PubMed, 14-day rolling window, about 10 themes, ranked with per-paper score breakdowns. Rebuilt every day at 13:00 UTC |
+| **Run history (snapshots)** | [`snapshots` branch](https://github.com/aglucaci/Carousel/tree/snapshots) | Every run is stored as an immutable, versioned snapshot. History starts 2026-01-21, and earlier runs were recovered from git history |
+| **Radar configs** | [`examples/`](examples/), [`carousel/config.py`](carousel/config.py) | YAML radars with strict validation and `file:line` error messages |
+| **`carousel` CLI** | [`carousel/cli.py`](carousel/cli.py) | `validate` and `show` today. `build`, `delta`, and `export` are next |
+| **Ranking evaluation** | [`scripts/validate_ranking.py`](scripts/validate_ranking.py) | Precision@K, Recall@K, and nDCG@K over expert-labeled rankings |
 
-## Core Concepts
+## Quick start
 
-### Radar
-
-A **radar** is a saved literature monitor for a research topic.
-
-Examples:
-
-- Cancer Evolution Radar
-- AI Drug Discovery Radar
-- Urban Microbiome Radar
-- Single-Cell Immunology Radar
-
-### Signal Profile
-
-A **signal profile** tells ETHER what to prioritize.
-
-Example signal categories:
-
-- methods
-- clinical relevance
-- datasets
-- mechanisms
-- biomarkers
-- translational potential
-- surveillance relevance
-- therapeutic relevance
-- open-source tools
-- review articles
-
-### Research Relevance Score
-
-The **Research Relevance Score** ranks papers using a transparent weighted
-model.
-
-```text
-Research Relevance Score =
-topic relevance
-+ recency
-+ priority term matches
-+ method signals
-+ source metadata
-+ optional user feedback
-```
-
-Each paper card explains its score with the matched topic, priority terms,
-method signals, recency, source, and score components.
-
-## Product Workflow
-
-ETHER is designed as a radar builder:
-
-```text
-Create Radar -> Enter Topic -> Choose Template -> Adjust Signals -> Generate Dashboard -> Export
-```
-
-Users can:
-
-1. Create a radar from a topic.
-2. Select sources.
-3. Define priority terms.
-4. Set scoring weights.
-5. Generate a live dashboard.
-6. Save, clone, export, or publish it.
-
-The fastest publishable version is CLI + configs + static dashboard + examples
-+ validation. User accounts, paid plans, team collaboration, and LLM summaries
-can come later.
-
-## Live Dashboard
-
-https://aglucaci.github.io/ETHER/
-
-[![ETHER](https://github.com/aglucaci/ETHER/actions/workflows/ether-radar.yml/badge.svg)](https://github.com/aglucaci/ETHER/actions/workflows/ether-radar.yml)
-
-## Site Map
-
-The static site now supports the MVP product and paper narrative:
-
-- `/` - home page and live generated dashboard
-- `/create/` - guided radar builder
-- `/radar/cancer-evolution/` - example radar dashboard page
-- `/templates/` - reusable starter radars
-- `/explore/` - public radar gallery with clone actions
-- `/examples/` - finished dashboards and links to configs
-- `/methodology/` - Research Relevance Score explanation
-- `/docs/` - usage and reproducibility documentation
-- `/export/` - Research Pack export formats
-- `/about/` - project purpose, audience, and open-source framing
-
-## Quick Start
-
-Current prototype:
+Requires Python 3.10+.
 
 ```bash
-pip install requests
-python scripts/daily_pubmed_watch_v2.py --days 1 --max 12
+git clone https://github.com/aglucaci/Carousel.git
+cd Carousel
+pip install -e ".[dev]"
 ```
 
-Output:
-
-```text
-docs/index.html
-docs/latest.json
-docs/latest.md
-```
-
-Run tests:
+Check every example radar:
 
 ```bash
-python -m unittest tests.test_scoring
+carousel validate examples/*.yml
 ```
-
-Planned package workflow:
-
-```bash
-git clone https://github.com/your-org/ether
-cd ether
-pip install -e .
-ether init ai_protein_design
-ether build radars/ai_protein_design.yml
-ether serve results/ai_protein_design/
-ether export results/ai_protein_design/ --format csv
-ether export results/ai_protein_design/ --format bibtex
-```
-
-## Create Your Own Radar
-
-### Step 1: Choose a Topic
-
-Example:
 
 ```text
-AI for protein design
+ok   examples/viral_evolution.yml  radar_id=viral-evolution sources=pubmed,biorxiv,medrxiv queries=5 signal_categories=3 window=90d hash=47e1d2439758
+...
+8/8 valid
 ```
 
-### Step 2: Start from a Template
+Print a radar's fully resolved config, with defaults filled in:
 
-Starter radar configurations live in [`examples/`](examples/).
+```bash
+carousel show examples/viral_evolution.yml
+```
 
-Recommended first templates:
+Run the current daily pipeline locally. It writes `index.html`,
+`latest.json`, and `latest.md`:
 
-- Cancer Evolution Radar
-- Viral Evolution Radar
-- Metagenomics Radar
-- Urban Microbiome Radar
-- AI Drug Discovery Radar
-- Protein Design Radar
-- Wastewater Surveillance Radar
-- Single-Cell Genomics Radar
+```bash
+python scripts/daily_pubmed_watch_v2.py --days 14 --max 25 --docs-dir results/demo
+```
 
-### Step 3: Edit Your Query Set
+Run the tests:
+
+```bash
+python -m pytest -q
+```
+
+## Defining a radar
+
+A **radar** is a saved literature monitor: what to search, what to prioritize,
+and how to rank. Start from one of the [example radars](examples/):
+
+| | | | |
+| --- | --- | --- | --- |
+| Cancer evolution | Viral evolution | Metagenomics | Urban microbiome |
+| AI drug discovery | Protein design | Wastewater surveillance | Single-cell genomics |
 
 ```yaml
-radar_name: AI Protein Design Radar
-
-sources:
-  - pubmed
-  - biorxiv
-  - medrxiv
-
-queries:
-  - "protein design"
-  - "protein engineering"
-  - "generative model"
-  - "diffusion model"
-  - "protein language model"
-```
-
-### Step 4: Define Your Signal Profile
-
-```yaml
-signal_profile:
-  methods:
-    description: "Computational or experimental methods"
-    terms:
-      - diffusion model
-      - protein language model
-      - inverse folding
-      - generative model
-    weight: 2.0
-
-  validation:
-    description: "Experimental validation or benchmark evidence"
-    terms:
-      - wet-lab validation
-      - binding assay
-      - functional assay
-      - benchmark
-    weight: 2.5
-
-  applications:
-    description: "Applied protein engineering outcomes"
-    terms:
-      - enzyme design
-      - antibody design
-      - therapeutic protein
-      - stability
-    weight: 1.5
-```
-
-### Step 5: Build, View, and Publish
-
-```bash
-ether build radars/ai_protein_design.yml
-ether serve results/ai_protein_design/
-ether publish results/ai_protein_design/
-```
-
-## Example Radar Configuration
-
-```yaml
-radar_name: Cancer Evolution Radar
-
+radar_name: Viral Evolution Radar
 description: >
-  Tracks papers related to cancer evolution, clonal dynamics,
-  therapy resistance, tumor phylogenetics, and single-cell methods.
+  Tracks viral mutation, immune escape, recombination, host jumps,
+  phylodynamics, and genomic surveillance.
 
-sources:
-  - pubmed
-  - biorxiv
-  - medrxiv
+sources: [pubmed, biorxiv, medrxiv]
 
 queries:
-  - "cancer evolution"
-  - "clonal evolution"
-  - "tumor phylogeny"
-  - "therapy resistance"
-  - "subclonal architecture"
+  - "viral evolution"
+  - "immune escape"
+  - "antigenic drift"
+
+exclude:            # optional: drop candidates matching these terms
+  - "case report"
 
 filters:
   date_range: "last_90_days"
-  language: "english"
 
-signal_profile:
-  biological_process:
-    terms:
-      - clonal selection
-      - subclonal expansion
-      - tumor evolution
-      - lineage tracing
-    weight: 2.0
-
-  methods:
-    terms:
-      - single-cell sequencing
-      - phylogenetic reconstruction
-      - mutational signatures
-      - spatial transcriptomics
-    weight: 1.5
-
-  clinical_relevance:
-    terms:
-      - relapse
-      - minimal residual disease
-      - treatment resistance
-      - metastasis
+signal_profile:     # what counts as interesting, by category
+  immune_escape:
+    description: "Immune evasion and antigenic change"
+    terms: [immune escape, antigenic drift, neutralization escape]
     weight: 2.5
+  methods:
+    terms: [phylodynamics, molecular clock, genomic epidemiology]
+    weight: 1.8
 
-scoring:
-  topic_relevance_weight: 0.35
-  recency_weight: 0.20
-  signal_weight: 0.35
-  source_weight: 0.10
+ranking:            # relative priority of the five CAROUSEL signals
+  relevance: 0.40
+  novelty: 0.20
+  momentum: 0.15
+  discovery: 0.10
+  evidence: 0.15
 
-outputs:
-  - dashboard
-  - csv
-  - bibtex
-  - markdown
+outputs: [dashboard, csv, bibtex]
 ```
 
-## Dashboard Features
+Validation rules:
 
-Each dashboard includes:
+- Unknown fields, unknown sources, duplicate YAML keys, and duplicate terms are rejected with the line number.
+- `radar_id` defaults to the file name, so `viral_evolution.yml` becomes `viral-evolution`.
+- Each resolved config gets a short `config_hash`, which is recorded with results.
+- Sources: `pubmed`, `europepmc`, `biorxiv`, `medrxiv`, `crossref`, `openalex`, `arxiv`. The config schema accepts all of these, but only PubMed is fetched today. The other connectors are part of v0.1.
 
-- ranked papers
-- Research Relevance Score
-- score explanations
-- matched priority terms
-- source filters
-- date filters
-- emerging trend summaries
-- saved papers
-- export tools
+## How ranking works
 
-Example paper card:
+CAROUSEL ranks with independently measurable signals rather than an opaque AI
+rating. Every recommendation can show why it ranked where it did.
+
+| Signal | Meaning | Default weight |
+| --- | --- | --- |
+| **Relevance** | Match to the radar's queries and signal profile | 40% |
+| **Novelty** | Distinctiveness relative to the literature the radar has already seen | 20% |
+| **Momentum** | Recent, field-normalized growth in attention | 15% |
+| **Discovery** | Cross-disciplinary connections and useful diversity | 10% |
+| **Evidence** | Available methodological detail: methods, data and code availability, open access | 15% |
+
+These are starting values, not tuned ones. Signals that are not available for
+a run, such as Momentum before enough history exists, are left out, and the
+other weights are rescaled to sum to 1. They are not counted as zero.
+
+Retractions and corrections are handled as **explicit flags or exclusions**,
+never as a score penalty that a high-ranking paper could outweigh.
+
+> A CAROUSEL score is an estimated *priority under a stated configuration*. It
+> is **not** a measure of a paper's scientific quality or future impact.
+
+**Current state:** the live dashboard still uses the ETHER-era score
+(`ranking_version: 0.0.1-ether`). That score combines theme priority, regex
+signal matches, a venue boost, recency, and a cross-domain bonus. The
+five-signal ranker replaces it during v0.1.
+
+## Run history and Research Delta
+
+Research Delta needs history: you can only say what changed if you kept what
+was there before. Every pipeline run is therefore written to the
+[`snapshots`](https://github.com/aglucaci/Carousel/tree/snapshots) branch as
+an immutable record. It includes the full payload, window, `ranking_version`,
+and provenance (commit and workflow run).
 
 ```text
-Title: Clonal dynamics during therapy resistance in lung cancer
-
-Research Relevance Score: 91
-
-Why ranked highly:
-- matched topic: therapy resistance
-- matched priority signal: clonal selection
-- matched method: single-cell sequencing
-- matched clinical term: relapse
-- recent publication: 14 days old
+snapshots/<radar_id>/<YYYY>/<YYYY-MM-DDTHHMMSSZ>.json.gz
+snapshots/<radar_id>/index.jsonl
 ```
 
-## Clone an Existing Radar
-
-Users can clone a radar and modify it.
-
-```bash
-ether clone examples/cancer_evolution.yml my_leukemia_radar.yml
+```sql
+-- DuckDB, on a checkout of the snapshots branch
+SELECT captured_at_utc, window_days, n_items
+FROM read_json_auto('snapshots/lab-default/index.jsonl')
+ORDER BY captured_at_utc;
 ```
 
-Then edit:
-
-```yaml
-radar_name: Leukemia Evolution Radar
-
-queries:
-  - "acute myeloid leukemia"
-  - "clonal hematopoiesis"
-  - "therapy resistance"
-  - "relapse"
-```
-
-Build:
-
-```bash
-ether build my_leukemia_radar.yml
-```
-
-## User Levels
-
-### Level 1: Web User
-
-For non-technical users:
-
-```text
-Enter topic -> choose template -> adjust sliders -> generate dashboard
-```
-
-### Level 2: Config User
-
-For scientists who want reproducibility:
-
-```bash
-ether build my_topic.yml
-```
-
-This is ideal for labs, papers, and GitHub workflows.
-
-### Level 3: Developer User
-
-For institutions and advanced users:
-
-- add new source adapters
-- add new scoring modules
-- deploy a private instance
-- connect internal databases
-- add institutional templates
-- run scheduled GitHub Actions
-
-## Repository Structure
-
-```text
-.
-|-- examples/
-|   |-- cancer_evolution.yml
-|   |-- viral_evolution.yml
-|   |-- metagenomics.yml
-|   |-- urban_microbiome.yml
-|   |-- ai_drug_discovery.yml
-|   |-- protein_design.yml
-|   |-- wastewater_surveillance.yml
-|   `-- single_cell_genomics.yml
-|-- scripts/
-|   `-- daily_pubmed_watch_v2.py
-|-- logo/
-|   `-- ETHER_logo.png
-|-- docs/
-|   `-- index.html
-|-- tests/
-|   `-- test_scoring.py
-|-- manuscript/
-|   `-- ether_manuscript.md
-|-- MANUSCRIPT_PLAN.md
-`-- .github/workflows/
-    `-- ether-radar.yml
-```
+Snapshots are managed with [`scripts/snapshot.py`](scripts/snapshot.py)
+(`write`, `backfill`, `reindex`). The same history will drive Momentum and
+time-forward evaluation, which scores papers using only what was known on the
+day they were recommended.
 
 ## Automation
 
-ETHER runs via GitHub Actions:
+| Workflow | Trigger | What it does |
+| --- | --- | --- |
+| [`carousel-radar.yml`](.github/workflows/carousel-radar.yml) | Daily 13:00 UTC, or manual (`days`, `max`) | Runs the pipeline, writes a snapshot to `snapshots`, and commits the dashboard to `docs/` (served by GitHub Pages) |
+| [`ci.yml`](.github/workflows/ci.yml) | Pull requests, pushes to `main` | Runs pytest and `carousel validate examples/*.yml` on Python 3.10 and 3.12 |
 
-- daily radar update
-- weekly deep scan
-- automatic commit only when output changes
-- concurrency-safe
-- dependency-cached for speed
-
-Workflow:
+## Repository layout
 
 ```text
-.github/workflows/ether-radar.yml
+carousel/            Python package: radar config models and CLI
+examples/            Starter radar configs (validated in CI)
+scripts/
+  daily_pubmed_watch_v2.py   current daily pipeline (being split into carousel/)
+  snapshot.py                run snapshots: write / backfill / reindex
+  validate_ranking.py        P@K, R@K, nDCG@K evaluation
+tests/               unittest/pytest suite
+docs/                Generated GitHub Pages site (do not edit by hand)
+logo/                Logo SVG/PNG and the generator script
+manuscript/          Paper draft and validation plan
+CAROUSEL_PLAN.md     Implementation plan and v0.1 task list
+MANUSCRIPT_PLAN.md   Publication plan
 ```
-
-## Validation Plan
-
-For the paper, the key missing piece is validation.
-
-Minimum evaluation:
-
-- use cancer evolution, viral evolution, and metagenomics case studies
-- retrieve 100-300 papers per case study
-- manually label relevance
-- compare ETHER ranking against baselines
-- report Precision@10, Precision@25, nDCG@10, and Recall@50
-
-Baselines:
-
-- date-only ranking
-- keyword-count ranking
-- PubMed relevance ranking
-- ETHER full model
-
-Modest claim:
-
-> ETHER improves prioritization of expert-relevant papers compared with
-> date-only and keyword-count baselines.
-
-ETHER is not a replacement for systematic review. It is a surveillance
-and prioritization layer.
-
-## Paper Framing
-
-Working title:
-
-**ETHER: Emerging Topic Horizon Engine for Research**
-
-Core novelty statement:
-
-> ETHER introduces a configurable signal-weighted framework for
-> scientific literature surveillance, allowing users to define not only which
-> topics to search, but which types of evidence, methods, applications, and
-> emerging research signals should influence paper prioritization.
 
 ## Roadmap
 
-- PubMed search backend
-- YAML radar config
-- scoring model
-- ranked CSV output
-- static dashboard
-- example radars
-- BibTeX/RIS export
-- GitHub Pages publishing
-- web interface
-- saved radars and user accounts
-- full-text support
-- LLM-assisted structured summaries
-- user feedback learning
-- team/shared radars
-- citation graph integration
+The detailed plan, including what to keep from ETHER, sequencing, and
+done-when checks for each task, is in [`CAROUSEL_PLAN.md`](CAROUSEL_PLAN.md).
+
+| Release | Focus | Status |
+| --- | --- | --- |
+| **v0.1 Discovery MVP** | Radar configs, multi-source retrieval (PubMed, Europe PMC, Crossref), dedup, integrity flags, five-signal ranker, snapshots and Research Delta, "Why this paper?" explanations, exports (CSV, BibTeX, RIS, Markdown) | In progress: scheduling, snapshots, and the config/CLI are done |
+| **v0.2 Intelligence** | FastAPI + Postgres/pgvector backend, accounts and feedback, embeddings (relevance and novelty), email digests, Next.js frontend, OpenAlex and arXiv | Planned |
+| **v0.3 Research Radar** | Topic clusters, Momentum, Trends view, Research Bridges | Planned |
+| **v0.4 Workflow** | Zotero sync, shared radars, collections, reproducibility bundles | Planned |
+| **v1.0** | Validated early-signal methods, benchmarks across disciplines, public API | Planned |
+
+## Evaluation
+
+CAROUSEL is designed to be evaluated, not just used. The validation plan
+([`manuscript/VALIDATION_PLAN.md`](manuscript/VALIDATION_PLAN.md)):
+
+- Benchmarks rankings against date-only, keyword-count, and PubMed-relevance baselines, plus ablations.
+- Uses expert-labeled case studies in cancer evolution, viral evolution, and metagenomics.
+- Reports Precision@K, nDCG@K, Recall@K, discovery latency, and time-forward performance.
+
+CAROUSEL is a surveillance and prioritization layer. It does not replace
+systematic review.
+
+## Contributing
+
+Issues and pull requests are welcome. Before opening a PR:
+
+```bash
+python -m pytest -q
+carousel validate examples/*.yml
+```
+
+New example radars must pass `carousel validate`.
 
 ## License
 
-MIT License
+[MIT](LICENSE)
