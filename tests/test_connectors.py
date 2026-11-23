@@ -4,6 +4,7 @@ import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from unittest import mock
 
 from pydantic import ValidationError
 
@@ -325,6 +326,19 @@ class HttpClientTests(unittest.TestCase):
             self.assertNotIn("Set-Cookie", text)
             self.assertIn("x-ratelimit-remaining", text)
             self.assertTrue(HttpClient(ReplayTransport(Path(d) / "f.json")).get(self.REQ).ok)
+
+    def test_certificate_errors_explain_the_fix(self) -> None:
+        import ssl
+        import urllib.error
+
+        from carousel.connectors.base import UrllibTransport
+
+        err = urllib.error.URLError(ssl.SSLCertVerificationError(1, "certificate verify failed"))
+        with mock.patch("urllib.request.urlopen", side_effect=err):
+            with self.assertRaises(ConnectorError) as ctx:
+                UrllibTransport().send(self.REQ)
+        self.assertIn("Install Certificates.command", str(ctx.exception))
+        self.assertNotIn("sekret", str(ctx.exception))
 
     def test_pacing(self) -> None:
         sleeps, now = [], [0.0]

@@ -178,6 +178,8 @@ def build_term(query: SearchQuery) -> str:
     Terms are left unquoted so PubMed's automatic term mapping (MeSH) still
     applies; exclusions are conservative exact phrases in title/abstract.
     """
+    if query.native:
+        return query.native
     term = " OR ".join(f"({t})" for t in query.terms)
     if len(query.terms) > 1:
         term = f"({term})"

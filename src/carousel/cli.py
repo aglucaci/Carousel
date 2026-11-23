@@ -9,7 +9,12 @@ carousel command-line interface.
     carousel review distinct STORE.db ID_A ID_B [--note TEXT]        # different works
     carousel review split STORE.db SOURCE SOURCE_ID [--note TEXT]    # undo a wrong merge
 
-`scan`, `delta`, and `export` arrive with later Phase 1A tasks (CAROUSEL_PLAN.md).
+    carousel scan RADAR.yml [--store carousel.db] [--as-of DATE] [--top N] [--mode M]
+                  [--embedder auto|semantic|hashing|none] [--csv OUT.csv] [--json OUT.json]
+    carousel runs [--store carousel.db] [--radar ID]                 # list stored runs
+    carousel delta RADAR.yml [--store carousel.db]                   # latest run vs the one before
+    carousel export RUN_ID (--csv OUT.csv | --json OUT.json) [--store carousel.db]
+    carousel feedback RADAR.yml save|dismiss|relevant|irrelevant REF... [--undo]
 """
 
 from __future__ import annotations
@@ -118,6 +123,118 @@ def cmd_review(args: argparse.Namespace) -> int:
     return 0
 
 
+def _load_radar_or_fail(path: str):
+    from carousel.radar import Radar
+
+    try:
+        return Radar.from_yaml(path)
+    except ConfigError as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return None
+
+
+def cmd_scan(args: argparse.Namespace) -> int:
+    import datetime as dt
+
+    from carousel.feedback import FeedbackError
+
+    radar = _load_radar_or_fail(args.radar)
+    if radar is None:
+        return 1
+    if args.feedback:
+        from pathlib import Path
+
+        radar.feedback_path = Path(args.feedback)
+    try:
+        res = radar.scan(
+            store=args.store, as_of=dt.date.fromisoformat(args.as_of) if args.as_of else None, top_n=args.top,
+            max_results=args.max_results, mode=args.mode, embedder=args.embedder,
+        )
+    except (FeedbackError, ValueError, ImportError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    if not args.quiet:
+        print(res.summary(top=args.top))
+    if args.csv:
+        print(f"wrote {res.to_csv(args.csv)}")
+    if args.json:
+        res.to_json(args.json)
+        print(f"wrote {args.json}")
+    return 0
+
+
+def cmd_runs(args: argparse.Namespace) -> int:
+    from carousel.database import StoreError
+
+    try:
+        store = _open_store(args.store)
+    except (FileNotFoundError, StoreError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    with store:
+        runs = store.list_runs(args.radar)
+    for r in runs:
+        print(f"{r['run_id']}  {r['radar_id']:<20} as_of={r['as_of']}  started={r['started_at'][:19]}  "
+              f"{r['status']:<7} items={r['n_items']:<3} ranking={r['ranking_version']} model={r['model_version'] or '-'}")
+    print(f"{len(runs)} run(s)")
+    return 0
+
+
+def cmd_delta(args: argparse.Namespace) -> int:
+    radar = _load_radar_or_fail(args.radar)
+    if radar is None:
+        return 1
+    res = radar.results(store=args.store)
+    if res is None:
+        print(f"FAIL no runs of {radar.radar_id} in {args.store}", file=sys.stderr)
+        return 1
+    print(json.dumps(res.delta(), indent=2))
+    return 0
+
+
+def cmd_export(args: argparse.Namespace) -> int:
+    from carousel.database import StoreError
+    from carousel.radar import ScanResults
+
+    try:
+        store = _open_store(args.store)
+    except (FileNotFoundError, StoreError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    with store:
+        run = store.get_run(args.run_id)
+        if run is None:
+            print(f"FAIL unknown run {args.run_id}", file=sys.stderr)
+            return 1
+        prev_id = store.previous_run_id(run["radar_id"], run["started_at"])
+        res = ScanResults(run, store.get_run(prev_id) if prev_id else None)
+    if args.csv:
+        print(f"wrote {res.to_csv(args.csv)}")
+    if args.json:
+        res.to_json(args.json)
+        print(f"wrote {args.json}")
+    if not (args.csv or args.json):
+        print(res.to_json())
+    return 0
+
+
+def cmd_feedback(args: argparse.Namespace) -> int:
+    from carousel import feedback as fb
+
+    radar = _load_radar_or_fail(args.radar)
+    if radar is None:
+        return 1
+    path = args.file or radar.feedback_path
+    try:
+        fb.update(path, args.action, args.refs, remove=args.undo, radar_id=radar.radar_id)
+    except fb.FeedbackError as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    verb = "removed from" if args.undo else "added to"
+    print(f"{len(args.refs)} reference(s) {verb} `{args.action}` in {path}; applied on the next scan")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="carousel", description="CAROUSEL research radar tools.")
     ap.add_argument("--version", action="version", version=f"carousel {__version__}")
@@ -154,6 +271,45 @@ def build_parser() -> argparse.ArgumentParser:
     for x in (rm, rd, rp):
         x.add_argument("--note", help="Why (kept in the queue and merge log)")
     r.set_defaults(func=cmd_review)
+
+    sc = sub.add_parser("scan", help="Run a radar: query sources, dedup, rank, and save the run")
+    sc.add_argument("radar", metavar="RADAR.yml")
+    sc.add_argument("--store", default="carousel.db", help="Paper store (default: carousel.db)")
+    sc.add_argument("--as-of", help="End date of the window, YYYY-MM-DD (default: today, UTC)")
+    sc.add_argument("--top", type=int, default=25, help="How many papers to recommend (default 25)")
+    sc.add_argument("--max-results", type=int, default=200, help="Per-source result cap (default 200)")
+    sc.add_argument("--mode", choices=("focused", "balanced", "exploratory"), help="Override the radar's mode")
+    sc.add_argument("--embedder", choices=("auto", "semantic", "hashing", "none"), default="auto")
+    sc.add_argument("--feedback", help="Feedback file (default: RADAR.feedback.yml next to the radar)")
+    sc.add_argument("--csv", help="Also write the recommendations as CSV")
+    sc.add_argument("--json", help="Also write the full run as JSON")
+    sc.add_argument("-q", "--quiet", action="store_true")
+    sc.set_defaults(func=cmd_scan)
+
+    ru = sub.add_parser("runs", help="List stored runs")
+    ru.add_argument("--store", default="carousel.db")
+    ru.add_argument("--radar", help="Only this radar_id")
+    ru.set_defaults(func=cmd_runs)
+
+    de = sub.add_parser("delta", help="What changed between a radar's latest run and the one before")
+    de.add_argument("radar", metavar="RADAR.yml")
+    de.add_argument("--store", default="carousel.db")
+    de.set_defaults(func=cmd_delta)
+
+    ex = sub.add_parser("export", help="Export a stored run as CSV or JSON")
+    ex.add_argument("run_id", metavar="RUN_ID")
+    ex.add_argument("--store", default="carousel.db")
+    ex.add_argument("--csv")
+    ex.add_argument("--json")
+    ex.set_defaults(func=cmd_export)
+
+    fe = sub.add_parser("feedback", help="Save, dismiss, or judge papers (edits the radar's feedback file)")
+    fe.add_argument("radar", metavar="RADAR.yml")
+    fe.add_argument("action", choices=("save", "dismiss", "relevant", "irrelevant"))
+    fe.add_argument("refs", nargs="+", metavar="REF", help="paper_id (cp_...) or doi:/pmid:/pmcid:/openalex:/arxiv: ID")
+    fe.add_argument("--undo", action="store_true", help="Remove the references instead")
+    fe.add_argument("--file", help="Feedback file (default: RADAR.feedback.yml next to the radar)")
+    fe.set_defaults(func=cmd_feedback)
     return ap
 
 
