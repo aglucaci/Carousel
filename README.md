@@ -43,6 +43,7 @@ changed in my field, why does it matter, and what should I read next?"**
 | **Duplicate detection** | [`src/carousel/ingestion/dedup.py`](src/carousel/ingestion/dedup.py), `carousel review` | Exact identifiers first (DOI, PMID, PMCID, OpenAlex, arXiv), then cautious title/author/year matching that merges automatically only when every check passes. Uncertain pairs, preprint/published versions, and identifier clashes go to a review queue; every merge is logged and can be split again |
 | **Candidate retrieval** | [`src/carousel/search/`](src/carousel/search/) | BM25 over titles and abstracts, semantic similarity to the radar's profile, and source-query hits, after recorded hard filters (retracted, date window, type, excluded terms). Embeddings are cached per paper and model version. Real semantic search needs `pip install "carousel-research[semantic]"` |
 | **Ranker** | [`src/carousel/ranking/`](src/carousel/ranking/) | `ranking_version` 0.1.0: relevance, novelty against only earlier-observed papers (guarded against temporal leakage), and method match; weighted by mode (focused / balanced / exploratory), then diversified with MMR. Every item carries its features and flags |
+| **Postgres schema (Phase 1B)** | [`src/carousel/database/models.py`](src/carousel/database/models.py), [`migrations/`](src/carousel/database/migrations/) | The spec's production tables on PostgreSQL + pgvector (papers with full-text search, identifiers, sources, authors, embeddings, runs and items, feedback, collections, topics, events), managed with Alembic. `carousel db import-store` and `import-snapshots` copy the engine's history in and verify counts. Needs `pip install "carousel-research[server]"` |
 | **Radar configs** | [`examples/`](examples/), [`src/carousel/core/config.py`](src/carousel/core/config.py) | YAML radars with strict validation and `file:line` error messages |
 | **`carousel scan` and the `Radar` API** | [`src/carousel/radar.py`](src/carousel/radar.py), [`src/carousel/cli.py`](src/carousel/cli.py) | One command runs the whole engine: query PubMed and OpenAlex, dedup into the local store, find candidates, rank, and save the run with its coverage. Rescans keep history; feedback in `RADAR.feedback.yml` (save / dismiss / relevant / irrelevant) applies on the next scan. Also `runs`, `delta`, `export`, `feedback`, `review`, `site`, `validate`, `show` |
 | **Ranking evaluation** | [`scripts/validate_ranking.py`](scripts/validate_ranking.py) | Precision@K, Recall@K, and nDCG@K over expert-labeled rankings |
@@ -119,7 +120,16 @@ Build the dashboard locally from one or more scan exports:
 carousel scan radars/lab_default.yml --json out/lab-default.json && carousel site out/*.json --out site
 ```
 
-Run the tests:
+Load everything into Postgres (Phase 1B; needs the `[server]` extra and a
+database with pgvector):
+
+```bash
+export CAROUSEL_DATABASE_URL=postgresql://user:pass@localhost/carousel
+carousel db upgrade && carousel db import-store carousel.db
+```
+
+Run the tests (the Postgres tests run when `CAROUSEL_TEST_DATABASE_URL` points
+at a disposable database):
 
 ```bash
 python -m pytest -q
@@ -253,7 +263,8 @@ day they were recommended.
 src/carousel/        Python package: radar.py (Radar API), feedback.py, core/ (radar config, identifiers, paper model),
                      connectors/ (PubMed, OpenAlex), ingestion/ (dedup), search/ (candidates),
                      ranking/ (ranker),
-                     database/ (local SQLite paper store), site.py (dashboard), cli.py
+                     database/ (SQLite store; Postgres models, migrations, importer),
+                     site.py (dashboard), cli.py
 radars/              Radars scanned daily by Actions (lab_default.yml = the lab's ten themes)
 examples/            Starter radar configs (validated in CI)
 scripts/

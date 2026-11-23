@@ -16,6 +16,8 @@ carousel command-line interface.
     carousel export RUN_ID (--csv OUT.csv | --json OUT.json) [--store carousel.db]
     carousel feedback RADAR.yml save|dismiss|relevant|irrelevant REF... [--undo]
     carousel site RUN.json... [--out docs]                           # static dashboard for GitHub Pages
+    carousel db upgrade|current|downgrade [--url URL]                # Postgres migrations ([server] extra)
+    carousel db import-store STORE.db | import-snapshots CHECKOUT    # copy Phase 1A data into Postgres
 """
 
 from __future__ import annotations
@@ -248,6 +250,39 @@ def cmd_site(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_db(args: argparse.Namespace) -> int:
+    try:
+        from carousel.database import importer, postgres
+    except ImportError as exc:
+        print(f'FAIL Postgres support needs the server extra: pip install "carousel-research[server]" ({exc})',
+              file=sys.stderr)
+        return 1
+    try:
+        if args.action == "upgrade":
+            postgres.upgrade(args.url, args.revision)
+            print(f"database at revision {postgres.current(args.url)}")
+        elif args.action == "downgrade":
+            postgres.downgrade(args.url, args.revision)
+            print(f"database at revision {postgres.current(args.url) or 'base (empty)'}")
+        elif args.action == "current":
+            print(postgres.current(args.url) or "base (empty)")
+        elif args.action == "import-store":
+            counts = importer.import_store(args.store, postgres.engine(args.url))
+            for table, n in counts.items():
+                print(f"  {table:<22} {n}")
+            print(f"imported {args.store}")
+        elif args.action == "import-snapshots":
+            results = importer.import_snapshots(args.root, postgres.engine(args.url), args.radar or None)
+            for r in results:
+                print(f"  {r.radar_id}: {r.snapshots}/{r.expected_snapshots} snapshots, {r.items}/{r.expected_items} items "
+                      f"(+{r.inserted_snapshots} new, {r.linked_items} items linked to papers)")
+            print("counts match")
+    except (ValueError, importer.ImportCountMismatch) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="carousel", description="CAROUSEL research radar tools.")
     ap.add_argument("--version", action="version", version=f"carousel {__version__}")
@@ -328,6 +363,23 @@ def build_parser() -> argparse.ArgumentParser:
     si.add_argument("runs", nargs="+", metavar="RUN.json", help="Exports from `carousel scan --json`")
     si.add_argument("--out", default="docs", help="Output directory, replaced entirely (default: docs)")
     si.set_defaults(func=cmd_site)
+
+    db = sub.add_parser("db", help="Postgres (Phase 1B): migrations and imports; needs the [server] extra")
+    dbs = db.add_subparsers(dest="action", required=True, metavar="ACTION")
+    for name, help_ in (("upgrade", "Apply migrations (default: to head)"), ("downgrade", "Revert migrations (default: to base)"),
+                        ("current", "Show the current migration revision")):
+        x = dbs.add_parser(name, help=help_)
+        x.add_argument("--url", help="Database URL (default: $CAROUSEL_DATABASE_URL)")
+        if name != "current":
+            x.add_argument("--revision", default="head" if name == "upgrade" else "base")
+    x = dbs.add_parser("import-store", help="Copy a Phase 1A SQLite store into Postgres (idempotent)")
+    x.add_argument("store", metavar="STORE.db")
+    x.add_argument("--url")
+    x = dbs.add_parser("import-snapshots", help="Import run snapshots from a checkout of the snapshots branch; verifies counts")
+    x.add_argument("root", metavar="SNAPSHOTS_CHECKOUT")
+    x.add_argument("--radar", action="append", help="Only this radar_id (repeatable)")
+    x.add_argument("--url")
+    db.set_defaults(func=cmd_db)
     return ap
 
 
