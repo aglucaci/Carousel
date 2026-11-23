@@ -50,7 +50,7 @@ from carousel.core.identifiers import normalize
 from carousel.core.paper import CanonicalPaper, SourceRecord, paper_id_for
 from carousel.ingestion.dedup import MatchDecision, best_match, title_tokens
 
-STORE_SCHEMA_VERSION = 3
+STORE_SCHEMA_VERSION = 4
 
 _DDL = """
 CREATE TABLE IF NOT EXISTS meta (
@@ -121,6 +121,64 @@ CREATE TABLE IF NOT EXISTS embeddings (      -- one vector per (paper, model_ver
     vector        BLOB NOT NULL,           -- little-endian float32
     created_at    TEXT NOT NULL,
     PRIMARY KEY (paper_id, model_version)
+);
+CREATE TABLE IF NOT EXISTS recommendation_runs (   -- one row per scan (spec §8 recommendation_runs)
+    run_id             TEXT PRIMARY KEY,
+    radar_id           TEXT NOT NULL,
+    radar_name         TEXT NOT NULL,
+    config_hash        TEXT NOT NULL,
+    as_of              TEXT NOT NULL,          -- date the window ends
+    started_at         TEXT NOT NULL,
+    finished_at        TEXT NOT NULL,
+    status             TEXT NOT NULL,          -- ok | partial (a source failed or was skipped)
+    ranking_version    TEXT NOT NULL,
+    candidates_version TEXT NOT NULL,
+    model_version      TEXT,
+    mode               TEXT NOT NULL,
+    n_observed         INTEGER NOT NULL,
+    n_candidates       INTEGER NOT NULL,
+    n_items            INTEGER NOT NULL,
+    coverage           TEXT NOT NULL,          -- JSON list, one entry per source
+    ranking            TEXT NOT NULL,          -- JSON: weights, signals, stats
+    notes              TEXT NOT NULL           -- JSON list of warnings
+);
+CREATE INDEX IF NOT EXISTS runs_radar ON recommendation_runs(radar_id, started_at);
+CREATE TABLE IF NOT EXISTS recommendation_items (  -- spec §8 recommendation_items
+    run_id     TEXT NOT NULL REFERENCES recommendation_runs(run_id),
+    rank       INTEGER NOT NULL,
+    paper_id   TEXT NOT NULL,
+    score      REAL NOT NULL,
+    mmr        REAL NOT NULL,
+    components TEXT NOT NULL,                  -- JSON
+    details    TEXT NOT NULL,                  -- JSON (features behind "Why this paper?")
+    flags      TEXT NOT NULL,                  -- JSON list
+    PRIMARY KEY (run_id, rank)
+);
+CREATE INDEX IF NOT EXISTS items_paper ON recommendation_items(paper_id);
+CREATE TABLE IF NOT EXISTS run_observations (      -- which source records each run saw
+    run_id    TEXT NOT NULL,
+    source    TEXT NOT NULL,
+    source_id TEXT NOT NULL,
+    paper_id  TEXT NOT NULL,
+    status    TEXT NOT NULL,                   -- Observation.status at the time
+    PRIMARY KEY (run_id, source, source_id)
+);
+CREATE TABLE IF NOT EXISTS feedback_state (        -- current feedback per radar (mirrors the feedback file)
+    radar_id TEXT NOT NULL,
+    paper_id TEXT NOT NULL,
+    action   TEXT NOT NULL,                    -- save | dismiss | relevant | irrelevant
+    ref      TEXT NOT NULL,                    -- as written in the file (paper_id, doi:..., pmid:...)
+    since    TEXT NOT NULL,
+    PRIMARY KEY (radar_id, paper_id, action)
+);
+CREATE TABLE IF NOT EXISTS feedback_events (       -- append-only history of feedback changes
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    radar_id TEXT NOT NULL,
+    paper_id TEXT NOT NULL,
+    action   TEXT NOT NULL,
+    change   TEXT NOT NULL,                    -- added | removed
+    ref      TEXT NOT NULL,
+    at       TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS merge_log (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -593,6 +651,93 @@ class PaperStore:
                 [(pid, model_version, h, len(v), pack(v), now) for pid, h, v in rows],
             )
 
+    # ---- runs ----
+
+    def save_run(self, run: Dict[str, Any], items: Sequence[Dict[str, Any]],
+                 observations: Sequence[Tuple[str, str, str, str]]) -> None:
+        """Persist one scan: run metadata, ranked items, and the (source, source_id, paper_id, status) it observed."""
+        j = lambda x: json.dumps(x, sort_keys=True, ensure_ascii=False)  # noqa: E731
+        with self.db:
+            self.db.execute(
+                "INSERT INTO recommendation_runs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (run["run_id"], run["radar_id"], run["radar_name"], run["config_hash"], run["as_of"],
+                 run["started_at"], run["finished_at"], run["status"], run["ranking_version"],
+                 run["candidates_version"], run.get("model_version"), run["mode"], run["n_observed"],
+                 run["n_candidates"], len(items), j(run["coverage"]), j(run["ranking"]), j(run.get("notes", []))),
+            )
+            self.db.executemany(
+                "INSERT INTO recommendation_items VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                [(run["run_id"], it["rank"], it["paper_id"], it["score"], it["mmr"], j(it["components"]),
+                  j(it["details"]), j(it["flags"])) for it in items],
+            )
+            self.db.executemany("INSERT OR IGNORE INTO run_observations VALUES (?, ?, ?, ?, ?)",
+                                [(run["run_id"], *o) for o in observations])
+
+    def _run_row(self, r: sqlite3.Row) -> Dict[str, Any]:
+        d = dict(r)
+        for k in ("coverage", "ranking", "notes"):
+            d[k] = json.loads(d[k])
+        return d
+
+    def list_runs(self, radar_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Runs, oldest first, without items."""
+        sql, args = "SELECT * FROM recommendation_runs", ()
+        if radar_id:
+            sql, args = sql + " WHERE radar_id = ?", (radar_id,)
+        return [self._run_row(r) for r in self.db.execute(sql + " ORDER BY started_at, run_id", args)]
+
+    def get_run(self, run_id: str) -> Optional[Dict[str, Any]]:
+        row = self.db.execute("SELECT * FROM recommendation_runs WHERE run_id = ?", (run_id,)).fetchone()
+        if row is None:
+            return None
+        run = self._run_row(row)
+        run["items"] = [
+            {**dict(r), "components": json.loads(r["components"]), "details": json.loads(r["details"]),
+             "flags": json.loads(r["flags"])}
+            for r in self.db.execute("SELECT * FROM recommendation_items WHERE run_id = ? ORDER BY rank", (run_id,))
+        ]
+        for it in run["items"]:
+            it.pop("run_id", None)
+        run["observations"] = [tuple(r) for r in self.db.execute(
+            "SELECT source, source_id, paper_id, status FROM run_observations WHERE run_id = ? ORDER BY source, source_id",
+            (run_id,))]
+        return run
+
+    def previous_run_id(self, radar_id: str, before: str) -> Optional[str]:
+        """The latest run of ``radar_id`` that started before ``before`` (ISO timestamp)."""
+        row = self.db.execute(
+            "SELECT run_id FROM recommendation_runs WHERE radar_id = ? AND started_at < ? ORDER BY started_at DESC, run_id DESC LIMIT 1",
+            (radar_id, before),
+        ).fetchone()
+        return row["run_id"] if row else None
+
+    # ---- feedback ----
+
+    def sync_feedback(self, radar_id: str, state: Dict[Tuple[str, str], str],
+                      at: Optional[dt.datetime] = None) -> Tuple[int, int]:
+        """Make the stored feedback for ``radar_id`` equal ``state`` ({(paper_id, action): ref}); log the changes.
+
+        Returns (added, removed).
+        """
+        now = _iso(at or dt.datetime.now(dt.timezone.utc))
+        with self.db:
+            current = {(r["paper_id"], r["action"]): r["ref"] for r in
+                       self.db.execute("SELECT * FROM feedback_state WHERE radar_id = ?", (radar_id,))}
+            added = [k for k in state if k not in current]
+            removed = [k for k in current if k not in state]
+            for pid, action in added:
+                self.db.execute("INSERT INTO feedback_state VALUES (?, ?, ?, ?, ?)", (radar_id, pid, action, state[(pid, action)], now))
+                self.db.execute("INSERT INTO feedback_events (radar_id, paper_id, action, change, ref, at) VALUES (?, ?, ?, 'added', ?, ?)",
+                                (radar_id, pid, action, state[(pid, action)], now))
+            for pid, action in removed:
+                self.db.execute("DELETE FROM feedback_state WHERE radar_id = ? AND paper_id = ? AND action = ?", (radar_id, pid, action))
+                self.db.execute("INSERT INTO feedback_events (radar_id, paper_id, action, change, ref, at) VALUES (?, ?, ?, 'removed', ?, ?)",
+                                (radar_id, pid, action, current[(pid, action)], now))
+        return len(added), len(removed)
+
+    def feedback_events(self, radar_id: str) -> List[Dict[str, Any]]:
+        return [dict(r) for r in self.db.execute("SELECT * FROM feedback_events WHERE radar_id = ? ORDER BY id", (radar_id,))]
+
     def merge_log(self) -> List[Dict[str, Any]]:
         rows = self.db.execute("SELECT * FROM merge_log ORDER BY id").fetchall()
         return [{**dict(r), "detail": json.loads(r["detail"])} for r in rows]
@@ -662,6 +807,7 @@ class PaperStore:
             "identifiers": q("SELECT COUNT(*) FROM identifiers"),
             "conflicts": q("SELECT COUNT(*) FROM identifier_conflicts"),
             "review_pending": q("SELECT COUNT(*) FROM review_queue WHERE status = 'pending'"),
+            "runs": q("SELECT COUNT(*) FROM recommendation_runs"),
             "embeddings": dict(self.db.execute(
                 "SELECT model_version, COUNT(*) FROM embeddings GROUP BY model_version ORDER BY model_version").fetchall()),
             "by_source": by_source,

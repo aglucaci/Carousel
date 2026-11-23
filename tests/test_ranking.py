@@ -279,7 +279,8 @@ class SignalAndModeTests(unittest.TestCase):
         r = rank(cs, cfg, store=f.store, embedder=f.emb)
         self.assertNotIn(seed.paper_id, r.ids())
         self.assertEqual(r.stats["excluded"], {"seed_paper": [seed.paper_id]})
-        self.assertEqual(r.stats["profile"], {"seeds_used": ["10.5555/seed"], "seeds_missing": ["10.5555/absent"]})
+        self.assertEqual(r.stats["profile"]["seeds_used"], ["10.5555/seed"])
+        self.assertEqual(r.stats["profile"]["seeds_missing"], ["10.5555/absent"])
 
     def test_integrity_is_a_flag_not_a_score(self) -> None:
         f = Fixture()

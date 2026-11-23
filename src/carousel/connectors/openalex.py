@@ -140,6 +140,8 @@ def _phrase(term: str) -> str:
 
 def build_search(query: SearchQuery) -> str:
     """Radar terms -> OpenAlex boolean search: ("a b" OR c) NOT ("d e")."""
+    if query.native:
+        return query.native
     s = "(" + " OR ".join(_phrase(t) for t in query.terms) + ")"
     if query.exclude:
         s += " NOT (" + " OR ".join(_phrase(t) for t in query.exclude) + ")"

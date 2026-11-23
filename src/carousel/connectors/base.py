@@ -14,6 +14,7 @@ import dataclasses
 import datetime as dt
 import hashlib
 import json
+import ssl
 import time
 import urllib.error
 import urllib.parse
@@ -127,7 +128,11 @@ class UrllibTransport(Transport):
         except urllib.error.HTTPError as exc:
             return Response(exc.code, exc.read() or b"", _kept_headers(dict(exc.headers or {})))
         except (urllib.error.URLError, TimeoutError, OSError) as exc:
-            raise ConnectorError(f"network error for {request.url}: {exc}") from exc
+            hint = ""
+            if isinstance(getattr(exc, "reason", exc), ssl.SSLCertVerificationError):
+                hint = (" (Python could not verify the HTTPS certificate. On macOS python.org builds, run "
+                        "'Install Certificates.command'; behind a proxy, set SSL_CERT_FILE to your CA bundle.)")
+            raise ConnectorError(f"network error for {request.url}: {exc}{hint}") from exc
 
 
 # -------------------------
@@ -347,6 +352,9 @@ class SearchQuery(_Strict):
     start: dt.date
     end: dt.date
     max_results: int = Field(default=200, ge=1, le=MAX_RESULTS_CAP)
+    native: Optional[str] = Field(
+        default=None, description="Source-native query sent verbatim instead of building one from terms (radar source_queries)"
+    )
 
     @field_validator("terms", "exclude")
     @classmethod

@@ -8,8 +8,9 @@ Signals (each in [0, 1]):
 
 ``relevance``
     ``R = α·sim(e_p, e_u) + β·BM25_norm``. ``e_u`` is the radar profile
-    vector (name, description, research question, queries), averaged with the
-    seed papers' vectors when they are in the store. ``BM25_norm`` is BM25
+    vector (name, description, research question, queries) moved toward seed
+    papers and saved/relevant papers and away from irrelevant ones
+    (:func:`rocchio`). ``BM25_norm`` is BM25
     divided by the run's maximum. Without embeddings, ``R = BM25_norm``.
 ``novelty``
     ``N = 1 − mean cosine similarity to the k nearest papers in H_t``, where
@@ -48,6 +49,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence,
 
 from carousel.core.paper import CanonicalPaper
 from carousel.core.text import search_tokens
+from carousel.feedback import Feedback
 from carousel.ingestion.dedup import is_notice, is_preprint
 from carousel.search.candidates import Candidate, CandidateSet, profile_text
 from carousel.search.embeddings import Embedder, Vector, _normalize, cosine, ensure_embeddings
@@ -83,6 +85,22 @@ INACTIVE_REASONS = {
 }
 
 PHASE1_SIGNALS = ("relevance", "novelty", "method_match")
+
+
+EXCLUDED_BY_FEEDBACK = {"save": "saved", "dismiss": "dismissed", "relevant": "marked_relevant",
+                        "irrelevant": "marked_irrelevant"}
+ROCCHIO = (1.0, 0.75, 0.25)
+"""Profile = 1.0·radar text + 0.75·mean(seeds, saved, relevant) − 0.25·mean(irrelevant)."""
+
+
+def rocchio(v_profile: Vector, positive: Sequence[Vector], negative: Sequence[Vector]) -> Vector:
+    a, b, c = ROCCHIO
+    out = [a * x for x in v_profile]
+    for vecs, w in ((positive, b), (negative, -c)):
+        if vecs:
+            mean = [sum(col) / len(vecs) for col in zip(*vecs)]
+            out = [o + w * m for o, m in zip(out, mean)]
+    return _normalize(out)
 
 
 class LeakageError(AssertionError):
@@ -223,8 +241,14 @@ def rank(
     history: Optional[Iterable[CanonicalPaper]] = None,
     top_n: int = 25,
     mode: Optional[str] = None,
+    feedback: Optional[Feedback] = None,
 ) -> Ranking:
-    """Score and select. ``history`` defaults to every paper in ``store``."""
+    """Score and select. ``history`` defaults to every paper in ``store``.
+
+    Papers with feedback (saved, dismissed, judged) and seed papers are not
+    recommended; ``save``/``relevant`` and seeds pull the profile toward
+    them and ``irrelevant`` pushes it away.
+    """
     mode = mode or radar.mode.value
     if mode not in MODES:
         raise ValueError(f"unknown mode {mode!r}; expected one of {', '.join(MODES)}")
@@ -232,33 +256,42 @@ def rank(
     cands: List[Candidate] = sorted(candidates.candidates, key=lambda c: c.paper_id)
     papers = {c.paper_id: c.paper for c in cands}
 
-    # ---- vectors: candidates, history, profile, seeds ----
-    vectors: Dict[str, Vector] = {}
-    hist_items: List[HistoryItem] = []
-    profile_info: Dict[str, Any] = {"seeds_used": [], "seeds_missing": list(radar.seed_papers)}
-    e_u: Optional[Vector] = None
-    seed_ids: set = set()
-    if store is not None and embedder is not None:
-        hist_papers = {p.paper_id: p for p in (history if history is not None else store.papers())}
-        seeds = {}
+    # ---- seeds and feedback ----
+    feedback = feedback or Feedback.empty()
+    seeds: Dict[str, CanonicalPaper] = {}
+    if store is not None:
         for doi in radar.seed_papers:
             p = store.find("doi", doi)
             if p is not None:
                 seeds[doi] = p
-                hist_papers.setdefault(p.paper_id, p)
-        everything = {**hist_papers, **papers}
+    seed_ids = {p.paper_id for p in seeds.values()}
+    profile_info: Dict[str, Any] = {
+        "seeds_used": sorted(seeds),
+        "seeds_missing": sorted(set(radar.seed_papers) - set(seeds)),
+        "feedback_positive": len(feedback.positive),
+        "feedback_negative": len(feedback.negative),
+        "feedback_unresolved": list(feedback.unresolved),
+    }
+
+    # ---- vectors: candidates, history, profile (Rocchio over seeds and feedback) ----
+    vectors: Dict[str, Vector] = {}
+    hist_items: List[HistoryItem] = []
+    e_u: Optional[Vector] = None
+    if store is not None and embedder is not None:
+        hist_papers = {p.paper_id: p for p in (history if history is not None else store.papers())}
+        extra = {p.paper_id: p for p in seeds.values()}
+        for pid in feedback.positive + feedback.negative:
+            fp = store.get(pid)
+            if fp is not None:
+                extra[pid] = fp
+        everything = {**extra, **hist_papers, **papers}
         vectors, _ = ensure_embeddings(store, [everything[k] for k in sorted(everything)], embedder)
         hist_items = [HistoryItem(pid, hist_papers[pid].first_seen, vectors[pid])
                       for pid in sorted(hist_papers) if pid in vectors]
         [v_profile] = embedder.embed([profile_text(radar)])
-        seed_vecs = [vectors[p.paper_id] for p in seeds.values() if p.paper_id in vectors]
-        if seed_vecs:
-            mean_seed = [sum(x) / len(seed_vecs) for x in zip(*seed_vecs)]
-            e_u = _normalize([0.5 * a + 0.5 * b for a, b in zip(v_profile, mean_seed)])
-        else:
-            e_u = v_profile
-        seed_ids = {p.paper_id for p in seeds.values()}
-        profile_info = {"seeds_used": sorted(seeds), "seeds_missing": sorted(set(radar.seed_papers) - set(seeds))}
+        pos = [vectors[pid] for pid in sorted(seed_ids | set(feedback.positive)) if pid in vectors]
+        neg = [vectors[pid] for pid in feedback.negative if pid in vectors]
+        e_u = rocchio(v_profile, pos, neg)
 
     # ---- relevance ----
     max_bm25 = max((c.bm25 for c in cands), default=0.0)
@@ -328,6 +361,9 @@ def rank(
         pid = c.paper_id
         if pid in seed_ids:
             excluded.setdefault("seed_paper", []).append(pid)
+            continue
+        if pid in feedback.excluded:
+            excluded.setdefault(EXCLUDED_BY_FEEDBACK[feedback.excluded[pid]], []).append(pid)
             continue
         flags: List[str] = []
         comp: Dict[str, Optional[float]] = {"relevance": relevance[pid]}
