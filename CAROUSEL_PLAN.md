@@ -150,8 +150,8 @@ previous history.
 | --- | --- | --- |
 | 1 | ✅ One scheduled workflow, and snapshots on every run | Daily green run; snapshot is written (done 2026-11-23) |
 | 2 | ✅ Package, strict `RadarConfig`, `carousel validate` / `show`, CI | 8 examples validate; bad YAML gives file:line errors (done 2026-11-23) |
-| 3 | ✅ Move to the `src/carousel/` layout; config into `core/`; add `CITATION.cff` | CI green; `pip install -e .` and the CLI unchanged |
-| 4 | Canonical paper model and local store: identifiers, per-source records, all spec §4.1 dates, `first_seen` / `last_verified`, per-field provenance | Round-trip tests; one paper seen from two sources keeps both source records |
+| 3 | ✅ Move to the `src/carousel/` layout; config into `core/`; add `CITATION.cff` | CI green; `pip install -e .` and the CLI unchanged (done 2026-11-23) |
+| 4 | ✅ Canonical paper model and local store: identifiers, per-source records, all spec §4.1 dates, `first_seen` / `last_verified`, per-field provenance | Round-trip tests; one paper seen from two sources keeps both source records (done 2026-11-23: `core/identifiers.py`, `core/paper.py`, SQLite `database/local.py`; exact-ID matching only, and conflicting IDs are logged, never merged) |
 | 5 | Connectors: **OpenAlex** (budget counter, cache, cursor paging, never full-corpus scans) and **PubMed** (ported from the legacy script) | Recorded-HTTP fixture tests; the source coverage of each query is recorded |
 | 6 | Dedup: DOI → PMID/PMCID/OpenAlex ID → (Phase 2: verified preprint links) → cautious title/author/year matching. Ambiguous pairs go to a review queue | Fixture suite of true merges, true non-merges, and ambiguous pairs; no automatic merge below threshold |
 | 7 | Lexical + semantic candidates; embeddings cached per `(paper, model_version)` | The same paper is never re-embedded under the same model |
