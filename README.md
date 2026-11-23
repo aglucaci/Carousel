@@ -22,12 +22,13 @@ your field since you last looked.
 The question it answers is not *"What papers were published?"* but **"What
 changed in my field, why does it matter, and what should I read next?"**
 
-> **Status: early development (Phase 1 in progress).** A daily PubMed radar,
-> its run history, and the radar config tooling work today. Multi-source
-> retrieval, the recommendation engine, and Research Delta are being built. See
-> [What works today](#what-works-today) and the [roadmap](#roadmap).
-> CAROUSEL grew out of the ETHER prototype, so you will still see that name in
-> the manuscript drafts and the current dashboard.
+> **Status: early development (Phase 1 in progress).** The engine (Phase 1A)
+> works end to end: PubMed and OpenAlex retrieval, careful deduplication,
+> lexical and semantic candidates, an interpretable ranker, stored runs, and
+> feedback, running daily on GitHub Actions. The web app (Phase 1B) and
+> Research Delta are next. See [What works today](#what-works-today) and the
+> [roadmap](#roadmap). CAROUSEL grew out of the ETHER prototype, so you will
+> still see that name in the manuscript drafts.
 
 ---
 
@@ -35,15 +36,15 @@ changed in my field, why does it matter, and what should I read next?"**
 
 | Capability | Where | Notes |
 | --- | --- | --- |
-| **Daily literature radar** | [Live dashboard](https://aglucaci.github.io/Carousel/) | PubMed, 14-day rolling window, about 10 themes, ranked with per-paper score breakdowns. Rebuilt every day at 13:00 UTC |
+| **Daily literature radar** | [Live dashboard](https://aglucaci.github.io/Carousel/), [`radars/`](radars/) | `carousel scan` runs every radar in `radars/` daily at 13:00 UTC (the lab's ten themes are [`radars/lab_default.yml`](radars/lab_default.yml)) and publishes a ranked list with "Why this paper?" for each item, filterable by theme |
 | **Run history (snapshots)** | [`snapshots` branch](https://github.com/aglucaci/Carousel/tree/snapshots) | Every run is stored as an immutable, versioned snapshot. History starts 2026-01-21, and earlier runs were recovered from git history |
-| **Paper store** | [`src/carousel/core/paper.py`](src/carousel/core/paper.py), [`src/carousel/database/local.py`](src/carousel/database/local.py) | Canonical paper records built from per-source records, with per-field provenance, separate publication / first-online / preprint dates, and CAROUSEL's own first-seen and last-verified times. Local SQLite store. Not yet wired into the daily radar |
-| **Connectors** | [`src/carousel/connectors/`](src/carousel/connectors/) | PubMed and OpenAlex searches that return source records plus a coverage report (matches available, retrieved, truncated and why, requests, OpenAlex credits). Bounded windows only, with a per-run OpenAlex credit budget and an on-disk cache. Not yet wired into the daily radar |
+| **Paper store** | [`src/carousel/core/paper.py`](src/carousel/core/paper.py), [`src/carousel/database/local.py`](src/carousel/database/local.py) | Canonical paper records built from per-source records, with per-field provenance, separate publication / first-online / preprint dates, and CAROUSEL's own first-seen and last-verified times. Local SQLite store |
+| **Connectors** | [`src/carousel/connectors/`](src/carousel/connectors/) | PubMed and OpenAlex searches that return source records plus a coverage report (matches available, retrieved, truncated and why, requests, OpenAlex credits). Bounded windows only, with a per-run OpenAlex credit budget and an on-disk cache. OpenAlex searches scholarly work types only |
 | **Duplicate detection** | [`src/carousel/ingestion/dedup.py`](src/carousel/ingestion/dedup.py), `carousel review` | Exact identifiers first (DOI, PMID, PMCID, OpenAlex, arXiv), then cautious title/author/year matching that merges automatically only when every check passes. Uncertain pairs, preprint/published versions, and identifier clashes go to a review queue; every merge is logged and can be split again |
 | **Candidate retrieval** | [`src/carousel/search/`](src/carousel/search/) | BM25 over titles and abstracts, semantic similarity to the radar's profile, and source-query hits, after recorded hard filters (retracted, date window, type, excluded terms). Embeddings are cached per paper and model version. Real semantic search needs `pip install "carousel-research[semantic]"` |
-| **Ranker** | [`src/carousel/ranking/`](src/carousel/ranking/) | `ranking_version` 0.1.0: relevance, novelty against only earlier-observed papers (guarded against temporal leakage), and method match; weighted by mode (focused / balanced / exploratory), then diversified with MMR. Every item carries its features and flags. Not yet wired into the daily radar (`carousel scan` is next) |
+| **Ranker** | [`src/carousel/ranking/`](src/carousel/ranking/) | `ranking_version` 0.1.0: relevance, novelty against only earlier-observed papers (guarded against temporal leakage), and method match; weighted by mode (focused / balanced / exploratory), then diversified with MMR. Every item carries its features and flags |
 | **Radar configs** | [`examples/`](examples/), [`src/carousel/core/config.py`](src/carousel/core/config.py) | YAML radars with strict validation and `file:line` error messages |
-| **`carousel scan` and the `Radar` API** | [`src/carousel/radar.py`](src/carousel/radar.py), [`src/carousel/cli.py`](src/carousel/cli.py) | One command runs the whole engine: query PubMed and OpenAlex, dedup into the local store, find candidates, rank, and save the run with its coverage. Rescans keep history; feedback in `RADAR.feedback.yml` (save / dismiss / relevant / irrelevant) applies on the next scan. Also `runs`, `delta`, `export`, `feedback`, `review`, `validate`, `show`. The daily dashboard still uses the legacy script until task 10 |
+| **`carousel scan` and the `Radar` API** | [`src/carousel/radar.py`](src/carousel/radar.py), [`src/carousel/cli.py`](src/carousel/cli.py) | One command runs the whole engine: query PubMed and OpenAlex, dedup into the local store, find candidates, rank, and save the run with its coverage. Rescans keep history; feedback in `RADAR.feedback.yml` (save / dismiss / relevant / irrelevant) applies on the next scan. Also `runs`, `delta`, `export`, `feedback`, `review`, `site`, `validate`, `show` |
 | **Ranking evaluation** | [`scripts/validate_ranking.py`](scripts/validate_ranking.py) | Precision@K, Recall@K, and nDCG@K over expert-labeled rankings |
 
 ## Quick start
@@ -112,11 +113,10 @@ Without the `[semantic]` extra, scans use a non-semantic fallback embedder and
 say so in the run's notes. Set `OPENALEX_API_KEY` to page past the first 100
 OpenAlex results, and `NCBI_API_KEY` for faster PubMed access.
 
-Run the legacy daily pipeline (still what the live dashboard uses). It writes
-`index.html`, `latest.json`, and `latest.md`:
+Build the dashboard locally from one or more scan exports:
 
 ```bash
-python scripts/daily_pubmed_watch_v2.py --days 14 --max 25 --docs-dir results/demo
+carousel scan radars/lab_default.yml --json out/lab-default.json && carousel site out/*.json --out site
 ```
 
 Run the tests:
@@ -185,7 +185,7 @@ Validation rules:
 - Unknown fields, unknown sources, duplicate YAML keys, and duplicate terms are rejected with the line number.
 - `radar_id` defaults to the file name, so `viral_evolution.yml` becomes `viral-evolution`.
 - Each resolved config gets a short `config_hash`, which is recorded with results.
-- Sources: `pubmed`, `europepmc`, `biorxiv`, `medrxiv`, `crossref`, `openalex`, `arxiv`. The config schema accepts all of these. PubMed and OpenAlex connectors exist (the daily radar still uses the legacy PubMed script until `carousel scan` lands); Europe PMC, Crossref, and arXiv arrive in Phase 2. Optional keys: `NCBI_API_KEY` raises PubMed's rate limit, and `OPENALEX_API_KEY` is needed to page past the first 100 OpenAlex results.
+- Sources: `pubmed`, `europepmc`, `biorxiv`, `medrxiv`, `crossref`, `openalex`, `arxiv`. The config schema accepts all of these. PubMed and OpenAlex have connectors; Europe PMC, Crossref, arXiv, and bioRxiv/medRxiv arrive in Phase 2 (until then a scan records them as `no_connector`). Optional keys: `NCBI_API_KEY` raises PubMed's rate limit, and `OPENALEX_API_KEY` is needed to page past the first 100 OpenAlex results.
 
 ## How recommendations work
 
@@ -210,10 +210,10 @@ Two other rules apply to every ranking:
 > Citation counts, venues, and AI scores are never presented as evidence of
 > validity.
 
-**Current state:** the live dashboard still uses the ETHER-era score
-(`ranking_version: 0.0.1-ether`). That score combines theme priority, regex
-signal matches, a venue boost, recency, and a cross-domain bonus. The
-pipeline above replaces it in Phase 1.
+**Current state:** the daily dashboard uses this pipeline as `ranking_version`
+0.1.0 (relevance, novelty, and method match; momentum, discovery, and evidence
+are reported as not yet scored). Runs before 2026-11 used the ETHER-era score,
+`0.0.1-ether`, and are kept in the run history under that version.
 
 ## Run history and Research Delta
 
@@ -244,8 +244,8 @@ day they were recommended.
 
 | Workflow | Trigger | What it does |
 | --- | --- | --- |
-| [`carousel-radar.yml`](.github/workflows/carousel-radar.yml) | Daily 13:00 UTC, or manual (`days`, `max`) | Runs the pipeline, writes a snapshot to `snapshots`, and commits the dashboard to `docs/` (served by GitHub Pages) |
-| [`ci.yml`](.github/workflows/ci.yml) | Pull requests, pushes to `main` | Runs pytest and `carousel validate examples/*.yml` on Python 3.10 and 3.12 |
+| [`carousel-radar.yml`](.github/workflows/carousel-radar.yml) | Daily 13:00 UTC, or manual (`top`, `max_results`) | Runs `carousel scan` for every radar in `radars/` (one matrix job each, real semantic model), then builds the dashboard into `docs/` (GitHub Pages), writes a snapshot of each run to `snapshots`, and saves each radar's paper store to the `carousel-state` branch so the next scan keeps its history. Optional secrets: `OPENALEX_API_KEY`, `NCBI_API_KEY` |
+| [`ci.yml`](.github/workflows/ci.yml) | Pull requests, pushes to `main` | Runs pytest and validates `examples/` and `radars/` on Python 3.10 and 3.12, and checks the built wheel |
 
 ## Repository layout
 
@@ -253,14 +253,14 @@ day they were recommended.
 src/carousel/        Python package: radar.py (Radar API), feedback.py, core/ (radar config, identifiers, paper model),
                      connectors/ (PubMed, OpenAlex), ingestion/ (dedup), search/ (candidates),
                      ranking/ (ranker),
-                     database/ (local SQLite paper store), cli.py
+                     database/ (local SQLite paper store), site.py (dashboard), cli.py
+radars/              Radars scanned daily by Actions (lab_default.yml = the lab's ten themes)
 examples/            Starter radar configs (validated in CI)
 scripts/
-  daily_pubmed_watch_v2.py   current daily pipeline (being replaced by `carousel scan`)
   snapshot.py                run snapshots: write / backfill / reindex
   validate_ranking.py        P@K, R@K, nDCG@K evaluation
 tests/               unittest/pytest suite
-docs/                Generated GitHub Pages site (do not edit by hand)
+docs/                GitHub Pages dashboard, generated daily by `carousel site` (do not edit by hand)
 logo/                Logo SVG/PNG and the generator script
 manuscript/          Paper draft and validation plan
 CAROUSEL_PLAN.md     Implementation plan: phases, tasks, done-when checks

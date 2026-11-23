@@ -15,6 +15,7 @@ carousel command-line interface.
     carousel delta RADAR.yml [--store carousel.db]                   # latest run vs the one before
     carousel export RUN_ID (--csv OUT.csv | --json OUT.json) [--store carousel.db]
     carousel feedback RADAR.yml save|dismiss|relevant|irrelevant REF... [--undo]
+    carousel site RUN.json... [--out docs]                           # static dashboard for GitHub Pages
 """
 
 from __future__ import annotations
@@ -235,6 +236,18 @@ def cmd_feedback(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_site(args: argparse.Namespace) -> int:
+    from carousel import site
+
+    try:
+        written = site.build(args.runs, args.out)
+    except (ValueError, OSError, KeyError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    print(f"wrote {len(written)} files to {args.out}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="carousel", description="CAROUSEL research radar tools.")
     ap.add_argument("--version", action="version", version=f"carousel {__version__}")
@@ -310,6 +323,11 @@ def build_parser() -> argparse.ArgumentParser:
     fe.add_argument("--undo", action="store_true", help="Remove the references instead")
     fe.add_argument("--file", help="Feedback file (default: RADAR.feedback.yml next to the radar)")
     fe.set_defaults(func=cmd_feedback)
+
+    si = sub.add_parser("site", help="Build the static dashboard (GitHub Pages) from run exports")
+    si.add_argument("runs", nargs="+", metavar="RUN.json", help="Exports from `carousel scan --json`")
+    si.add_argument("--out", default="docs", help="Output directory, replaced entirely (default: docs)")
+    si.set_defaults(func=cmd_site)
     return ap
 
 

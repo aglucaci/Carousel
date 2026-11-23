@@ -36,5 +36,8 @@ version = { attr = "carousel.__version__" }
 where = ["src"]
 include = ["carousel*"]
 
+[tool.setuptools.package-data]
+carousel = ["site_assets/*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
