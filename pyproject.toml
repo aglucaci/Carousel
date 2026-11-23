@@ -18,6 +18,9 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
+# Real semantic retrieval (sentence-transformers + torch). Without it, CAROUSEL
+# falls back to the dependency-free, non-semantic HashingEmbedder.
+semantic = ["sentence-transformers>=3"]
 
 [project.scripts]
 carousel = "carousel.cli:main"

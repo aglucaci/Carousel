@@ -31,13 +31,13 @@ from __future__ import annotations
 
 import dataclasses
 import difflib
-import html
 import re
-import unicodedata
 from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 from carousel.core.identifiers import SCHEMES
 from carousel.core.paper import CanonicalPaper, partial_date_bounds
+from carousel.core.text import STOPWORDS
+from carousel.core.text import normalize_text as normalize_title
 
 AUTO_MERGE_TITLE = 0.97
 """Title similarity required (with all other gates) for an automatic merge."""
@@ -45,20 +45,6 @@ REVIEW_TITLE = 0.85
 """Below this title similarity, a pair is distinct."""
 MAX_REVIEW_YEAR_GAP = 2
 MIN_TITLE_TOKENS = 4
-
-_GREEK = {
-    "α": "alpha", "β": "beta", "γ": "gamma", "δ": "delta", "ε": "epsilon", "ζ": "zeta", "η": "eta",
-    "θ": "theta", "ι": "iota", "κ": "kappa", "λ": "lambda", "μ": "mu", "ν": "nu", "ξ": "xi",
-    "π": "pi", "ρ": "rho", "σ": "sigma", "ς": "sigma", "τ": "tau", "υ": "upsilon", "φ": "phi",
-    "χ": "chi", "ψ": "psi", "ω": "omega",
-}
-_TAG = re.compile(r"<[^>]+>")
-_NON_ALNUM = re.compile(r"[^a-z0-9]+")
-
-STOPWORDS = frozenset(
-    "a an and are as at be by for from in into is of on or the to with via its their this that these "
-    "using use based between during after before among within without".split()
-)
 
 _NOTICE = re.compile(
     r"^(?:erratum|errata|corrigendum|corrigenda|correction|author correction|publisher correction|"
@@ -83,17 +69,6 @@ _COLLECTIVE = re.compile(r"\b(consortium|group|collaboration|network|investigato
 # -------------------------
 # Normalization
 # -------------------------
-
-def normalize_title(title: Optional[str]) -> str:
-    """Lowercase ASCII words: tags and accents stripped, Greek letters spelled out."""
-    if not title:
-        return ""
-    t = html.unescape(_TAG.sub(" ", title))
-    t = "".join(_GREEK.get(ch, _GREEK.get(ch.lower(), ch)) for ch in t)
-    t = unicodedata.normalize("NFKD", t)
-    t = "".join(ch for ch in t if not unicodedata.combining(ch)).lower()
-    return " ".join(_NON_ALNUM.sub(" ", t).split())
-
 
 def title_tokens(title: Optional[str]) -> List[str]:
     """Significant tokens for candidate blocking (unique, in order)."""

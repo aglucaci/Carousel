@@ -12,6 +12,7 @@ import yaml
 from carousel import cli
 from carousel.core.paper import CanonicalPaper, SourceRecord
 from carousel.database import PaperStore, StoreError
+from carousel.database.local import STORE_SCHEMA_VERSION
 from carousel.ingestion.dedup import AUTO_MERGE_TITLE, compare, family_name, normalize_title
 
 REPO = Path(__file__).resolve().parents[1]
@@ -202,7 +203,7 @@ class MigrationTests(unittest.TestCase):
             con.commit()
             con.close()
             with PaperStore(path) as s:
-                self.assertEqual(s.db.execute("SELECT value FROM meta").fetchone()[0], "2")
+                self.assertEqual(s.db.execute("SELECT value FROM meta").fetchone()[0], str(STORE_SCHEMA_VERSION))
                 obs = s.observe(record(by_id("subtitle_dropped")["b"]), T1)  # needs the backfilled title index
                 self.assertEqual(len(obs.queued), 1)
 

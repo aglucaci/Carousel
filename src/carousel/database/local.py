@@ -50,7 +50,7 @@ from carousel.core.identifiers import normalize
 from carousel.core.paper import CanonicalPaper, SourceRecord, paper_id_for
 from carousel.ingestion.dedup import MatchDecision, best_match, title_tokens
 
-STORE_SCHEMA_VERSION = 2
+STORE_SCHEMA_VERSION = 3
 
 _DDL = """
 CREATE TABLE IF NOT EXISTS meta (
@@ -112,6 +112,15 @@ CREATE TABLE IF NOT EXISTS review_queue (
     decided_at  TEXT,
     note        TEXT,
     PRIMARY KEY (paper_a, paper_b)
+);
+CREATE TABLE IF NOT EXISTS embeddings (      -- one vector per (paper, model_version); see search/embeddings.py
+    paper_id      TEXT NOT NULL,
+    model_version TEXT NOT NULL,
+    text_sha256   TEXT NOT NULL,           -- hash of the embedded text (recipe-versioned)
+    dim           INTEGER NOT NULL,
+    vector        BLOB NOT NULL,           -- little-endian float32
+    created_at    TEXT NOT NULL,
+    PRIMARY KEY (paper_id, model_version)
 );
 CREATE TABLE IF NOT EXISTS merge_log (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -492,6 +501,7 @@ class PaperStore:
         self.db.execute("UPDATE source_records SET paper_id = ? WHERE paper_id = ?", (keep, other))
         self.db.execute("UPDATE identifiers SET paper_id = ? WHERE paper_id = ?", (keep, other))
         self.db.execute("DELETE FROM title_tokens WHERE paper_id = ?", (other,))
+        self.db.execute("DELETE FROM embeddings WHERE paper_id = ?", (other,))
         self.db.execute("UPDATE papers SET merged_into = ? WHERE paper_id = ? OR merged_into = ?", (keep, other, other))
         self._decide(keep, other, "merged", note, now, kind="fuzzy" if decision else "manual")
         self.db.execute(
@@ -552,6 +562,36 @@ class PaperStore:
                 (now, old, new_id, json.dumps({"source": source, "source_id": source_id, "note": note}, sort_keys=True)),
             )
             return self._rebuild(old), self._rebuild(new_id)
+
+    # ---- embeddings ----
+
+    def get_embeddings(self, paper_ids: Sequence[str], model_version: str) -> Dict[str, Tuple[str, List[float]]]:
+        """{paper_id: (text_sha256, vector)} for the papers that have one under ``model_version``."""
+        from carousel.search.embeddings import unpack
+
+        out: Dict[str, Tuple[str, List[float]]] = {}
+        ids = list(paper_ids)
+        for i in range(0, len(ids), 500):
+            chunk = ids[i : i + 500]
+            rows = self.db.execute(
+                f"SELECT paper_id, text_sha256, vector FROM embeddings WHERE model_version = ? "
+                f"AND paper_id IN ({','.join('?' * len(chunk))})",
+                (model_version, *chunk),
+            ).fetchall()
+            out.update({r["paper_id"]: (r["text_sha256"], unpack(r["vector"])) for r in rows})
+        return out
+
+    def put_embeddings(self, rows: Sequence[Tuple[str, str, Sequence[float]]], model_version: str,
+                       at: Optional[dt.datetime] = None) -> None:
+        """Store ``(paper_id, text_sha256, vector)`` rows, replacing any older vector for the same model."""
+        from carousel.search.embeddings import pack
+
+        now = _iso(at or dt.datetime.now(dt.timezone.utc))
+        with self.db:
+            self.db.executemany(
+                "INSERT OR REPLACE INTO embeddings VALUES (?, ?, ?, ?, ?, ?)",
+                [(pid, model_version, h, len(v), pack(v), now) for pid, h, v in rows],
+            )
 
     def merge_log(self) -> List[Dict[str, Any]]:
         rows = self.db.execute("SELECT * FROM merge_log ORDER BY id").fetchall()
@@ -622,6 +662,8 @@ class PaperStore:
             "identifiers": q("SELECT COUNT(*) FROM identifiers"),
             "conflicts": q("SELECT COUNT(*) FROM identifier_conflicts"),
             "review_pending": q("SELECT COUNT(*) FROM review_queue WHERE status = 'pending'"),
+            "embeddings": dict(self.db.execute(
+                "SELECT model_version, COUNT(*) FROM embeddings GROUP BY model_version ORDER BY model_version").fetchall()),
             "by_source": by_source,
         }
 
