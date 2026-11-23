@@ -30,6 +30,10 @@ from typing import Any, Dict, List, Optional, Tuple
 
 EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
 
+# Bump whenever scoring formulas, weights, signal patterns, or theme queries change.
+# Recorded in every output payload and snapshot so rankings can be reproduced.
+RANKING_VERSION = "0.0.1-ether"
+
 
 # =========================
 # v2: Theme taxonomy
@@ -1538,6 +1542,7 @@ def main() -> int:
         "generated_at_utc": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
         "days": args.days,
         "window_utc": {"mindate": mindate, "maxdate": maxdate},
+        "ranking_version": RANKING_VERSION,
         "ranking": "research_relevance_score(topic_priority + research_signal + source_metadata + recency + cross_domain)",
         "signal_ontology": {
             s.name: {"label": s.label, "weight": s.weight, "patterns": s.patterns}

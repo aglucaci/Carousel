@@ -1,0 +1,116 @@
+name: CAROUSEL radar
+
+# Single scheduled pipeline. Replaces ether-radar.yml and ether-radar-2weeks.yml,
+# which both ran at 13:00 UTC and overwrote each other's docs/latest.json.
+#
+# Each run:
+#   1. builds the dashboard into docs/ (committed to main, served by Pages)
+#   2. stores an immutable snapshot on the `snapshots` branch (for Research Delta,
+#      Momentum, and time-forward evaluation)
+
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Lookback window in days"
+        required: false
+        default: "14"
+      max:
+        description: "Max papers per theme"
+        required: false
+        default: "25"
+  schedule:
+    # ~9am ET (13:00 UTC)
+    - cron: "0 13 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: carousel-radar
+  cancel-in-progress: false
+
+env:
+  PYTHONUNBUFFERED: "1"
+  PIPELINE_SCRIPT: scripts/daily_pubmed_watch_v2.py
+  SITE_DIR: docs
+  # The current pipeline runs the hardcoded lab theme set as one radar.
+  # When radars move to YAML configs (v0.1 task 3) this becomes a matrix over radars/*.yml.
+  RADAR_ID: lab-default
+  SNAPSHOT_BRANCH: snapshots
+  SNAPSHOT_DIR: ${{ github.workspace }}/../snapshots-worktree
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Run pipeline
+        env:
+          DAYS: ${{ inputs.days || '14' }}
+          MAX_RESULTS: ${{ inputs.max || '25' }}
+        run: |
+          set -euo pipefail
+          echo "radar=${RADAR_ID} days=${DAYS} max=${MAX_RESULTS}"
+          python "${PIPELINE_SCRIPT}" --days "${DAYS}" --max "${MAX_RESULTS}" --docs-dir "${SITE_DIR}"
+          test -s "${SITE_DIR}/index.html"
+          python -c "import json; json.load(open('${SITE_DIR}/latest.json'))"
+
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Write snapshot
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads origin "${SNAPSHOT_BRANCH}" >/dev/null; then
+            git fetch origin "${SNAPSHOT_BRANCH}:${SNAPSHOT_BRANCH}"
+            git worktree add "${SNAPSHOT_DIR}" "${SNAPSHOT_BRANCH}"
+          else
+            git worktree add --detach "${SNAPSHOT_DIR}"
+            git -C "${SNAPSHOT_DIR}" checkout --orphan "${SNAPSHOT_BRANCH}"
+            git -C "${SNAPSHOT_DIR}" rm -rf --quiet .
+          fi
+          python scripts/snapshot.py write \
+            --input "${SITE_DIR}/latest.json" \
+            --root "${SNAPSHOT_DIR}" \
+            --radar-id "${RADAR_ID}"
+
+      - name: Push snapshot
+        run: |
+          set -euo pipefail
+          cd "${SNAPSHOT_DIR}"
+          git add snapshots
+          if git diff --cached --quiet; then
+            echo "No new snapshot."
+            exit 0
+          fi
+          git commit -m "snapshot ${RADAR_ID} $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          git push origin "HEAD:${SNAPSHOT_BRANCH}"
+
+      - name: Commit dashboard
+        run: |
+          set -euo pipefail
+          git add "${SITE_DIR}/"
+          if git diff --cached --quiet; then
+            echo "No dashboard changes."
+            exit 0
+          fi
+          git commit -m "CAROUSEL radar update $(date -u +'%Y-%m-%d')"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
