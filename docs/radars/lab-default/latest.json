@@ -1,0 +1,3445 @@
+{
+ "run_id": "run_85844762e0039973",
+ "radar_id": "lab-default",
+ "radar_name": "Evolution & Surveillance (lab default)",
+ "config_hash": "4ade43793af4",
+ "as_of": "2026-11-23",
+ "started_at": "2026-11-23T23:27:08.279100Z",
+ "finished_at": "2026-11-23T23:27:47.017638Z",
+ "status": "ok",
+ "ranking_version": "0.1.0",
+ "candidates_version": "0.1.0",
+ "model_version": "sentence-transformers/all-MiniLM-L6-v2",
+ "mode": "balanced",
+ "n_observed": 270,
+ "n_candidates": 261,
+ "n_items": 25,
+ "coverage": [
+  {
+   "cache_hits": 0,
+   "connector_version": "0.1.0",
+   "cost": 2.0,
+   "cost_unit": "requests",
+   "date_field": "publication date",
+   "end": "2026-11-23",
+   "errors": [],
+   "native_query": "((((\"dN/dS\" OR \"codon model\" OR HyPhy OR FEL OR MEME OR FUBAR OR BUSTED OR \"branch-site\") AND (selection OR evolution OR adaptive OR constraint)) OR ((\"episodic selection\" OR \"positive selection\" OR \"diversifying selection\") AND (virus OR pathogen))) AND (\"computational evolutionary biology\" OR \"molecular evolution\" OR phylogenomics OR phylodynamics OR HyPhy OR \"codon model\") NOT (case report OR randomized OR psychology)) OR ((((\"cancer evolution\" OR \"tumor evolution\" OR \"somatic evolution\" OR \"clonal evolution\") AND (genomics OR sequencing OR phylogen* OR \"single-cell\")) OR ((cancer OR tumor OR lymphoma OR leukemia) AND (\"positive selection\" OR \"clonal selection\" OR \"driver mutation\" OR \"dN/dS\" OR \"selection inference\")) OR ((\"mutational signature\" OR \"mutational signatures\") AND (cancer OR tumor) AND (evolution OR selection OR phylogeny))) AND (\"computational evolutionary biology\" OR \"molecular evolution\" OR phylogenomics OR phylodynamics OR HyPhy OR \"codon model\") NOT (case report OR randomized OR psychology)) OR ((((recombination OR \"mosaic genome\" OR breakpoint OR \"gene conversion\") AND (virus OR virome OR pathogen)) OR ((RDP OR GARD OR \"recombination detection\") AND (sequence OR alignment))) AND (\"computational evolutionary biology\" OR \"molecular evolution\" OR phylogenomics OR phylodynamics OR HyPhy OR \"codon model\") NOT (case report OR randomized OR psychology)) OR ((((phylodynamic* OR \"time-resolved phylogeny\" OR BEAST OR \"birth-death\" OR coalescent) AND (virus OR pathogen)) OR ((\"genomic epidemiology\" OR \"phylodynamic inference\") AND (outbreak OR transmission))) AND (\"computational evolutionary biology\" OR \"molecular evolution\" OR phylogenomics OR phylodynamics OR HyPhy OR \"codon model\") NOT (case report OR randomized OR psychology)) OR ((((virome OR \"viral metagenomics\" OR viromics) AND (\"built environment\" OR urban OR subway OR transit OR surface)) OR ((\"urban microbiome\" OR MetaSUB) AND (virus OR virome OR phage))) AND (\"computational evolutionary biology\" OR \"molecular evolution\" OR phylogenomics OR phylodynamics OR HyPhy OR \"codon model\") NOT (case report OR randomized OR psychology)) OR ((((\"wastewater surveillance\" OR WBE OR sewage) AND (virus OR virome OR pathogen OR SARS-CoV-2)) OR ((wastewater OR sewage) AND (\"viral metagenomics\" OR viromics) AND (variant OR lineage OR evolution))) AND (\"computational evolutionary biology\" OR \"molecular evolution\" OR phylogenomics OR phylodynamics OR HyPhy OR \"codon model\") NOT (case report OR randomized OR psychology)) OR ((((\"pandemic preparedness\" OR biosurveillance OR \"pathogen surveillance\") AND (genomics OR sequencing)) OR ((\"early warning\" OR \"sentinel surveillance\") AND (metagenomics OR sequencing))) AND (\"computational evolutionary biology\" OR \"molecular evolution\" OR phylogenomics OR phylodynamics OR HyPhy OR \"codon model\") NOT (case report OR randomized OR psychology)) OR ((((atlas OR database OR compendium OR \"reference catalog\" OR resource) AND (virome OR microbiome OR pathogen)) OR ((\"large-scale\" OR global) AND (virome OR microbiome) AND (metadata OR harmonization))) AND (\"computational evolutionary biology\" OR \"molecular evolution\" OR phylogenomics OR phylodynamics OR HyPhy OR \"codon model\") NOT (case report OR randomized OR psychology)) OR (((metagenomics AND (benchmark* OR pipeline OR \"best practices\" OR reproducible OR workflow)) OR ((Kraken2 OR MetaPhlAn OR Bracken OR Centrifuge OR Kaiju) AND (benchmark* OR evaluation))) AND (benchmark* OR workflow OR pipeline OR Snakemake OR Nextflow OR WDL) NOT (case report OR randomized OR psychology)) OR ((((\"machine learning\" OR \"deep learning\" OR transformer) AND (virus OR pathogen OR evolution OR phylogeny)) OR ((\"protein language model\" OR ESM) AND (mutation OR evolution OR fitness))) AND (\"machine learning\" OR \"deep learning\" OR transformer OR \"foundation model\" OR \"protein language model\" OR ESM) NOT (case report OR randomized OR psychology))",
+   "pages": 1,
+   "rate_limit": {
+    "x-ratelimit-limit": "3",
+    "x-ratelimit-remaining": "1"
+   },
+   "requests": 2,
+   "retrieved": 170,
+   "retrieved_at": "2026-11-23T23:27:22.468954Z",
+   "source": "pubmed",
+   "start": "2026-11-10",
+   "status": "ok",
+   "total_available": 170,
+   "truncated": false,
+   "truncation_reason": null
+  },
+  {
+   "cache_hits": 0,
+   "connector_version": "0.1.0",
+   "cost": 10.0,
+   "cost_unit": "credits",
+   "date_field": "publication date",
+   "end": "2026-11-23",
+   "errors": [],
+   "native_query": "search.title_and_abstract=(\"positive selection\" OR \"episodic selection\" OR \"codon model\" OR dN/dS OR HyPhy OR \"cancer evolution\" OR \"clonal evolution\" OR \"somatic evolution\" OR \"mutational signatures\" OR \"viral recombination\" OR \"recombination detection\" OR phylodynamics OR \"genomic epidemiology\" OR \"built environment virome\" OR \"urban microbiome\" OR MetaSUB OR \"wastewater surveillance\" OR \"viral metagenomics\" OR \"pandemic preparedness\" OR \"pathogen surveillance\" OR biosurveillance OR \"virome atlas\" OR \"metagenomics benchmark\" OR \"protein language model\" OR \"deep learning for virus evolution\") NOT (\"case report\") filter=from_publication_date:2026-11-10,to_publication_date:2026-11-23,type:article|preprint|review|letter",
+   "pages": 1,
+   "rate_limit": {
+    "x-ratelimit-cost-usd": "0.001",
+    "x-ratelimit-credits-used": "10",
+    "x-ratelimit-limit": "1000",
+    "x-ratelimit-limit-usd": "0.1",
+    "x-ratelimit-onetime-remaining": "0",
+    "x-ratelimit-prepaid-remaining-usd": "0",
+    "x-ratelimit-remaining": "990",
+    "x-ratelimit-remaining-usd": "0.099",
+    "x-ratelimit-reset": "1954"
+   },
+   "requests": 1,
+   "retrieved": 100,
+   "retrieved_at": "2026-11-23T23:27:27.468184Z",
+   "source": "openalex",
+   "start": "2026-11-10",
+   "status": "ok",
+   "total_available": 257,
+   "truncated": true,
+   "truncation_reason": "no_api_key"
+  }
+ ],
+ "ranking": {
+  "active_signals": [
+   "relevance",
+   "method_match"
+  ],
+  "inactive_signals": {
+   "discovery": "needs the citation graph and Method Transfer (Phase 4)",
+   "evidence": "needs evidence-grounded extraction (Phase 2)",
+   "momentum": "needs run history and trend models (Phase 3)",
+   "novelty": "fewer than 3 earlier papers in history (first scans)"
+  },
+  "mmr_lambda": 0.7,
+  "mode": "balanced",
+  "model_version": "sentence-transformers/all-MiniLM-L6-v2",
+  "ranking_version": "0.1.0",
+  "stats": {
+   "candidate_stats": {
+    "candidates": 261,
+    "candidates_version": "0.1.0",
+    "eligible": 261,
+    "embedded": 261,
+    "embeddings_reused": 0,
+    "filtered": {},
+    "lexical_hits": 200,
+    "lexical_k": 200,
+    "model_version": "sentence-transformers/all-MiniLM-L6-v2",
+    "pool": 261,
+    "semantic_hits": 200,
+    "semantic_k": 200,
+    "source_query_hits": 261
+   },
+   "candidates": 261,
+   "excluded": {},
+   "history_size": 261,
+   "profile": {
+    "feedback_negative": 0,
+    "feedback_positive": 0,
+    "feedback_unresolved": [],
+    "seeds_missing": [],
+    "seeds_used": []
+   },
+   "relevance_formula": "0.6*sim + 0.4*bm25_norm",
+   "scored": 261,
+   "selected": 25
+  },
+  "weights": {
+   "method_match": 0.2,
+   "relevance": 0.8
+  },
+  "window": {
+   "days": 14,
+   "end": "2026-11-23",
+   "start": "2026-11-10"
+  }
+ },
+ "notes": [],
+ "items": [
+  {
+   "rank": 1,
+   "paper_id": "cp_446ff4ec24bf6cbb",
+   "score": 0.594389,
+   "mmr": 0.416072,
+   "components": {
+    "method_match": 0.333333,
+    "relevance": 0.659653
+   },
+   "details": {
+    "bm25": 36.482164,
+    "bm25_norm": 0.772917,
+    "earliest_public_date": "2026-11-13",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [],
+    "methods_matched": [
+     "metagenomics"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.954497,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Michael J Tisza",
+      "Shelby R Simar",
+      "Jackie K Zorz",
+      "et al."
+     ],
+     "doi": "10.64898/2026.09.29.755457",
+     "earliest_public_date": "2026-11-13",
+     "openalex": null,
+     "pmcid": "PMC13648648",
+     "pmid": "42856497",
+     "title": "EsViritu is a sensitive and specific profiler for viral pathogen detection and genome recovery in metagenomes.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/42856497/",
+     "venue": "bioRxiv : the preprint server for biology"
+    },
+    "publication_kind": "preprint",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "atlases_resources": [
+      "database"
+     ],
+     "metagenomics_pipelines": [
+      "Kraken2"
+     ],
+     "urban_virome": [
+      "virome"
+     ]
+    },
+    "similarity": 0.584144,
+    "sources": [
+     "pubmed"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 2,
+   "paper_id": "cp_eadec2c8322d675d",
+   "score": 0.576226,
+   "mmr": 0.268722,
+   "components": {
+    "method_match": 0.333333,
+    "relevance": 0.636949
+   },
+   "details": {
+    "bm25": 43.587213,
+    "bm25_norm": 0.923446,
+    "earliest_public_date": "2026-11-16",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "positive selection",
+     "phylodynamics"
+    ],
+    "methods_matched": [
+     "phylodynamics"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.921645,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Wensheng Fan",
+      "Qiaomu Deng",
+      "Yu Zhang",
+      "et al."
+     ],
+     "doi": "10.1128/spectrum.03080-25",
+     "earliest_public_date": "2026-11-16",
+     "openalex": "W7233782264",
+     "pmcid": null,
+     "pmid": "43037251",
+     "title": "Molecular epidemiology of the Taiwan (GI-7) IBV genotype in China over six decades: uncovering recombination hotspots and a nationwide transmission network.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/43037251/",
+     "venue": "Microbiology spectrum"
+    },
+    "publication_kind": "article",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "phylodynamics": [
+      "phylodynamics",
+      "phylodynamic",
+      "transmission"
+     ],
+     "recombination": [
+      "recombination",
+      "breakpoint"
+     ],
+     "selection_codon_models": [
+      "positive selection"
+     ]
+    },
+    "similarity": 0.445952,
+    "sources": [
+     "openalex",
+     "pubmed"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 3,
+   "paper_id": "cp_6bd78effdd5cb181",
+   "score": 0.55758,
+   "mmr": 0.25841,
+   "components": {
+    "method_match": 0.666667,
+    "relevance": 0.530308
+   },
+   "details": {
+    "bm25": 30.876277,
+    "bm25_norm": 0.65415,
+    "earliest_public_date": "2026-11-16",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "positive selection",
+     "codon model",
+     "HyPhy"
+    ],
+    "methods_matched": [
+     "HyPhy",
+     "codon model"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.767339,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Nabanita Ghosh"
+     ],
+     "doi": "10.5281/zenodo.24282986",
+     "earliest_public_date": "2026-11-16",
+     "openalex": "W7234281677",
+     "pmcid": null,
+     "pmid": null,
+     "title": "Signals of episodic positive selection on the Caenorhabditis antiviral helicase DRH-1 depend on multinucleotide substitution modelling",
+     "url": "https://doi.org/10.5281/zenodo.24282986",
+     "venue": "Zenodo (CERN European Organization for Nuclear Research)"
+    },
+    "publication_kind": "article",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "recombination": [
+      "GARD"
+     ],
+     "selection_codon_models": [
+      "codon model",
+      "HyPhy",
+      "positive selection",
+      "BUSTED"
+     ]
+    },
+    "similarity": 0.447747,
+    "sources": [
+     "openalex"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 4,
+   "paper_id": "cp_a0cc806d24ab1ffc",
+   "score": 0.585175,
+   "mmr": 0.250732,
+   "components": {
+    "method_match": 0.333333,
+    "relevance": 0.648136
+   },
+   "details": {
+    "bm25": 47.200633,
+    "bm25_norm": 1.0,
+    "earliest_public_date": "2026-10-12",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [],
+    "methods_matched": [
+     "metagenomics"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.937832,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Peiwei Xie",
+      "Mei Luo",
+      "Jiahui Fan",
+      "et al."
+     ],
+     "doi": "10.1128/msystems.00901-26",
+     "earliest_public_date": "2026-10-12",
+     "openalex": null,
+     "pmcid": "PMC13776707",
+     "pmid": "42861963",
+     "title": "A global atlas of the gut virome reveals subtype-specific and functional alterations in irritable bowel syndrome.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/42861963/",
+     "venue": "mSystems"
+    },
+    "publication_kind": "article",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "atlases_resources": [
+      "atlas",
+      "resource"
+     ],
+     "metagenomics_pipelines": [
+      "pipeline"
+     ],
+     "ml_evolution": [
+      "machine learning"
+     ],
+     "urban_virome": [
+      "virome"
+     ]
+    },
+    "similarity": 0.41356,
+    "sources": [
+     "pubmed"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 5,
+   "paper_id": "cp_c6937ea9e5732818",
+   "score": 0.55288,
+   "mmr": 0.228783,
+   "components": {
+    "method_match": 0.0,
+    "relevance": 0.6911
+   },
+   "details": {
+    "bm25": 37.265085,
+    "bm25_norm": 0.789504,
+    "earliest_public_date": "2026-10-21",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "wastewater surveillance",
+     "pandemic preparedness"
+    ],
+    "methods_matched": [],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 1.0,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Putri Ayu Fajar",
+      "Ray W Izquierdo-Lara",
+      "Nathalie Worp",
+      "et al."
+     ],
+     "doi": "10.1128/jvi.01238-26",
+     "earliest_public_date": "2026-10-21",
+     "openalex": null,
+     "pmcid": "PMC13776626",
+     "pmid": "42904649",
+     "title": "Characterization of norovirus GI.3 and GII.12 variants detected in wastewater: proof-of-concept for integrating phenotypic insights in wastewater-based epidemiology.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/42904649/",
+     "venue": "Journal of virology"
+    },
+    "publication_kind": "article",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "biosurveillance": [
+      "pandemic preparedness"
+     ],
+     "wastewater": [
+      "wastewater",
+      "wastewater-based epidemiology",
+      "wastewater surveillance"
+     ]
+    },
+    "similarity": 0.625498,
+    "sources": [
+     "pubmed"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 6,
+   "paper_id": "cp_277069dadb1616be",
+   "score": 0.53406,
+   "mmr": 0.204632,
+   "components": {
+    "method_match": 0.0,
+    "relevance": 0.667575
+   },
+   "details": {
+    "bm25": 39.014482,
+    "bm25_norm": 0.826567,
+    "earliest_public_date": "2026-11-16",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "pandemic preparedness"
+    ],
+    "methods_matched": [],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.96596,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Ivan Specht",
+      "Soyoon Park",
+      "Aakarsh Vermani",
+      "et al."
+     ],
+     "doi": "10.64898/2026.08.27.741102",
+     "earliest_public_date": "2026-11-16",
+     "openalex": null,
+     "pmcid": "PMC13684659",
+     "pmid": "42922681",
+     "title": "Forecasting viral antigenic evolution from phylogenetic trees.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/42922681/",
+     "venue": "bioRxiv : the preprint server for biology"
+    },
+    "publication_kind": "preprint",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "biosurveillance": [
+      "pandemic preparedness"
+     ],
+     "ml_evolution": [
+      "machine learning"
+     ]
+    },
+    "similarity": 0.561581,
+    "sources": [
+     "pubmed"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 7,
+   "paper_id": "cp_9c9f7a9fd5646d60",
+   "score": 0.401695,
+   "mmr": 0.203301,
+   "components": {
+    "method_match": 0.333333,
+    "relevance": 0.418785
+   },
+   "details": {
+    "bm25": 29.899044,
+    "bm25_norm": 0.633446,
+    "earliest_public_date": "2026-11-16",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "clonal evolution"
+    ],
+    "methods_matched": [
+     "single-cell"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.605969,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Sihui Huang",
+      "Yang Jin",
+      "Panruo Jiang",
+      "et al."
+     ],
+     "doi": "10.3389/fimmu.2026.2014066",
+     "earliest_public_date": "2026-11-16",
+     "openalex": "W7233733055",
+     "pmcid": null,
+     "pmid": null,
+     "title": "Second primary malignancies after CAR T-cell therapy: causal attribution, clonal evolution, and risk-adapted surveillance",
+     "url": "https://doi.org/10.3389/fimmu.2026.2014066",
+     "venue": "Frontiers in Immunology"
+    },
+    "publication_kind": "article",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "cancer_evolution": [
+      "clonal evolution",
+      "clonal selection"
+     ]
+    },
+    "similarity": 0.275678,
+    "sources": [
+     "openalex"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 8,
+   "paper_id": "cp_0861513a7f1c4020",
+   "score": 0.544061,
+   "mmr": 0.196905,
+   "components": {
+    "method_match": 0.666667,
+    "relevance": 0.513409
+   },
+   "details": {
+    "bm25": 23.391749,
+    "bm25_norm": 0.495581,
+    "earliest_public_date": "2026",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [],
+    "methods_matched": [
+     "metagenomics",
+     "benchmark"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.742886,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Jennifer L Mallek",
+      "Anthony Mannion",
+      "Amy Xiao",
+      "et al."
+     ],
+     "doi": "10.1371/journal.pone.0361775",
+     "earliest_public_date": "2026",
+     "openalex": null,
+     "pmcid": "PMC13773292",
+     "pmid": "43038260",
+     "title": "Experimental and computational insights for broad, metagenomic next-generation sequencing-based biodetection in complex environments.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/43038260/",
+     "venue": "PloS one"
+    },
+    "publication_kind": "article",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "metagenomics_pipelines": [
+      "benchmark",
+      "workflow"
+     ]
+    },
+    "similarity": 0.525294,
+    "sources": [
+     "pubmed"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 9,
+   "paper_id": "cp_0f6dc687645dbb74",
+   "score": 0.459634,
+   "mmr": 0.191139,
+   "components": {
+    "method_match": 0.333333,
+    "relevance": 0.491209
+   },
+   "details": {
+    "bm25": 35.096657,
+    "bm25_norm": 0.743563,
+    "earliest_public_date": "2026-11-16",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "somatic evolution"
+    ],
+    "methods_matched": [
+     "single-cell"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.710763,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Chenshan Ma",
+      "Hanyu Zhu",
+      "Zhenyu Li",
+      "et al."
+     ],
+     "doi": "10.14218/csp.2026.00014",
+     "earliest_public_date": "2026-11-16",
+     "openalex": "W7234280111",
+     "pmcid": null,
+     "pmid": null,
+     "title": "From Germline Susceptibility to Somatic Evolution: The Genetic Trajectory of Pancreatic Ductal Adenocarcinoma and Implications for Screening and Early Detection",
+     "url": "https://doi.org/10.14218/csp.2026.00014",
+     "venue": "Cancer Screening and Prevention"
+    },
+    "publication_kind": "article",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "cancer_evolution": [
+      "somatic evolution",
+      "subclonal"
+     ],
+     "recombination": [
+      "recombination"
+     ]
+    },
+    "similarity": 0.322972,
+    "sources": [
+     "openalex"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 10,
+   "paper_id": "cp_c5a6d1b8001ecc3c",
+   "score": 0.541344,
+   "mmr": 0.177378,
+   "components": {
+    "method_match": 0.333333,
+    "relevance": 0.593347
+   },
+   "details": {
+    "bm25": 28.824387,
+    "bm25_norm": 0.610678,
+    "earliest_public_date": "2026-11-13",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "pathogen surveillance"
+    ],
+    "methods_matched": [
+     "benchmark"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.858554,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Michael Barber",
+      "Carl J. E. Suster",
+      "Jingyi Lei",
+      "et al."
+     ],
+     "doi": "10.64898/2026.11.11.765853",
+     "earliest_public_date": "2026-11-13",
+     "openalex": "W7226021904",
+     "pmcid": null,
+     "pmid": null,
+     "title": "MicroDUET: a dual-headed genomic foundation model for pathogen surveillance",
+     "url": "https://doi.org/10.64898/2026.11.11.765853",
+     "venue": "bioRxiv (Cold Spring Harbor Laboratory)"
+    },
+    "publication_kind": "preprint",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "biosurveillance": [
+      "pathogen surveillance"
+     ],
+     "metagenomics_pipelines": [
+      "benchmark"
+     ],
+     "ml_evolution": [
+      "foundation model"
+     ]
+    },
+    "similarity": 0.581793,
+    "sources": [
+     "openalex"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 11,
+   "paper_id": "cp_8a4706e4a6f00bd0",
+   "score": 0.476909,
+   "mmr": 0.176044,
+   "components": {
+    "method_match": 0.333333,
+    "relevance": 0.512803
+   },
+   "details": {
+    "bm25": 30.92406,
+    "bm25_norm": 0.655162,
+    "earliest_public_date": "2026-11-12",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "phylodynamics"
+    ],
+    "methods_matched": [
+     "phylodynamics"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.742009,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Abdoulie Kanteh",
+      "Bakary Sanyang",
+      "Haruna S. Jallow",
+      "et al."
+     ],
+     "doi": "10.1038/s41598-026-77138-9",
+     "earliest_public_date": "2026-11-12",
+     "openalex": "W7225858332",
+     "pmcid": null,
+     "pmid": null,
+     "title": "Phylodynamic analysis of the SARS-CoV-2 pandemic in the Gambia: a 2-year genomic surveillance investigation",
+     "url": "https://doi.org/10.1038/s41598-026-77138-9",
+     "venue": "Scientific Reports"
+    },
+    "publication_kind": "article",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "phylodynamics": [
+      "phylodynamics",
+      "phylodynamic",
+      "transmission"
+     ]
+    },
+    "similarity": 0.417897,
+    "sources": [
+     "openalex"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 12,
+   "paper_id": "cp_5c4d69dd65973b22",
+   "score": 0.479909,
+   "mmr": 0.173185,
+   "components": {
+    "method_match": 0.333333,
+    "relevance": 0.516553
+   },
+   "details": {
+    "bm25": 32.127655,
+    "bm25_norm": 0.680662,
+    "earliest_public_date": "2026-11-14",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "HyPhy"
+    ],
+    "methods_matched": [
+     "HyPhy"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.747436,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Sergei L Kosakovsky Pond",
+      "Steven Weaver",
+      "Darren P Martin",
+      "et al."
+     ],
+     "doi": "10.64898/2026.11.06.764988",
+     "earliest_public_date": "2026-11-14",
+     "openalex": "W7233568316",
+     "pmcid": "PMC13779245",
+     "pmid": "43060073",
+     "title": "All Together Now: Joint Codon Alignment, Ohmic Networks, and Error-Controlled Selection Inference in HyPhy 3.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/43060073/",
+     "venue": "bioRxiv : the preprint server for biology"
+    },
+    "publication_kind": "preprint",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "atlases_resources": [
+      "atlas"
+     ],
+     "metagenomics_pipelines": [
+      "pipeline",
+      "workflow"
+     ],
+     "selection_codon_models": [
+      "HyPhy",
+      "BUSTED"
+     ]
+    },
+    "similarity": 0.407148,
+    "sources": [
+     "openalex",
+     "pubmed"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 13,
+   "paper_id": "cp_9aee5d82a57b91fb",
+   "score": 0.356455,
+   "mmr": 0.163172,
+   "components": {
+    "method_match": 0.666667,
+    "relevance": 0.278902
+   },
+   "details": {
+    "bm25": 19.715926,
+    "bm25_norm": 0.417705,
+    "earliest_public_date": "2026-09-28",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [],
+    "methods_matched": [
+     "metagenomics",
+     "benchmark"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.403562,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Hugo M Lisboa",
+      "Janaina Lima",
+      "Maria Eduarda Martins",
+      "et al."
+     ],
+     "doi": "10.1016/j.carbpol.2026.125895",
+     "earliest_public_date": "2026-09-28",
+     "openalex": null,
+     "pmcid": null,
+     "pmid": "42907021",
+     "title": "CAZyme-guided modification of cactus and regional polysaccharides for food hydrocolloid applications.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/42907021/",
+     "venue": "Carbohydrate polymers"
+    },
+    "publication_kind": "review",
+    "retrieved_by": [
+     "lexical",
+     "source_query"
+    ],
+    "signals_matched": {
+     "metagenomics_pipelines": [
+      "benchmark"
+     ]
+    },
+    "similarity": 0.186367,
+    "sources": [
+     "pubmed"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 14,
+   "paper_id": "cp_1c50e01dba5053fd",
+   "score": 0.448542,
+   "mmr": 0.162145,
+   "components": {
+    "method_match": 0.0,
+    "relevance": 0.560678
+   },
+   "details": {
+    "bm25": 27.498399,
+    "bm25_norm": 0.582585,
+    "earliest_public_date": "2026-11-19",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "wastewater surveillance"
+    ],
+    "methods_matched": [],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.811283,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Jenna Webb",
+      "Megan E. Gerdes",
+      "Heather E. Reese",
+      "et al."
+     ],
+     "doi": "10.21203/rs.3.rs-11625409/v1",
+     "earliest_public_date": "2026-11-19",
+     "openalex": "W7236683247",
+     "pmcid": null,
+     "pmid": null,
+     "title": "Validation of Centers for Disease Control and Prevention National Wastewater Surveillance System’s Wastewater Viral Activity Level for Respiratory Viruses, 2025 –2026 Respiratory Season",
+     "url": "https://doi.org/10.21203/rs.3.rs-11625409/v1",
+     "venue": "Research Square"
+    },
+    "publication_kind": "preprint",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "wastewater": [
+      "wastewater",
+      "wastewater surveillance"
+     ]
+    },
+    "similarity": 0.546073,
+    "sources": [
+     "openalex"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 15,
+   "paper_id": "cp_38a5a465bd1614ac",
+   "score": 0.510429,
+   "mmr": 0.161596,
+   "components": {
+    "method_match": 0.666667,
+    "relevance": 0.47137
+   },
+   "details": {
+    "bm25": 18.138281,
+    "bm25_norm": 0.38428,
+    "earliest_public_date": "2026-11-23",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [],
+    "methods_matched": [
+     "metagenomics",
+     "Nextflow"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.682057,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Lorna Richardson",
+      "Christian Atallah",
+      "Germana Baldi",
+      "et al."
+     ],
+     "doi": "10.1093/nar/gkag1235",
+     "earliest_public_date": "2026-11-23",
+     "openalex": null,
+     "pmcid": null,
+     "pmid": "43069503",
+     "title": "MGnify analyses in 2027: enhancing the depth and breadth of analyses across metabarcoding, unassembled metagenomes, and assembled datasets.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/43069503/",
+     "venue": "Nucleic acids research"
+    },
+    "publication_kind": "article",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "metagenomics_pipelines": [
+      "pipeline",
+      "workflow",
+      "Nextflow"
+     ]
+    },
+    "similarity": 0.529429,
+    "sources": [
+     "pubmed"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 16,
+   "paper_id": "cp_289a793279ec7789",
+   "score": 0.516312,
+   "mmr": 0.154853,
+   "components": {
+    "method_match": 0.666667,
+    "relevance": 0.478723
+   },
+   "details": {
+    "bm25": 15.581869,
+    "bm25_norm": 0.33012,
+    "earliest_public_date": "2026-11-18",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "viral metagenomics"
+    ],
+    "methods_matched": [
+     "viral metagenomics",
+     "metagenomics"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.692697,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Julia S. Galeeva",
+      "Polina Kuzmichenko",
+      "Nikolay Popov",
+      "et al."
+     ],
+     "doi": "10.3390/v18111284",
+     "earliest_public_date": "2026-11-18",
+     "openalex": "W7236116605",
+     "pmcid": null,
+     "pmid": null,
+     "title": "Reading the Host from the Virus: A Systematic Review of Sequence-Based Prediction of Host-Related Properties for Eukaryote-Infecting Viruses",
+     "url": "https://doi.org/10.3390/v18111284",
+     "venue": "Viruses"
+    },
+    "publication_kind": "review",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "phylodynamics": [
+      "transmission"
+     ],
+     "urban_virome": [
+      "viral metagenomics"
+     ]
+    },
+    "similarity": 0.577792,
+    "sources": [
+     "openalex"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 17,
+   "paper_id": "cp_8c79a8f364fa8fc0",
+   "score": 0.494662,
+   "mmr": 0.154692,
+   "components": {
+    "method_match": 0.666667,
+    "relevance": 0.451661
+   },
+   "details": {
+    "bm25": 20.881801,
+    "bm25_norm": 0.442405,
+    "earliest_public_date": "2026-10-09",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [],
+    "methods_matched": [
+     "metagenomics",
+     "benchmark"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.653539,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Luke B Harrison",
+      "Juba O Ahmed",
+      "Gnéré M Coulibaly",
+      "et al."
+     ],
+     "doi": "10.1128/msystems.00444-26",
+     "earliest_public_date": "2026-10-09",
+     "openalex": null,
+     "pmcid": "PMC13776699",
+     "pmid": "42852904",
+     "title": "Comparative performance of reference-based metagenomic tools to identify species-level taxa among families of bacteria: benchmarking Mycobacteriaceae and Neisseriaceae.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/42852904/",
+     "venue": "mSystems"
+    },
+    "publication_kind": "article",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "atlases_resources": [
+      "database"
+     ],
+     "metagenomics_pipelines": [
+      "benchmark",
+      "Kraken2",
+      "Bracken"
+     ]
+    },
+    "similarity": 0.457832,
+    "sources": [
+     "pubmed"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 18,
+   "paper_id": "cp_7be97ada25c3dd3b",
+   "score": 0.361118,
+   "mmr": 0.15153,
+   "components": {
+    "method_match": 0.333333,
+    "relevance": 0.368065
+   },
+   "details": {
+    "bm25": 20.645285,
+    "bm25_norm": 0.437394,
+    "earliest_public_date": "2026-11-10",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "somatic evolution"
+    ],
+    "methods_matched": [
+     "single-cell"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.532578,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Hyrum T. Diesen",
+      "Frederick R. Adler"
+     ],
+     "doi": "10.64898/2026.11.07.764957",
+     "earliest_public_date": "2026-11-10",
+     "openalex": "W7225709461",
+     "pmcid": null,
+     "pmid": null,
+     "title": "Parsimonious Creatures: Building Gene Regulatory Networks Robust to Somatic Evolution",
+     "url": "https://doi.org/10.64898/2026.11.07.764957",
+     "venue": "bioRxiv (Cold Spring Harbor Laboratory)"
+    },
+    "publication_kind": "preprint",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "cancer_evolution": [
+      "somatic evolution"
+     ]
+    },
+    "similarity": 0.321845,
+    "sources": [
+     "openalex"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 19,
+   "paper_id": "cp_534267106b848dff",
+   "score": 0.400867,
+   "mmr": 0.145796,
+   "components": {
+    "method_match": 0.333333,
+    "relevance": 0.417751
+   },
+   "details": {
+    "bm25": 31.725866,
+    "bm25_norm": 0.672149,
+    "earliest_public_date": "2026-11-11",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "dN/dS"
+    ],
+    "methods_matched": [
+     "dN/dS"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.604472,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Clara I Saldamando-Benjumea"
+     ],
+     "doi": "10.1080/24701394.2026.2759686",
+     "earliest_public_date": "2026-11-11",
+     "openalex": "W7225825090",
+     "pmcid": null,
+     "pmid": "43013776",
+     "title": "Mitochondrial genome evolution in Noctuidae: codon usage bias, nucleotide composition, and phylogenetic relationships among major agricultural pests.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/43013776/",
+     "venue": "Mitochondrial DNA. Part A, DNA mapping, sequencing, and analysis"
+    },
+    "publication_kind": "article",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "selection_codon_models": [
+      "dN/dS"
+     ]
+    },
+    "similarity": 0.248152,
+    "sources": [
+     "openalex",
+     "pubmed"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 20,
+   "paper_id": "cp_452f84f281a0ee00",
+   "score": 0.47515,
+   "mmr": 0.14439,
+   "components": {
+    "method_match": 0.333333,
+    "relevance": 0.510604
+   },
+   "details": {
+    "bm25": 16.313872,
+    "bm25_norm": 0.345628,
+    "earliest_public_date": "2026-11-12",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "phylodynamics"
+    ],
+    "methods_matched": [
+     "phylodynamics"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.738828,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Manolo F Perez",
+      "Anna Zhukova",
+      "Renny Doig",
+      "et al."
+     ],
+     "doi": "10.1016/j.tim.2026.10.006",
+     "earliest_public_date": "2026-11-12",
+     "openalex": null,
+     "pmcid": null,
+     "pmid": "43020769",
+     "title": "Machine learning methods to decipher the evolutionary dynamics of microbial pathogens.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/43020769/",
+     "venue": "Trends in microbiology"
+    },
+    "publication_kind": "review",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "ml_evolution": [
+      "machine learning"
+     ],
+     "phylodynamics": [
+      "phylodynamics",
+      "phylodynamic"
+     ]
+    },
+    "similarity": 0.620588,
+    "sources": [
+     "pubmed"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 21,
+   "paper_id": "cp_593d52e6e9f7897e",
+   "score": 0.46634,
+   "mmr": 0.139355,
+   "components": {
+    "method_match": 0.666667,
+    "relevance": 0.416259
+   },
+   "details": {
+    "bm25": 23.379407,
+    "bm25_norm": 0.49532,
+    "earliest_public_date": "2026-11-12",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "codon model",
+     "dN/dS"
+    ],
+    "methods_matched": [
+     "codon model",
+     "dN/dS"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.602313,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Jordan Douglas",
+      "Lindell Bromham"
+     ],
+     "doi": "10.1093/sysbio/syag081",
+     "earliest_public_date": "2026-11-12",
+     "openalex": null,
+     "pmcid": null,
+     "pmid": "43019535",
+     "title": "Reconstructing substitution histories on phylogenies, with accuracy, precision, and coverage.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/43019535/",
+     "venue": "Systematic biology"
+    },
+    "publication_kind": "article",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "phylodynamics": [
+      "BEAST",
+      "coalescent",
+      "transmission"
+     ],
+     "selection_codon_models": [
+      "dN/dS",
+      "codon model"
+     ]
+    },
+    "similarity": 0.363551,
+    "sources": [
+     "pubmed"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 22,
+   "paper_id": "cp_56e431fbcbefc687",
+   "score": 0.462991,
+   "mmr": 0.137524,
+   "components": {
+    "method_match": 0.0,
+    "relevance": 0.578739
+   },
+   "details": {
+    "bm25": 37.416958,
+    "bm25_norm": 0.792722,
+    "earliest_public_date": "2026-11-20",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [],
+    "methods_matched": [],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.837416,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Hanjun Zhao",
+      "Ruiqing Sun",
+      "Jie Zhang",
+      "et al."
+     ],
+     "doi": "10.1038/s41392-026-03078-5",
+     "earliest_public_date": "2026-11-20",
+     "openalex": null,
+     "pmcid": "PMC13785644",
+     "pmid": "43058094",
+     "title": "Influenza virus and coronavirus: evolution, epidemiology, antiviral drugs and vaccine development.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/43058094/",
+     "venue": "Signal transduction and targeted therapy"
+    },
+    "publication_kind": "review",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "phylodynamics": [
+      "transmission"
+     ],
+     "recombination": [
+      "recombination",
+      "reassortment"
+     ]
+    },
+    "similarity": 0.436083,
+    "sources": [
+     "pubmed"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 23,
+   "paper_id": "cp_f9c98cb0ca292ed1",
+   "score": 0.362168,
+   "mmr": 0.132245,
+   "components": {
+    "method_match": 0.333333,
+    "relevance": 0.369376
+   },
+   "details": {
+    "bm25": 24.20358,
+    "bm25_norm": 0.512781,
+    "earliest_public_date": "2026-11-12",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "positive selection",
+     "HyPhy"
+    ],
+    "methods_matched": [
+     "HyPhy"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.534476,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Jie Wei",
+      "Zhenpeng Yu",
+      "Yuting Ni",
+      "et al."
+     ],
+     "doi": "10.1186/s12864-026-13552-7",
+     "earliest_public_date": "2026-11-12",
+     "openalex": "W7225906869",
+     "pmcid": null,
+     "pmid": null,
+     "title": "Comparative genomic and seasonal expression analyses highlight HSPA12A as a candidate gene associated with winter physiology in the Chinese alligator (Alligator sinensis)",
+     "url": "https://doi.org/10.1186/s12864-026-13552-7",
+     "venue": "BMC Genomics"
+    },
+    "publication_kind": "article",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "selection_codon_models": [
+      "HyPhy",
+      "positive selection",
+      "diversifying selection"
+     ]
+    },
+    "similarity": 0.273773,
+    "sources": [
+     "openalex"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 24,
+   "paper_id": "cp_13a3849af83d3fa0",
+   "score": 0.362549,
+   "mmr": 0.132033,
+   "components": {
+    "method_match": 0.666667,
+    "relevance": 0.286519
+   },
+   "details": {
+    "bm25": 10.858301,
+    "bm25_norm": 0.230046,
+    "earliest_public_date": "2026-11-19",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "protein language model"
+    ],
+    "methods_matched": [
+     "phylogenomics",
+     "protein language model"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.414584,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Jahyeon Sim",
+      "Chaewon Kim",
+      "Daul Park",
+      "et al."
+     ],
+     "doi": "10.1093/femsyr/foag064",
+     "earliest_public_date": "2026-11-19",
+     "openalex": null,
+     "pmcid": null,
+     "pmid": "43055734",
+     "title": "Fungal laccases: a double-edged sword linking environmental adaptation and pathogenicity.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/43055734/",
+     "venue": "FEMS yeast research"
+    },
+    "publication_kind": "article",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "ml_evolution": [
+      "protein language model"
+     ],
+     "wastewater": [
+      "wastewater"
+     ]
+    },
+    "similarity": 0.324168,
+    "sources": [
+     "pubmed"
+    ]
+   },
+   "flags": []
+  },
+  {
+   "rank": 25,
+   "paper_id": "cp_5b7a9761dc7d11ee",
+   "score": 0.431602,
+   "mmr": 0.128428,
+   "components": {
+    "method_match": 0.333333,
+    "relevance": 0.456169
+   },
+   "details": {
+    "bm25": 21.584607,
+    "bm25_norm": 0.457295,
+    "earliest_public_date": "2026-11-12",
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "phylodynamics",
+     "genomic epidemiology"
+    ],
+    "methods_matched": [
+     "phylodynamics"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.660062,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Abbey Marye",
+      "Kelly F. Oakeson",
+      "Yu Lan",
+      "et al."
+     ],
+     "doi": "10.64898/2026.11.10.26367744",
+     "earliest_public_date": "2026-11-12",
+     "openalex": "W7225918147",
+     "pmcid": null,
+     "pmid": null,
+     "title": "Phylogeography and transmission dynamics of the 2025–2026 Utah-Arizona measles outbreak: a retrospective genomic epidemiology study",
+     "url": "https://doi.org/10.64898/2026.11.10.26367744",
+     "venue": "medRxiv"
+    },
+    "publication_kind": "preprint",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "atlases_resources": [
+      "resource"
+     ],
+     "phylodynamics": [
+      "phylodynamics",
+      "phylodynamic",
+      "genomic epidemiology",
+      "transmission"
+     ]
+    },
+    "similarity": 0.455418,
+    "sources": [
+     "openalex"
+    ]
+   },
+   "flags": []
+  }
+ ],
+ "observations": [
+  [
+   "openalex",
+   "W4416182836",
+   "cp_82b0b8f5ed4679a5",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7166180066",
+   "cp_846746b4bbdd2378",
+   "new_source"
+  ],
+  [
+   "openalex",
+   "W7214051589",
+   "cp_2f222b15230674a2",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7221536779",
+   "cp_0852304727f510b4",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7222992950",
+   "cp_f8019630db75d800",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225304918",
+   "cp_b7ea4db41773dcee",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225699990",
+   "cp_d7876bfa6408655c",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225702226",
+   "cp_74b1631eda83949b",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225705868",
+   "cp_8b1906e41ca458d0",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225709461",
+   "cp_7be97ada25c3dd3b",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225729331",
+   "cp_bfc2548b7ee69863",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225730308",
+   "cp_a9d84aa93f618d87",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225732024",
+   "cp_b0e5c7bd7abea06f",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225733716",
+   "cp_d4d39a1f724328bd",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225738386",
+   "cp_d31bfb27b7a95441",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225744916",
+   "cp_6890962b96999580",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225749168",
+   "cp_1c718c24ccf7e265",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225755865",
+   "cp_0aa41868532f1399",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225771198",
+   "cp_dfc55b6c07f11d17",
+   "new_source"
+  ],
+  [
+   "openalex",
+   "W7225776122",
+   "cp_c257c452008ca28c",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225784245",
+   "cp_dc91131176f05bca",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225785580",
+   "cp_e0243460aa2c55c1",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225794596",
+   "cp_13197216bb37689a",
+   "new_source"
+  ],
+  [
+   "openalex",
+   "W7225808832",
+   "cp_cf8673d788544e97",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225814201",
+   "cp_579b5aa238459327",
+   "new_source"
+  ],
+  [
+   "openalex",
+   "W7225821357",
+   "cp_1fb50379e9abae4f",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225821890",
+   "cp_545fa24757cb97c1",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225825090",
+   "cp_534267106b848dff",
+   "new_source"
+  ],
+  [
+   "openalex",
+   "W7225835073",
+   "cp_5200513f698608ba",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225847905",
+   "cp_6d9a0fcffc637dd4",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225858332",
+   "cp_8a4706e4a6f00bd0",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225860864",
+   "cp_55720069dc4c1b56",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225879015",
+   "cp_9e3fa70fb5bade47",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225906869",
+   "cp_f9c98cb0ca292ed1",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225916296",
+   "cp_1ef2da2b64dfa756",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225918029",
+   "cp_8a3e881a3e5042d0",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225918147",
+   "cp_5b7a9761dc7d11ee",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225919319",
+   "cp_94e438f1fac7cc9c",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225993152",
+   "cp_30bf09aca8c9cace",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225993490",
+   "cp_758263752452b8fd",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225999474",
+   "cp_784513708213d5f5",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7225999695",
+   "cp_bee0ad7e66cfa5b3",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7226008471",
+   "cp_cebdecbaf9cde265",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7226009064",
+   "cp_2d27f7bfd92a6d4e",
+   "new_source"
+  ],
+  [
+   "openalex",
+   "W7226010483",
+   "cp_4fb5de2d8a555deb",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7226016148",
+   "cp_fd1b56396d3ff4d1",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7226021904",
+   "cp_c5a6d1b8001ecc3c",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7226024217",
+   "cp_e382e88abcfb472a",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7226024218",
+   "cp_608c07758699e87e",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7229069417",
+   "cp_af8308795875c583",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7230943499",
+   "cp_97deabe8a80b43ea",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7230992312",
+   "cp_5a23eef5002fbd86",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7233547880",
+   "cp_a597fae981c07c7e",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7233548271",
+   "cp_cad6ff0a6bb09dab",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7233568316",
+   "cp_5c4d69dd65973b22",
+   "new_source"
+  ],
+  [
+   "openalex",
+   "W7233610477",
+   "cp_77d832d06199f9f1",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7233733055",
+   "cp_9c9f7a9fd5646d60",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7233735948",
+   "cp_b10c8e7943303353",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7233782264",
+   "cp_eadec2c8322d675d",
+   "new_source"
+  ],
+  [
+   "openalex",
+   "W7234265661",
+   "cp_2d00d41af49cede0",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7234278184",
+   "cp_b7e0c01bb3ce92a7",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7234280111",
+   "cp_0f6dc687645dbb74",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7234281677",
+   "cp_6bd78effdd5cb181",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7234383856",
+   "cp_abc3514f62d5ea5f",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7234502798",
+   "cp_943b7af9cc17b02c",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7234978728",
+   "cp_e58f064afa8780bc",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7235068510",
+   "cp_d8ef860e42a03436",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7235111671",
+   "cp_55321e391fd99831",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7235214591",
+   "cp_0d4a3242b54f01cf",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7235233285",
+   "cp_f57553f187ae0d15",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7235358690",
+   "cp_e7271f130e88adfb",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7235467392",
+   "cp_aeec2749ec2899ed",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7235793844",
+   "cp_6f81fd5e0e5dc213",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7235803835",
+   "cp_6b3dc113bad7b445",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7235891558",
+   "cp_a3aabfbe5119e200",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7235904433",
+   "cp_cc372343ea487571",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7236039876",
+   "cp_c1ce989f43b63c12",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7236087838",
+   "cp_48a2d6b07b2db6f1",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7236116605",
+   "cp_289a793279ec7789",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7236117137",
+   "cp_c2c977e236f91d96",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7236124319",
+   "cp_e1836e1cf8171d0c",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7236188803",
+   "cp_d0891ff948e6f884",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7236655902",
+   "cp_743241bdaee40152",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7236683247",
+   "cp_1c50e01dba5053fd",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7236706422",
+   "cp_a9bbfc4715118dae",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7236806983",
+   "cp_f0c8f0e83a11485f",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7236850151",
+   "cp_d2e1e187f1f79afd",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7236856292",
+   "cp_c07e96737752d56c",
+   "new_source"
+  ],
+  [
+   "openalex",
+   "W7236856657",
+   "cp_85661ff942f9b57f",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7236862850",
+   "cp_9e7fab24c15ad714",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7237016641",
+   "cp_44669e998d0d29d5",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7237129280",
+   "cp_ac22e5fea799a774",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7237182359",
+   "cp_43d78bc8ee2d6286",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7237223465",
+   "cp_932b9b7cc602e525",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7237239466",
+   "cp_0f1bde8d1b643270",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7237354605",
+   "cp_c6152644b512a8dd",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7237367687",
+   "cp_870cbc14985cc3a8",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7238000722",
+   "cp_30564f49d077e45e",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7238250124",
+   "cp_595a6ba64d33f307",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7238384325",
+   "cp_7b235aa1cf425adc",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42166990",
+   "cp_33c55c50cca6b1fa",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42468339",
+   "cp_ba632bca4e4cca01",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42613235",
+   "cp_fc8ae30a4399c1a2",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42660460",
+   "cp_8384bfd1d1235348",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42705234",
+   "cp_a25e322b5fd2f164",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42720301",
+   "cp_889666ce549d0f8f",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42743699",
+   "cp_659f14913f4f1090",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42748669",
+   "cp_e1a5bc0957b0167e",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42748678",
+   "cp_a305b70ef6b28f0f",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42767222",
+   "cp_52e416e80543c4fa",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42778002",
+   "cp_1704e6db011febc8",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42826689",
+   "cp_5984360d7c160d0e",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42831621",
+   "cp_41b54574491f551c",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42831628",
+   "cp_229de5ae20cf6cce",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42841645",
+   "cp_eba2e788eea8fca5",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42841777",
+   "cp_f15e1d1f8b09cb21",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42847686",
+   "cp_d3f8f775aa196b8a",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42847688",
+   "cp_b33ed373c0a6d2d1",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42852904",
+   "cp_8c79a8f364fa8fc0",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42856497",
+   "cp_446ff4ec24bf6cbb",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42861963",
+   "cp_a0cc806d24ab1ffc",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42864870",
+   "cp_2ad1206066b5e7c7",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42873111",
+   "cp_6a3109f386e7bdae",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42887976",
+   "cp_15945c5eb26389b4",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42894539",
+   "cp_456b6092ebf9c0e5",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42899678",
+   "cp_b2d7c1f418249e07",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42899681",
+   "cp_55f1b564707f4dec",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42904142",
+   "cp_7efa461af66245d6",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42904649",
+   "cp_c6937ea9e5732818",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42904687",
+   "cp_4797f57845cee2f5",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42906577",
+   "cp_03e84d718802daab",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42907021",
+   "cp_9aee5d82a57b91fb",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42922398",
+   "cp_a6a12a3369b01417",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42922681",
+   "cp_277069dadb1616be",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42925064",
+   "cp_6aac47573921aee1",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42932627",
+   "cp_4b75908c643639b4",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42937297",
+   "cp_3e4f33f028a4f35e",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42937545",
+   "cp_8791bc0cc5347523",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42945587",
+   "cp_61ac0d62315e1cbb",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42948945",
+   "cp_2c974830461cf158",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42950827",
+   "cp_c1120090e01c59b9",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42953774",
+   "cp_e6545add1550bfca",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42961116",
+   "cp_ea0e0692413bde67",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42975944",
+   "cp_64c2de9c1161aaa6",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42985122",
+   "cp_e2b0c634541e8891",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42990603",
+   "cp_f45e595d5d569213",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42992184",
+   "cp_be07148178fda32a",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "42993562",
+   "cp_17dc3d1dba8b7c33",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43000701",
+   "cp_799d4f2187a2f8e6",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43003789",
+   "cp_5288bef7ab65d757",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43004170",
+   "cp_d3be3f1d13893a91",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43007011",
+   "cp_b0fe120ea9a7981c",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43007776",
+   "cp_148266fadb62b66d",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43008010",
+   "cp_eb33f17d8a879a7a",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43009663",
+   "cp_3247d48bb54e8402",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43010064",
+   "cp_94fc689012caa302",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43010692",
+   "cp_be02509a16f40188",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43010778",
+   "cp_d727fe5ce0253079",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43011893",
+   "cp_204822cba5fc7be8",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43012073",
+   "cp_df4fb2c04c8e95b7",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43012162",
+   "cp_103cc4430e24cbec",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43012506",
+   "cp_13197216bb37689a",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43012543",
+   "cp_dfc55b6c07f11d17",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43013125",
+   "cp_02e3cd6a91037dd6",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43013215",
+   "cp_21dfb848020d91ff",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43013634",
+   "cp_579b5aa238459327",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43013775",
+   "cp_610fa77f60feac24",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43013776",
+   "cp_534267106b848dff",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43013850",
+   "cp_d23b86ca10437cc8",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43014466",
+   "cp_21fa89505808dbe4",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43014755",
+   "cp_43c23f9e2f344f78",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43015262",
+   "cp_4e89d607429e97bb",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43015444",
+   "cp_2b15dff1f6d89459",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43016300",
+   "cp_79bfd33ffe184abf",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43018675",
+   "cp_5fa916572bfbbd89",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43019353",
+   "cp_207e64af202c73fb",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43019461",
+   "cp_c2c1c90dc94ce500",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43019535",
+   "cp_593d52e6e9f7897e",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43020024",
+   "cp_421f6eaf7250941e",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43020769",
+   "cp_452f84f281a0ee00",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43021054",
+   "cp_1088449ca69c13d7",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43021171",
+   "cp_bc97b5cd05cbd778",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43022788",
+   "cp_270a894fc80092aa",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43023360",
+   "cp_b4e7d7e332e6a202",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43023808",
+   "cp_30e09593882c21fa",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43024324",
+   "cp_12f6bb08ba7de71f",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43024864",
+   "cp_85350dfbc5d93cfd",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43024942",
+   "cp_9727b336e2dd4646",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43025061",
+   "cp_97aa33d32b282f6c",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43025408",
+   "cp_0736770f222060c3",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43026677",
+   "cp_d11a025840403c0c",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43031432",
+   "cp_2fd81dca821d94ac",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43032624",
+   "cp_5216bad84af65ec9",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43032873",
+   "cp_5b9f7e73925bcdb2",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43033420",
+   "cp_846746b4bbdd2378",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43033514",
+   "cp_a30aaa2b92ce2650",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43034692",
+   "cp_946bfca93773f35c",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43035586",
+   "cp_b47c460947e378cd",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43037119",
+   "cp_17f2a43718ce60cb",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43037251",
+   "cp_eadec2c8322d675d",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43037945",
+   "cp_bb98df070aaa813c",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43038260",
+   "cp_0861513a7f1c4020",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43038353",
+   "cp_c7f958b38bc0ae6f",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43038458",
+   "cp_d4716180a1055a1b",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43038517",
+   "cp_0da8241304e18373",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43038922",
+   "cp_a62a61ba1cd7d287",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43038929",
+   "cp_aefd270ea0d288ec",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43041015",
+   "cp_2fa5286e4129c38a",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43041104",
+   "cp_0f2e943ff6448c9f",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43043236",
+   "cp_e76240b6a43d4e32",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43043349",
+   "cp_1a07bd9b8fcad81d",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43043582",
+   "cp_2188afeaef670e8d",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43043667",
+   "cp_7b7de3fd609d51dc",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43044577",
+   "cp_241e9a242381f067",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43045882",
+   "cp_fb54b1afa5605783",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43048057",
+   "cp_dbe3c218b77fc139",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43049206",
+   "cp_0549f18761196784",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43049609",
+   "cp_1f6dc6a0055e2500",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43049627",
+   "cp_ab659ca67c6dc4a7",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43050492",
+   "cp_499d779316f1a8bf",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43050736",
+   "cp_8924c8ae2cb93d23",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43050870",
+   "cp_2d27f7bfd92a6d4e",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43051089",
+   "cp_fbaf0dd2b7e959aa",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43051098",
+   "cp_5e7b785ed02b4177",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43052216",
+   "cp_193c4b48149de4a4",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43052454",
+   "cp_9443ca216b65fa37",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43052478",
+   "cp_5600db737ba8dbc8",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43053439",
+   "cp_e3f65d73d857cf4a",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43053892",
+   "cp_169f72bcb158bd7e",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43054475",
+   "cp_f02fa0b3af4443c9",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43055583",
+   "cp_cca3e566f5b199cf",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43055589",
+   "cp_dd44311f2875e3bf",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43055723",
+   "cp_445048820edf6a8e",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43055734",
+   "cp_13a3849af83d3fa0",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43055976",
+   "cp_c07e96737752d56c",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43056402",
+   "cp_0ace62c676de7663",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43056965",
+   "cp_612619a0ddb9ebf1",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43057018",
+   "cp_5f1f70d78e40198c",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43057091",
+   "cp_2296df85c91623cd",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43057237",
+   "cp_03e3f8c21ee72aca",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43057581",
+   "cp_443d2062a7be44ee",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43058094",
+   "cp_56e431fbcbefc687",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43058107",
+   "cp_450c76af583b5bb6",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43060073",
+   "cp_5c4d69dd65973b22",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43060857",
+   "cp_cf570967e63aaf61",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43061397",
+   "cp_88832c4304c67df5",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43062522",
+   "cp_80316d1f2bf6511f",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43062629",
+   "cp_9bcf899a4aafec9e",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43063020",
+   "cp_0ced78a4b1c75d95",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43063572",
+   "cp_6b20fdbd16025712",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43065204",
+   "cp_7e7bd32aba965b91",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43065941",
+   "cp_308ddb513e8b51d4",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43066203",
+   "cp_a5961bfcae789eb4",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43067613",
+   "cp_b9fa5f430012e683",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43067808",
+   "cp_29cabfb26e2f8a91",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43068013",
+   "cp_1d30fa587ae7b702",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43068474",
+   "cp_498fa865e10b2e2a",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43068761",
+   "cp_6c4b9bb30315b835",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43069503",
+   "cp_38a5a465bd1614ac",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43069569",
+   "cp_f960f2fa3d32ab54",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43070074",
+   "cp_8170c47d232b22e2",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43070134",
+   "cp_b0fe0c16675aca0f",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43070934",
+   "cp_0c394351836681d8",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43070947",
+   "cp_9709c941880f9617",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43070949",
+   "cp_b0559ee29b6b5b00",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43070970",
+   "cp_3238fc6d8c310491",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43070972",
+   "cp_d2031aa9a3919152",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43071669",
+   "cp_3778d44ee5a5f320",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43071701",
+   "cp_9b4c25c1ad4fbfd0",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43071851",
+   "cp_5038ba09b7eb753f",
+   "new_paper"
+  ]
+ ],
+ "delta": {
+  "previous_run_id": null,
+  "entered": [
+   "cp_446ff4ec24bf6cbb",
+   "cp_eadec2c8322d675d",
+   "cp_6bd78effdd5cb181",
+   "cp_a0cc806d24ab1ffc",
+   "cp_c6937ea9e5732818",
+   "cp_277069dadb1616be",
+   "cp_9c9f7a9fd5646d60",
+   "cp_0861513a7f1c4020",
+   "cp_0f6dc687645dbb74",
+   "cp_c5a6d1b8001ecc3c",
+   "cp_8a4706e4a6f00bd0",
+   "cp_5c4d69dd65973b22",
+   "cp_9aee5d82a57b91fb",
+   "cp_1c50e01dba5053fd",
+   "cp_38a5a465bd1614ac",
+   "cp_289a793279ec7789",
+   "cp_8c79a8f364fa8fc0",
+   "cp_7be97ada25c3dd3b",
+   "cp_534267106b848dff",
+   "cp_452f84f281a0ee00",
+   "cp_593d52e6e9f7897e",
+   "cp_56e431fbcbefc687",
+   "cp_f9c98cb0ca292ed1",
+   "cp_13a3849af83d3fa0",
+   "cp_5b7a9761dc7d11ee"
+  ],
+  "left": [],
+  "moved": []
+ },
+ "radar": {
+  "radar_id": "lab-default",
+  "radar_name": "Evolution & Surveillance (lab default)",
+  "description": "Computational evolutionary biology of pathogens and cancer (selection and codon models, recombination, phylodynamics, somatic evolution), urban, built-environment, and wastewater virome surveillance, pandemic preparedness, reference atlases and metagenomics pipelines, and machine learning for evolution.",
+  "research_question": "What new methods and findings matter for inferring selection and transmission in pathogens and tumours, and for genomic surveillance of viruses in cities and wastewater?",
+  "sources": [
+   "pubmed",
+   "openalex"
+  ],
+  "queries": [
+   "positive selection",
+   "episodic selection",
+   "codon model",
+   "dN/dS",
+   "HyPhy",
+   "cancer evolution",
+   "clonal evolution",
+   "somatic evolution",
+   "mutational signatures",
+   "viral recombination",
+   "recombination detection",
+   "phylodynamics",
+   "genomic epidemiology",
+   "built environment virome",
+   "urban microbiome",
+   "MetaSUB",
+   "wastewater surveillance",
+   "viral metagenomics",
+   "pandemic preparedness",
+   "pathogen surveillance",
+   "biosurveillance",
+   "virome atlas",
+   "metagenomics benchmark",
+   "protein language model",
+   "deep learning for virus evolution"
+  ],
+  "mode": "balanced",
+  "window_days": 14,
+  "themes": {
+   "selection_codon_models": "Selection & codon models",
+   "urban_virome": "Urban / built environment virome",
+   "wastewater": "Wastewater / WBE viral surveillance",
+   "cancer_evolution": "Cancer evolution & somatic selection",
+   "recombination": "Recombination & mosaicism",
+   "phylodynamics": "Phylodynamics & transmission",
+   "biosurveillance": "Pandemic preparedness & biosurveillance",
+   "atlases_resources": "Atlases, compendia, reference resources",
+   "metagenomics_pipelines": "Metagenomics benchmarking & pipelines",
+   "ml_evolution": "ML for evolution & pathogens"
+  },
+  "config_hash": "4ade43793af4"
+ }
+}
