@@ -13,8 +13,8 @@ Layout under --root (the checked-out `snapshots` branch):
 
 Commands:
 
-    # After a pipeline run (used by the GitHub workflow)
-    python scripts/snapshot.py write --input docs/latest.json --root ../snapshots --radar-id lab-default
+    # After a scan (used by the GitHub workflow): the run export from `carousel scan --json`
+    python scripts/snapshot.py write --input out/lab-default.json --root ../snapshots --radar-id lab-default
 
     # One-time: recover past runs from git history of docs/latest.json
     python scripts/snapshot.py backfill --repo . --ref main --path docs/latest.json \
@@ -52,10 +52,11 @@ def payload_sha256(payload: Dict[str, Any]) -> str:
 
 
 def _parse_generated_at(payload: Dict[str, Any]) -> Optional[dt.datetime]:
-    raw = payload.get("generated_at_utc")
+    # Legacy payloads carry generated_at_utc; CAROUSEL run exports carry started_at.
+    raw = payload.get("generated_at_utc") or payload.get("started_at")
     if not isinstance(raw, str):
         return None
-    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S"):
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%fZ"):
         try:
             return dt.datetime.strptime(raw, fmt).replace(tzinfo=dt.timezone.utc)
         except ValueError:
@@ -64,10 +65,20 @@ def _parse_generated_at(payload: Dict[str, Any]) -> Optional[dt.datetime]:
 
 
 def _count_items(payload: Dict[str, Any]) -> int:
+    if isinstance(payload.get("items"), list):  # CAROUSEL run export
+        return len(payload["items"])
     sections = payload.get("sections")
     if not isinstance(sections, list):
         return 0
     return sum(len(s.get("items") or []) for s in sections if isinstance(s, dict))
+
+
+def _window(payload: Dict[str, Any]) -> Tuple[Any, Any]:
+    """(window_days, window_utc) from a legacy payload or a CAROUSEL run export."""
+    if "days" in payload or "window_utc" in payload:
+        return payload.get("days"), payload.get("window_utc")
+    w = (payload.get("ranking") or {}).get("window") or {}
+    return w.get("days"), ({"start": w["start"], "end": w["end"]} if "start" in w else None)
 
 
 def build_envelope(
@@ -84,10 +95,11 @@ def build_envelope(
         "captured_at_utc": captured.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "source": source,
         "provenance": provenance,
-        "window_days": payload.get("days"),
-        "window_utc": payload.get("window_utc"),
+        "window_days": _window(payload)[0],
+        "window_utc": _window(payload)[1],
         "ranking_version": payload.get("ranking_version", "unversioned"),
         "n_sections": len(payload.get("sections") or []),
+        "run_id": payload.get("run_id"),
         "n_items": _count_items(payload),
         "payload_sha256": payload_sha256(payload),
         "payload": payload,
@@ -121,6 +133,7 @@ def write_envelope(root: Path, envelope: Dict[str, Any]) -> Tuple[Path, bool]:
 
 INDEX_FIELDS = (
     "captured_at_utc",
+    "run_id",
     "source",
     "window_days",
     "ranking_version",

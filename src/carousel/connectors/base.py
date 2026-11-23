@@ -56,6 +56,7 @@ class Request:
     headers: Tuple[Tuple[str, str], ...] = ()
     secret_params: Tuple[Tuple[str, str], ...] = dataclasses.field(default=(), compare=False, repr=False)
     secret_headers: Tuple[Tuple[str, str], ...] = dataclasses.field(default=(), compare=False, repr=False)
+    method: str = "GET"  # POST sends params form-encoded in the body (for queries too long for a URL)
 
     @classmethod
     def build(
@@ -65,19 +66,30 @@ class Request:
         headers: Optional[Mapping[str, str]] = None,
         secret_params: Optional[Mapping[str, Optional[str]]] = None,
         secret_headers: Optional[Mapping[str, Optional[str]]] = None,
+        method: str = "GET",
     ) -> "Request":
         def norm(m: Optional[Mapping[str, Any]]) -> Tuple[Tuple[str, str], ...]:
             return tuple(sorted((k, str(v)) for k, v in (m or {}).items() if v is not None))
 
-        return cls(url, norm(params), norm(headers), norm(secret_params), norm(secret_headers))
+        if method not in ("GET", "POST"):
+            raise ValueError(f"unsupported method {method}")
+        return cls(url, norm(params), norm(headers), norm(secret_params), norm(secret_headers), method)
 
     def key(self) -> str:
         """Identity of the request for caching and fixtures. Excludes secrets."""
-        return self.url + ("?" + urllib.parse.urlencode(self.params) if self.params else "")
+        k = self.url + ("?" + urllib.parse.urlencode(self.params) if self.params else "")
+        return k if self.method == "GET" else f"{self.method} {k}"
 
     def full_url(self) -> str:
+        if self.method != "GET":
+            return self.url
         params = self.params + self.secret_params
         return self.url + ("?" + urllib.parse.urlencode(params) if params else "")
+
+    def body(self) -> Optional[bytes]:
+        if self.method == "GET":
+            return None
+        return urllib.parse.urlencode(self.params + self.secret_params).encode("utf-8")
 
 
 @dataclasses.dataclass(frozen=True)
@@ -121,7 +133,10 @@ class UrllibTransport(Transport):
 
     def send(self, request: Request) -> Response:
         headers = {"User-Agent": USER_AGENT, **dict(request.headers), **dict(request.secret_headers)}
-        req = urllib.request.Request(request.full_url(), headers=headers)
+        body = request.body()
+        if body is not None:
+            headers.setdefault("Content-Type", "application/x-www-form-urlencoded")
+        req = urllib.request.Request(request.full_url(), data=body, headers=headers, method=request.method)
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                 return Response(resp.status, resp.read(), _kept_headers(dict(resp.headers)))

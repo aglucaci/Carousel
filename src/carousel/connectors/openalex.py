@@ -18,6 +18,8 @@ other ``X-RateLimit-*`` headers in the query's coverage.
 
 Rules this connector keeps:
 
+- Searches cover scholarly work types only (:data:`DEFAULT_WORK_TYPES`)
+  unless ``work_types`` says otherwise.
 - Queries are always bounded by a publication-date window and ``max_results``
   (:class:`~carousel.connectors.base.SearchQuery`); it never pages through
   the whole corpus.
@@ -53,6 +55,10 @@ SEARCH_CREDITS = 10
 LIST_CREDITS = 1
 DEFAULT_BUDGET_CREDITS = 500
 PER_PAGE_MAX = 100
+
+DEFAULT_WORK_TYPES = ("article", "preprint", "review", "letter")
+"""Scholarly work types searched by default. OpenAlex also indexes datasets, software, peer reviews,
+supplementary material, and paratext, which otherwise crowd out papers."""
 
 SELECT = ",".join((
     "id", "doi", "ids", "display_name", "publication_date", "type", "language", "is_retracted",
@@ -154,7 +160,9 @@ class OpenAlexConnector(Connector):
     cost_unit = "credits"
 
     def __init__(self, client: Optional[HttpClient] = None, api_key: Optional[str] = None,
-                 budget_credits: Optional[float] = DEFAULT_BUDGET_CREDITS) -> None:
+                 budget_credits: Optional[float] = DEFAULT_BUDGET_CREDITS,
+                 work_types: Optional[Sequence[str]] = DEFAULT_WORK_TYPES) -> None:
+        self.work_types = tuple(work_types) if work_types else ()
         self.api_key = (api_key if api_key is not None else os.environ.get("OPENALEX_API_KEY")) or None
         if client is None:
             # Boolean searches with >5 operators are limited to 2/s with a key, 1/s without.
@@ -166,6 +174,10 @@ class OpenAlexConnector(Connector):
     def _request(self, params: Dict[str, Any]) -> Request:
         auth = {"Authorization": f"Bearer {self.api_key}"} if self.api_key else None
         return Request.build(API, params, secret_headers=auth)
+
+    def _filter(self, query: SearchQuery) -> str:
+        f = f"from_publication_date:{query.start.isoformat()},to_publication_date:{query.end.isoformat()}"
+        return f + (f",type:{'|'.join(self.work_types)}" if self.work_types else "")
 
     def search(self, query: SearchQuery) -> SearchResult:
         before = self._snapshot_stats()
@@ -182,7 +194,7 @@ class OpenAlexConnector(Connector):
                 break
             params = {
                 "search.title_and_abstract": search,
-                "filter": f"from_publication_date:{query.start.isoformat()},to_publication_date:{query.end.isoformat()}",
+                "filter": self._filter(query),
                 "select": SELECT,
                 "per_page": min(PER_PAGE_MAX, query.max_results - len(records)),
                 "cursor": cursor,
@@ -210,7 +222,7 @@ class OpenAlexConnector(Connector):
             reason = "max_results"
         coverage = self._coverage(
             query, before,
-            native_query=f"search.title_and_abstract={search}",
+            native_query=f"search.title_and_abstract={search} filter={self._filter(query)}",
             date_field="publication date",
             total_available=total,
             retrieved=len(records),

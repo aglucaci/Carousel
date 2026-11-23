@@ -39,7 +39,9 @@ jobs:
         run: python -m pytest -q
 
       - name: Validate radar configs
-        run: carousel validate examples/*.yml
+        run: |
+          radars=(); for f in radars/*.yml; do case "$f" in *.feedback.yml) ;; *) radars+=("$f");; esac; done
+          carousel validate examples/*.yml "${radars[@]}"
 
       - name: Check packaging (built wheel, not the editable install)
         run: |

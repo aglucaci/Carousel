@@ -1,0 +1,145 @@
+# The lab's default radar: the ten themes of the ETHER-era daily watch,
+# migrated to CAROUSEL (plan task 10). Scanned daily by
+# .github/workflows/carousel-radar.yml and published to GitHub Pages.
+#
+# - PubMed retrieval is unchanged from the legacy script: each theme's exact
+#   native query is in `source_queries.pubmed` (core concepts AND boosters
+#   NOT common negatives).
+# - `queries` are the same concepts in plain language. They drive OpenAlex,
+#   BM25, matched terms, and the semantic interest profile.
+# - Each theme is a `signal_profile` category (weight = its legacy priority),
+#   so the dashboard can still show and filter papers by theme.
+#
+# Feedback for this radar goes in radars/lab_default.feedback.yml.
+
+schema_version: 2
+radar_name: Evolution & Surveillance (lab default)
+description: >
+  Computational evolutionary biology of pathogens and cancer (selection and
+  codon models, recombination, phylodynamics, somatic evolution), urban,
+  built-environment, and wastewater virome surveillance, pandemic
+  preparedness, reference atlases and metagenomics pipelines, and machine
+  learning for evolution.
+research_question: >
+  What new methods and findings matter for inferring selection and
+  transmission in pathogens and tumours, and for genomic surveillance of
+  viruses in cities and wastewater?
+
+sources: [pubmed, openalex]
+
+queries:
+  - positive selection
+  - episodic selection
+  - codon model
+  - dN/dS
+  - HyPhy
+  - cancer evolution
+  - clonal evolution
+  - somatic evolution
+  - mutational signatures
+  - viral recombination
+  - recombination detection
+  - phylodynamics
+  - genomic epidemiology
+  - built environment virome
+  - urban microbiome
+  - MetaSUB
+  - wastewater surveillance
+  - viral metagenomics
+  - pandemic preparedness
+  - pathogen surveillance
+  - biosurveillance
+  - virome atlas
+  - metagenomics benchmark
+  - protein language model
+  - deep learning for virus evolution
+
+exclude:
+  - case report
+
+filters:
+  date_range: last_14_days
+
+source_queries:
+  pubmed:
+    # Selection & codon models
+    - '((("dN/dS" OR "codon model" OR HyPhy OR FEL OR MEME OR FUBAR OR BUSTED OR "branch-site") AND (selection OR evolution OR adaptive OR constraint)) OR (("episodic selection" OR "positive selection" OR "diversifying selection") AND (virus OR pathogen))) AND ("computational evolutionary biology" OR "molecular evolution" OR phylogenomics OR phylodynamics OR HyPhy OR "codon model") NOT (case report OR randomized OR psychology)'
+    # Cancer evolution & somatic selection
+    - '((("cancer evolution" OR "tumor evolution" OR "somatic evolution" OR "clonal evolution") AND (genomics OR sequencing OR phylogen* OR "single-cell")) OR ((cancer OR tumor OR lymphoma OR leukemia) AND ("positive selection" OR "clonal selection" OR "driver mutation" OR "dN/dS" OR "selection inference")) OR (("mutational signature" OR "mutational signatures") AND (cancer OR tumor) AND (evolution OR selection OR phylogeny))) AND ("computational evolutionary biology" OR "molecular evolution" OR phylogenomics OR phylodynamics OR HyPhy OR "codon model") NOT (case report OR randomized OR psychology)'
+    # Recombination & mosaicism
+    - '(((recombination OR "mosaic genome" OR breakpoint OR "gene conversion") AND (virus OR virome OR pathogen)) OR ((RDP OR GARD OR "recombination detection") AND (sequence OR alignment))) AND ("computational evolutionary biology" OR "molecular evolution" OR phylogenomics OR phylodynamics OR HyPhy OR "codon model") NOT (case report OR randomized OR psychology)'
+    # Phylodynamics & transmission
+    - '(((phylodynamic* OR "time-resolved phylogeny" OR BEAST OR "birth-death" OR coalescent) AND (virus OR pathogen)) OR (("genomic epidemiology" OR "phylodynamic inference") AND (outbreak OR transmission))) AND ("computational evolutionary biology" OR "molecular evolution" OR phylogenomics OR phylodynamics OR HyPhy OR "codon model") NOT (case report OR randomized OR psychology)'
+    # Urban / built environment virome
+    - '(((virome OR "viral metagenomics" OR viromics) AND ("built environment" OR urban OR subway OR transit OR surface)) OR (("urban microbiome" OR MetaSUB) AND (virus OR virome OR phage))) AND ("computational evolutionary biology" OR "molecular evolution" OR phylogenomics OR phylodynamics OR HyPhy OR "codon model") NOT (case report OR randomized OR psychology)'
+    # Wastewater / WBE viral surveillance
+    - '((("wastewater surveillance" OR WBE OR sewage) AND (virus OR virome OR pathogen OR SARS-CoV-2)) OR ((wastewater OR sewage) AND ("viral metagenomics" OR viromics) AND (variant OR lineage OR evolution))) AND ("computational evolutionary biology" OR "molecular evolution" OR phylogenomics OR phylodynamics OR HyPhy OR "codon model") NOT (case report OR randomized OR psychology)'
+    # Pandemic preparedness & biosurveillance
+    - '((("pandemic preparedness" OR biosurveillance OR "pathogen surveillance") AND (genomics OR sequencing)) OR (("early warning" OR "sentinel surveillance") AND (metagenomics OR sequencing))) AND ("computational evolutionary biology" OR "molecular evolution" OR phylogenomics OR phylodynamics OR HyPhy OR "codon model") NOT (case report OR randomized OR psychology)'
+    # Atlases, compendia, reference resources
+    - '(((atlas OR database OR compendium OR "reference catalog" OR resource) AND (virome OR microbiome OR pathogen)) OR (("large-scale" OR global) AND (virome OR microbiome) AND (metadata OR harmonization))) AND ("computational evolutionary biology" OR "molecular evolution" OR phylogenomics OR phylodynamics OR HyPhy OR "codon model") NOT (case report OR randomized OR psychology)'
+    # Metagenomics benchmarking & pipelines
+    - '((metagenomics AND (benchmark* OR pipeline OR "best practices" OR reproducible OR workflow)) OR ((Kraken2 OR MetaPhlAn OR Bracken OR Centrifuge OR Kaiju) AND (benchmark* OR evaluation))) AND (benchmark* OR workflow OR pipeline OR Snakemake OR Nextflow OR WDL) NOT (case report OR randomized OR psychology)'
+    # ML for evolution & pathogens
+    - '((("machine learning" OR "deep learning" OR transformer) AND (virus OR pathogen OR evolution OR phylogeny)) OR (("protein language model" OR ESM) AND (mutation OR evolution OR fitness))) AND ("machine learning" OR "deep learning" OR transformer OR "foundation model" OR "protein language model" OR ESM) NOT (case report OR randomized OR psychology)'
+
+signal_profile:
+  selection_codon_models:
+    description: Selection & codon models
+    terms: [dN/dS, codon model, HyPhy, positive selection, episodic selection, diversifying selection, branch-site, FUBAR, BUSTED]
+    weight: 1.35
+  urban_virome:
+    description: Urban / built environment virome
+    terms: [built environment, urban microbiome, MetaSUB, subway, transit, virome, viral metagenomics, viromics]
+    weight: 1.30
+  wastewater:
+    description: Wastewater / WBE viral surveillance
+    terms: [wastewater, sewage, wastewater-based epidemiology, wastewater surveillance]
+    weight: 1.25
+  cancer_evolution:
+    description: Cancer evolution & somatic selection
+    terms: [cancer evolution, tumor evolution, somatic evolution, clonal evolution, clonal selection, driver mutation, mutational signature, subclonal]
+    weight: 1.20
+  recombination:
+    description: Recombination & mosaicism
+    terms: [recombination, mosaic genome, breakpoint, gene conversion, reassortment, GARD, RDP]
+    weight: 1.20
+  phylodynamics:
+    description: Phylodynamics & transmission
+    terms: [phylodynamics, phylodynamic, time-resolved phylogeny, BEAST, birth-death, coalescent, genomic epidemiology, transmission]
+    weight: 1.20
+  biosurveillance:
+    description: Pandemic preparedness & biosurveillance
+    terms: [pandemic preparedness, biosurveillance, pathogen surveillance, early warning, sentinel surveillance]
+    weight: 1.15
+  atlases_resources:
+    description: Atlases, compendia, reference resources
+    terms: [atlas, compendium, reference catalog, database, resource, harmonization]
+    weight: 1.10
+  metagenomics_pipelines:
+    description: Metagenomics benchmarking & pipelines
+    terms: [benchmark, pipeline, workflow, best practices, Snakemake, Nextflow, Kraken2, MetaPhlAn, Bracken, Kaiju]
+    weight: 1.05
+  ml_evolution:
+    description: ML for evolution & pathogens
+    terms: [machine learning, deep learning, transformer, foundation model, protein language model, ESM, AlphaFold]
+    weight: 1.00
+
+methods_profile:
+  - HyPhy
+  - codon model
+  - dN/dS
+  - phylodynamics
+  - phylogenomics
+  - recombination detection
+  - viral metagenomics
+  - metagenomics
+  - single-cell
+  - Snakemake
+  - Nextflow
+  - benchmark
+  - protein language model
+
+mode: balanced
+
+outputs: [dashboard, csv, markdown]

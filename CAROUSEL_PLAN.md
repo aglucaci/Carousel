@@ -14,16 +14,18 @@ my research area since my last visit?"*
 
 ## 1. Where the repo is today
 
+_Updated at the end of Phase 1A (task 10)._
+
 | Area | State |
 | --- | --- |
-| Daily radar | ✅ `carousel-radar.yml` runs `scripts/daily_pubmed_watch_v2.py` (PubMed, hardcoded lab themes) once a day and publishes `docs/` to Pages. |
+| Daily radar | ✅ `carousel-radar.yml` runs `carousel scan` over `radars/*.yml` (matrix) daily and publishes the `carousel site` dashboard to Pages; paper stores persist on the `carousel-state` branch. The ETHER-era script is retired (task 10). |
 | Run history | ✅ Every run is snapshotted to the `snapshots` branch (`scripts/snapshot.py`). 350 runs from 2026-01-21 onward were backfilled. These runs mix 1/7/14/30-day windows and are `unversioned`. |
-| Package + CLI | ✅ `carousel/` with a strict `RadarConfig` (Pydantic) and `carousel validate` / `show`. CI runs on 3.10 and 3.12. |
-| Radar configs | ✅ 8 example radars validate. Nothing fetches from them yet. |
-| Connectors | ⚠️ PubMed only, inside the 1,557-line legacy script. |
-| Identity / dedup | ❌ Records are keyed by PMID within a theme. No cross-source canonical record exists. |
-| Ranking | ⚠️ ETHER-era additive score (`ranking_version: 0.0.1-ether`): regex signal classes, a venue boost, recency, and a cross-domain bonus. The spec rules out the venue boost as a validity proxy. |
-| Site | ⚠️ 12 static pages generated from Python strings, still branded ETHER. Some pages describe features that don't exist. |
+| Package + CLI | ✅ `src/carousel/` with a strict `RadarConfig` (schema v2) and the `carousel` CLI: `scan`, `runs`, `delta`, `export`, `feedback`, `review`, `site`, `validate`, `show`. CI runs on 3.10 and 3.12. |
+| Radar configs | ✅ 8 example radars plus `radars/lab_default.yml` (the lab's ten themes, scanned daily) validate. |
+| Connectors | ✅ PubMed (POST for long queries) and OpenAlex (credit budget, scholarly types), with recorded-HTTP fixtures and per-query coverage. |
+| Identity / dedup | ✅ Canonical papers from per-source records; exact-ID then cautious title/author/year matching; review queue, merge log, reversible splits. |
+| Ranking | ✅ `ranking_version` 0.1.0: relevance, leakage-free novelty, method match, modes, MMR. Momentum, discovery, and evidence are reported as not yet scored. |
+| Site | ✅ `carousel site`: a CAROUSEL-branded index plus one page per radar (ranked list, theme filter, "Why this paper?", coverage). The ETHER pages are gone. |
 | Evaluation | ⚠️ `scripts/validate_ranking.py` (P@K, R@K, nDCG@K) and `manuscript/VALIDATION_PLAN.md`. No labels or baselines yet. |
 
 **Keep from ETHER:** the PubMed E-utilities logic, the radar and signal-profile
@@ -157,7 +159,7 @@ previous history.
 | 7 | ✅ Lexical + semantic candidates; embeddings cached per `(paper, model_version)` | The same paper is never re-embedded under the same model (done 2026-11-23: `search/`; BM25 + cached embeddings + source-query hits with hard filters; `[semantic]` extra for sentence-transformers, `HashingEmbedder` fallback; store schema v3) |
 | 8 | ✅ Ranker: relevance, novelty (`H_t` without leakage), method match, MMR, three modes; `ranking_version` 0.1.0; config `schema_version: 2` | Deterministic given a stored run; a leakage test fails if `H_t` contains later papers (done 2026-11-23: `ranking/ranker.py`; novelty credited in proportion to relevance and MMR over a relevance-qualified pool, both found necessary with the real model) |
 | 9 | ✅ `carousel scan` + `Radar` API; persist runs (`recommendation_runs` / `items` shape); feedback file (save / dismiss / relevant / irrelevant) applied on the next scan | Rescanning keeps history, dismissed papers stay dismissed, and `results.to_csv()` works (done 2026-11-23: `radar.py`, `feedback.py`, store schema v4; also `carousel runs / delta / export / feedback`; verified with a live PubMed + OpenAlex scan and the real model) |
-| 10 | Switch the Actions demo to `carousel scan` over `radars/*.yml` (matrix); retire `daily_pubmed_watch_v2.py`; migrate the lab themes to `radars/lab_default.yml` | Pages shows the new pipeline's output; snapshots continue under `ranking_version` 0.1.0 |
+| 10 | ✅ Switch the Actions demo to `carousel scan` over `radars/*.yml` (matrix); retire `daily_pubmed_watch_v2.py`; migrate the lab themes to `radars/lab_default.yml` | Pages shows the new pipeline's output; snapshots continue under `ranking_version` 0.1.0 (done 2026-11-23: workflow plan → scan matrix → publish; `carousel site`; snapshots read run exports; live preview found and fixed PubMed 414 (now POST) and OpenAlex datasets/software in results (now scholarly types only)) |
 
 **1B — Application**
 

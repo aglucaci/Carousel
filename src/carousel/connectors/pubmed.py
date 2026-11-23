@@ -1,4 +1,4 @@
-"""PubMed connector (NCBI E-utilities), ported from ``scripts/daily_pubmed_watch_v2.py``.
+"""PubMed connector (NCBI E-utilities), ported from the ETHER-era daily script (retired in plan task 10).
 
 ``search`` runs ESearch (JSON) for the PMIDs in the date window, paging with
 ``retstart``, then EFetch (XML) in batches for the records. Changes from the
@@ -27,6 +27,8 @@ from carousel.core.identifiers import try_normalize
 from carousel.core.paper import Author, SourceRecord
 
 EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
+MAX_GET_URL = 2000
+"""Longer requests (long native queries, big ID batches) are sent as POST."""
 
 _MONTHS = {m: i for i, m in enumerate(("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"), 1)}
 
@@ -212,7 +214,11 @@ class PubMedConnector(Connector):
         self.tool = tool
 
     def _request(self, endpoint: str, params: Dict[str, Any]) -> Request:
-        return Request.build(EUTILS + endpoint, {**params, "tool": self.tool}, secret_params={"api_key": self.api_key})
+        req = Request.build(EUTILS + endpoint, {**params, "tool": self.tool}, secret_params={"api_key": self.api_key})
+        if len(req.full_url()) > MAX_GET_URL:  # NCBI answers 414 for long URLs; E-utilities accept POST
+            req = Request.build(EUTILS + endpoint, {**params, "tool": self.tool},
+                                secret_params={"api_key": self.api_key}, method="POST")
+        return req
 
     def search(self, query: SearchQuery) -> SearchResult:
         before = self._snapshot_stats()

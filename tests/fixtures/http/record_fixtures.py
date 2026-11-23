@@ -1,6 +1,6 @@
 """Re-record the connector fixtures from the live APIs.
 
-    python tests/fixtures/http/record_fixtures.py
+    python tests/fixtures/http/record_fixtures.py [pubmed] [openalex]   # default: both
 
 Fixtures hold requests and responses only; API keys are never recorded. The
 queries are deliberately tiny (a few results, small pages) so paging is
@@ -24,17 +24,21 @@ QUERY = SearchQuery(
 )
 
 
-def main() -> None:
-    rec = RecordingTransport(UrllibTransport(), HERE / "pubmed_search.json")
-    pm = PubMedConnector(HttpClient(rec, min_interval=0.4), api_key="", page_size=3, batch_size=5)
-    res = pm.search(QUERY)
-    print("pubmed", res.coverage.total_available, len(res.records), rec.save())
+def main(sources) -> None:
+    if "pubmed" in sources:
+        rec = RecordingTransport(UrllibTransport(), HERE / "pubmed_search.json")
+        pm = PubMedConnector(HttpClient(rec, min_interval=0.4), api_key="", page_size=3, batch_size=5)
+        res = pm.search(QUERY)
+        print("pubmed", res.coverage.total_available, len(res.records), rec.save())
 
-    rec = RecordingTransport(UrllibTransport(), HERE / "openalex_search.json")
-    oa = OpenAlexConnector(HttpClient(rec, min_interval=1.1), api_key="")
-    res = oa.search(QUERY)
-    print("openalex", res.coverage.total_available, len(res.records), res.coverage.rate_limit, rec.save())
+    if "openalex" in sources:
+        rec = RecordingTransport(UrllibTransport(), HERE / "openalex_search.json")
+        oa = OpenAlexConnector(HttpClient(rec, min_interval=1.1), api_key="")
+        res = oa.search(QUERY)
+        print("openalex", res.coverage.total_available, len(res.records), res.coverage.rate_limit, rec.save())
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    main(sys.argv[1:] or ["pubmed", "openalex"])

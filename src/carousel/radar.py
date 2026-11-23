@@ -86,6 +86,7 @@ class ScanResults:
 
     run: Dict[str, Any]
     previous: Optional[Dict[str, Any]] = None
+    radar: Optional[Dict[str, Any]] = None  # config summary for reports (name, description, themes, ...)
 
     @property
     def run_id(self) -> str:
@@ -137,7 +138,10 @@ class ScanResults:
         return p
 
     def to_dict(self) -> Dict[str, Any]:
-        return {**self.run, "delta": self.delta()}
+        out = {**self.run, "delta": self.delta()}
+        if self.radar is not None:
+            out["radar"] = self.radar
+        return out
 
     def to_json(self, path: Optional[Union[str, Path]] = None) -> str:
         text = json.dumps(self.to_dict(), indent=2, ensure_ascii=False)
@@ -223,6 +227,17 @@ class Radar:
     @property
     def radar_id(self) -> str:
         return self.config.radar_id or "radar"
+
+    def summary(self) -> Dict[str, Any]:
+        """What a report needs to describe the radar (no secrets, no file paths)."""
+        c = self.config
+        return {
+            "radar_id": self.radar_id, "radar_name": c.radar_name, "description": c.description,
+            "research_question": c.research_question, "sources": [s.value for s in c.sources],
+            "queries": list(c.queries), "mode": c.mode.value, "window_days": c.filters.days,
+            "themes": {k: (v.description or k) for k, v in c.signal_profile.items()},
+            "config_hash": c.config_hash(),
+        }
 
     def _open(self, store: Union[str, Path, PaperStore, None]) -> Tuple[PaperStore, bool]:
         store = store if store is not None else self.store
@@ -310,6 +325,7 @@ class Radar:
                 d["details"]["paper"] = _paper_summary(st.get(it.paper_id))  # type: ignore[arg-type]
                 items.append(d)
             ranking_meta = {k: v for k, v in ranking.to_dict().items() if k != "items"}
+            ranking_meta["window"] = {"start": start.isoformat(), "end": as_of.isoformat(), "days": days}
 
             started_iso = _iso(started)
             run_id = "run_" + hashlib.sha256(f"{self.radar_id}|{started_iso}|{cfg.config_hash()}".encode()).hexdigest()[:16]
@@ -326,7 +342,7 @@ class Radar:
             st.save_run(run, items, observations)
             prev_id = st.previous_run_id(self.radar_id, started_iso)
             saved = st.get_run(run_id)
-            return ScanResults(saved, st.get_run(prev_id) if prev_id else None)  # type: ignore[arg-type]
+            return ScanResults(saved, st.get_run(prev_id) if prev_id else None, self.summary())  # type: ignore[arg-type]
         finally:
             if owned:
                 st.close()
@@ -350,7 +366,7 @@ class Radar:
             if run is None:
                 return None
             prev = st.previous_run_id(self.radar_id, run["started_at"])
-            return ScanResults(run, st.get_run(prev) if prev else None)
+            return ScanResults(run, st.get_run(prev) if prev else None, self.summary())
         finally:
             if owned:
                 st.close()

@@ -103,8 +103,12 @@ class OpenAlexFixtureTests(unittest.TestCase):
         conn = OpenAlexConnector(replay("openalex_search.json"), api_key="")
         res = conn.search(QUERY)
         cov = res.coverage
-        self.assertEqual(cov.native_query, 'search.title_and_abstract=("immune escape" OR "antigenic drift") NOT ("case report")')
-        self.assertEqual((cov.total_available, cov.retrieved, cov.pages, cov.requests), (120, 5, 1, 1))
+        self.assertEqual(cov.native_query,
+                         'search.title_and_abstract=("immune escape" OR "antigenic drift") NOT ("case report") '
+                         'filter=from_publication_date:2026-10-01,to_publication_date:2026-10-14,'
+                         'type:article|preprint|review|letter')
+        self.assertEqual((cov.total_available, cov.retrieved, cov.pages, cov.requests), (109, 5, 1, 1))
+        self.assertTrue(all(r.publication_types[0] in ("article", "preprint") for r in res.records))
         self.assertEqual((cov.cost, cov.cost_unit), (10.0, "credits"))  # from X-RateLimit-Credits-Used
         self.assertIn("x-ratelimit-remaining", cov.rate_limit)
         self.assertEqual(cov.truncation_reason, "max_results")
@@ -267,6 +271,14 @@ class OpenAlexPagingTests(unittest.TestCase):
         with self.assertRaises(BudgetExceeded):
             OpenAlexConnector(HttpClient(FakeTransport(), budget=Budget(5)), api_key="k").search(self.query(10))
 
+    def test_work_type_filter_can_be_widened(self) -> None:
+        t = FakeTransport(oa_page([work(1)]), oa_page([work(2)]))
+        OpenAlexConnector(HttpClient(t), api_key="").search(self.query(5))
+        OpenAlexConnector(HttpClient(t), api_key="", work_types=None).search(self.query(5))
+        filters = [dict(r.params)["filter"] for r in t.sent]
+        self.assertTrue(filters[0].endswith(",type:article|preprint|review|letter"))
+        self.assertNotIn("type:", filters[1])
+
     def test_fetch_uses_cheap_list_requests(self) -> None:
         t = FakeTransport(oa_page([work(7)], credits="1"))
         client = HttpClient(t)
@@ -339,6 +351,21 @@ class HttpClientTests(unittest.TestCase):
                 UrllibTransport().send(self.REQ)
         self.assertIn("Install Certificates.command", str(ctx.exception))
         self.assertNotIn("sekret", str(ctx.exception))
+
+    def test_long_pubmed_queries_are_posted(self) -> None:
+        t = FakeTransport(Response(200, b'{"esearchresult": {"count": "0", "idlist": []}}'))
+        q = QUERY.model_copy(update={"native": "(" + " OR ".join(f'"term number {i}"' for i in range(150)) + ")"})
+        PubMedConnector(HttpClient(t), api_key="sekret").search(q)
+        req = t.sent[0]
+        self.assertEqual(req.method, "POST")
+        self.assertEqual(req.full_url(), "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi")
+        self.assertIn(b"term+number+149", req.body())
+        self.assertIn(b"api_key=sekret", req.body())          # sent...
+        self.assertTrue(req.key().startswith("POST "))
+        self.assertNotIn("sekret", req.key())                # ...but never part of the key
+        short = FakeTransport(Response(200, b'{"esearchresult": {"count": "0", "idlist": []}}'))
+        PubMedConnector(HttpClient(short), api_key="").search(QUERY)
+        self.assertEqual(short.sent[0].method, "GET")
 
     def test_pacing(self) -> None:
         sleeps, now = [], [0.0]
