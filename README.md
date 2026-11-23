@@ -38,6 +38,7 @@ changed in my field, why does it matter, and what should I read next?"**
 | **Daily literature radar** | [Live dashboard](https://aglucaci.github.io/Carousel/) | PubMed, 14-day rolling window, about 10 themes, ranked with per-paper score breakdowns. Rebuilt every day at 13:00 UTC |
 | **Run history (snapshots)** | [`snapshots` branch](https://github.com/aglucaci/Carousel/tree/snapshots) | Every run is stored as an immutable, versioned snapshot. History starts 2026-01-21, and earlier runs were recovered from git history |
 | **Paper store** | [`src/carousel/core/paper.py`](src/carousel/core/paper.py), [`src/carousel/database/local.py`](src/carousel/database/local.py) | Canonical paper records built from per-source records, with per-field provenance, separate publication / first-online / preprint dates, and CAROUSEL's own first-seen and last-verified times. Local SQLite store. Not yet wired into the daily radar |
+| **Connectors** | [`src/carousel/connectors/`](src/carousel/connectors/) | PubMed and OpenAlex searches that return source records plus a coverage report (matches available, retrieved, truncated and why, requests, OpenAlex credits). Bounded windows only, with a per-run OpenAlex credit budget and an on-disk cache. Not yet wired into the daily radar |
 | **Radar configs** | [`examples/`](examples/), [`src/carousel/core/config.py`](src/carousel/core/config.py) | YAML radars with strict validation and `file:line` error messages |
 | **`carousel` CLI** | [`src/carousel/cli.py`](src/carousel/cli.py) | `validate` and `show` today. `scan`, `delta`, and `export` are next |
 | **Ranking evaluation** | [`scripts/validate_ranking.py`](scripts/validate_ranking.py) | Precision@K, Recall@K, and nDCG@K over expert-labeled rankings |
@@ -136,7 +137,7 @@ Validation rules:
 - Unknown fields, unknown sources, duplicate YAML keys, and duplicate terms are rejected with the line number.
 - `radar_id` defaults to the file name, so `viral_evolution.yml` becomes `viral-evolution`.
 - Each resolved config gets a short `config_hash`, which is recorded with results.
-- Sources: `pubmed`, `europepmc`, `biorxiv`, `medrxiv`, `crossref`, `openalex`, `arxiv`. The config schema accepts all of these, but only PubMed is fetched today. OpenAlex arrives in Phase 1, and Europe PMC, Crossref, and arXiv in Phase 2.
+- Sources: `pubmed`, `europepmc`, `biorxiv`, `medrxiv`, `crossref`, `openalex`, `arxiv`. The config schema accepts all of these. PubMed and OpenAlex connectors exist (the daily radar still uses the legacy PubMed script until `carousel scan` lands); Europe PMC, Crossref, and arXiv arrive in Phase 2. Optional keys: `NCBI_API_KEY` raises PubMed's rate limit, and `OPENALEX_API_KEY` is needed to page past the first 100 OpenAlex results.
 
 ## How recommendations work
 
@@ -202,7 +203,7 @@ day they were recommended.
 
 ```text
 src/carousel/        Python package: core/ (radar config, identifiers, paper model),
-                     database/ (local SQLite paper store), cli.py
+                     connectors/ (PubMed, OpenAlex), database/ (local SQLite paper store), cli.py
 examples/            Starter radar configs (validated in CI)
 scripts/
   daily_pubmed_watch_v2.py   current daily pipeline (being replaced by `carousel scan`)
