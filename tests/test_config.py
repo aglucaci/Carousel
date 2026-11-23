@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from carousel import cli
-from carousel.config import ConfigError, RadarConfig, load_radar
+from carousel.core.config import ConfigError, RadarConfig, load_radar
 
 REPO = Path(__file__).resolve().parents[1]
 

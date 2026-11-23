@@ -2,7 +2,7 @@
 
 Starter radar configurations for CAROUSEL. Each radar defines a topic, sources,
 query set, signal profile, ranking weights, and outputs. The schema is defined
-and validated by `carousel/config.py`.
+and validated by `src/carousel/core/config.py`.
 
 ```bash
 pip install -e .

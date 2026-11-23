@@ -40,3 +40,18 @@ jobs:
 
       - name: Validate radar configs
         run: carousel validate examples/*.yml
+
+      - name: Check packaging (built wheel, not the editable install)
+        run: |
+          set -euo pipefail
+          pip wheel . --no-deps -w dist -q
+          python -m zipfile -l dist/*.whl | grep -q "carousel/core/config.py"
+          python -m venv /tmp/wheel-env
+          /tmp/wheel-env/bin/pip install -q dist/*.whl
+          cd /tmp && /tmp/wheel-env/bin/carousel --version
+
+      - name: Validate CITATION.cff
+        if: matrix.python-version == '3.12'
+        run: |
+          pip install -q cffconvert
+          cffconvert --validate

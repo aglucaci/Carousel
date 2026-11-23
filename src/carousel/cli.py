@@ -18,7 +18,7 @@ from typing import List, Optional
 import yaml
 
 from carousel import __version__
-from carousel.config import ConfigError, RadarConfig, load_radar
+from carousel.core.config import ConfigError, RadarConfig, load_radar
 
 
 def _summary(cfg: RadarConfig) -> str:

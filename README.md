@@ -37,8 +37,8 @@ changed in my field, why does it matter, and what should I read next?"**
 | --- | --- | --- |
 | **Daily literature radar** | [Live dashboard](https://aglucaci.github.io/Carousel/) | PubMed, 14-day rolling window, about 10 themes, ranked with per-paper score breakdowns. Rebuilt every day at 13:00 UTC |
 | **Run history (snapshots)** | [`snapshots` branch](https://github.com/aglucaci/Carousel/tree/snapshots) | Every run is stored as an immutable, versioned snapshot. History starts 2026-01-21, and earlier runs were recovered from git history |
-| **Radar configs** | [`examples/`](examples/), [`carousel/config.py`](carousel/config.py) | YAML radars with strict validation and `file:line` error messages |
-| **`carousel` CLI** | [`carousel/cli.py`](carousel/cli.py) | `validate` and `show` today. `build`, `delta`, and `export` are next |
+| **Radar configs** | [`examples/`](examples/), [`src/carousel/core/config.py`](src/carousel/core/config.py) | YAML radars with strict validation and `file:line` error messages |
+| **`carousel` CLI** | [`src/carousel/cli.py`](src/carousel/cli.py) | `validate` and `show` today. `scan`, `delta`, and `export` are next |
 | **Ranking evaluation** | [`scripts/validate_ranking.py`](scripts/validate_ranking.py) | Precision@K, Recall@K, and nDCG@K over expert-labeled rankings |
 
 ## Quick start
@@ -200,10 +200,10 @@ day they were recommended.
 ## Repository layout
 
 ```text
-carousel/            Python package: radar config models and CLI
+src/carousel/        Python package (core/ holds the radar config models; cli.py)
 examples/            Starter radar configs (validated in CI)
 scripts/
-  daily_pubmed_watch_v2.py   current daily pipeline (being split into carousel/)
+  daily_pubmed_watch_v2.py   current daily pipeline (being replaced by `carousel scan`)
   snapshot.py                run snapshots: write / backfill / reindex
   validate_ranking.py        P@K, R@K, nDCG@K evaluation
 tests/               unittest/pytest suite
@@ -211,6 +211,7 @@ docs/                Generated GitHub Pages site (do not edit by hand)
 logo/                Logo SVG/PNG and the generator script
 manuscript/          Paper draft and validation plan
 CAROUSEL_PLAN.md     Implementation plan: phases, tasks, done-when checks
+CITATION.cff         How to cite CAROUSEL
 MANUSCRIPT_PLAN.md   Publication plan
 ```
 
@@ -253,6 +254,11 @@ carousel validate examples/*.yml
 ```
 
 New example radars must pass `carousel validate`.
+
+## Citing
+
+If you use CAROUSEL in your research, please cite it with the metadata in
+[`CITATION.cff`](CITATION.cff). GitHub's "Cite this repository" button reads it.
 
 ## License
 

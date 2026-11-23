@@ -30,6 +30,7 @@ Repository = "https://github.com/aglucaci/Carousel"
 version = { attr = "carousel.__version__" }
 
 [tool.setuptools.packages.find]
+where = ["src"]
 include = ["carousel*"]
 
 [tool.pytest.ini_options]
