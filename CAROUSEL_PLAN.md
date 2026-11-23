@@ -166,7 +166,7 @@ previous history.
 | # | Task | Done when |
 | --- | --- | --- |
 | 11 | ✅ Postgres + pgvector schema (spec §8 tables) via Alembic; import the 1A store and historical snapshots | Migration tests; snapshot import counts match (done 2026-11-23: `database/models.py` + Alembic `0001`, `[server]` extra, `carousel db upgrade / import-store / import-snapshots`; real snapshots branch: 352/352 snapshots, 21,518/21,518 items) |
-| 12 | FastAPI v1: radars, runs (asynchronous job IDs), papers, explanation, feedback | OpenAPI schema plus API tests; scans run in a Redis/RQ worker |
+| 12 | ✅ FastAPI v1: radars, runs (asynchronous job IDs), papers, explanation, feedback | OpenAPI schema plus API tests; scans run in a Redis/RQ worker (done 2026-11-23: `api/` (12 routes, contract in `openapi/carousel-v1.json`), `workers/scan.py` (RQ; runs the engine scan, then imports into Postgres), optional `CAROUSEL_API_TOKEN` for writes; verified end to end with real Redis, uvicorn, a separate worker, and a live scan) |
 | 13 | Next.js app: **For You**, **Radars** (create with progressive disclosure; approve the proposed search strategy), paper card + **"Why this paper?"** drawer (features from the stored run only), save/dismiss, **Library** (saved list) | Playwright test of the spec acceptance flow |
 | 14 | `docker-compose up` brings up postgres, redis, api, worker, and web | A fresh clone reaches the acceptance flow with one command |
 

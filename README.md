@@ -44,6 +44,7 @@ changed in my field, why does it matter, and what should I read next?"**
 | **Candidate retrieval** | [`src/carousel/search/`](src/carousel/search/) | BM25 over titles and abstracts, semantic similarity to the radar's profile, and source-query hits, after recorded hard filters (retracted, date window, type, excluded terms). Embeddings are cached per paper and model version. Real semantic search needs `pip install "carousel-research[semantic]"` |
 | **Ranker** | [`src/carousel/ranking/`](src/carousel/ranking/) | `ranking_version` 0.1.0: relevance, novelty against only earlier-observed papers (guarded against temporal leakage), and method match; weighted by mode (focused / balanced / exploratory), then diversified with MMR. Every item carries its features and flags |
 | **Postgres schema (Phase 1B)** | [`src/carousel/database/models.py`](src/carousel/database/models.py), [`migrations/`](src/carousel/database/migrations/) | The spec's production tables on PostgreSQL + pgvector (papers with full-text search, identifiers, sources, authors, embeddings, runs and items, feedback, collections, topics, events), managed with Alembic. `carousel db import-store` and `import-snapshots` copy the engine's history in and verify counts. Needs `pip install "carousel-research[server]"` |
+| **REST API v1 (Phase 1B)** | [`src/carousel/api/`](src/carousel/api/), [`openapi/carousel-v1.json`](openapi/carousel-v1.json) | FastAPI over Postgres: radars, scans as background jobs (RQ on Redis, `carousel worker`), ranked papers, delta, paper records, "Why this paper?" explanations from the stored run, full-text search, and feedback. Writes need `CAROUSEL_API_TOKEN` when it is set |
 | **Radar configs** | [`examples/`](examples/), [`src/carousel/core/config.py`](src/carousel/core/config.py) | YAML radars with strict validation and `file:line` error messages |
 | **`carousel scan` and the `Radar` API** | [`src/carousel/radar.py`](src/carousel/radar.py), [`src/carousel/cli.py`](src/carousel/cli.py) | One command runs the whole engine: query PubMed and OpenAlex, dedup into the local store, find candidates, rank, and save the run with its coverage. Rescans keep history; feedback in `RADAR.feedback.yml` (save / dismiss / relevant / irrelevant) applies on the next scan. Also `runs`, `delta`, `export`, `feedback`, `review`, `site`, `validate`, `show` |
 | **Ranking evaluation** | [`scripts/validate_ranking.py`](scripts/validate_ranking.py) | Precision@K, Recall@K, and nDCG@K over expert-labeled rankings |
@@ -128,8 +129,23 @@ export CAROUSEL_DATABASE_URL=postgresql://user:pass@localhost/carousel
 carousel db upgrade && carousel db import-store carousel.db
 ```
 
-Run the tests (the Postgres tests run when `CAROUSEL_TEST_DATABASE_URL` points
-at a disposable database):
+Then serve the API and run the scan worker (Redis required); interactive docs
+are at `http://127.0.0.1:8000/api/v1/docs`:
+
+```bash
+carousel api serve
+```
+
+```bash
+carousel worker
+```
+
+```bash
+curl -X POST -H "Authorization: Bearer $CAROUSEL_API_TOKEN" http://127.0.0.1:8000/api/v1/radars/lab-default/runs
+```
+
+Run the tests (the Postgres and API tests run when `CAROUSEL_TEST_DATABASE_URL`
+points at a disposable database):
 
 ```bash
 python -m pytest -q
@@ -264,9 +280,10 @@ src/carousel/        Python package: radar.py (Radar API), feedback.py, core/ (r
                      connectors/ (PubMed, OpenAlex), ingestion/ (dedup), search/ (candidates),
                      ranking/ (ranker),
                      database/ (SQLite store; Postgres models, migrations, importer),
-                     site.py (dashboard), cli.py
+                     api/ (REST API v1), workers/ (scan jobs), site.py (dashboard), cli.py
 radars/              Radars scanned daily by Actions (lab_default.yml = the lab's ten themes)
 examples/            Starter radar configs (validated in CI)
+openapi/             The committed API contract (checked against the app in CI)
 scripts/
   snapshot.py                run snapshots: write / backfill / reindex
   validate_ranking.py        P@K, R@K, nDCG@K evaluation

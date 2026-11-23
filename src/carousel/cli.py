@@ -18,6 +18,8 @@ carousel command-line interface.
     carousel site RUN.json... [--out docs]                           # static dashboard for GitHub Pages
     carousel db upgrade|current|downgrade [--url URL]                # Postgres migrations ([server] extra)
     carousel db import-store STORE.db | import-snapshots CHECKOUT    # copy Phase 1A data into Postgres
+    carousel api serve [--host H --port P] | api openapi [--out F]   # REST API v1
+    carousel worker [--burst]                                        # scan worker (RQ on Redis)
 """
 
 from __future__ import annotations
@@ -283,6 +285,56 @@ def cmd_db(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_api(args: argparse.Namespace) -> int:
+    try:
+        from carousel.api.app import openapi_document
+    except ImportError as exc:
+        print(f'FAIL the API needs the server extra: pip install "carousel-research[server]" ({exc})', file=sys.stderr)
+        return 1
+    if args.action == "openapi":
+        text = json.dumps(openapi_document(), indent=2, sort_keys=True) + "\n"
+        if args.out:
+            with open(args.out, "w", encoding="utf-8") as fh:
+                fh.write(text)
+            print(f"wrote {args.out}")
+        else:
+            print(text, end="")
+        return 0
+    import uvicorn
+
+    from carousel.api.app import create_app
+
+    try:
+        app = create_app()
+    except ValueError as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    if not app.state.settings.api_token and args.host not in ("127.0.0.1", "localhost", "::1"):
+        print("warning: CAROUSEL_API_TOKEN is not set, so anyone who can reach this server can write to it",
+              file=sys.stderr)
+    uvicorn.run(app, host=args.host, port=args.port, log_level="info")
+    return 0
+
+
+def cmd_worker(args: argparse.Namespace) -> int:
+    try:
+        from redis import Redis
+        from rq import Queue, SimpleWorker, Worker
+
+        from carousel.workers.scan import QUEUE
+    except ImportError as exc:
+        print(f'FAIL the worker needs the server extra: pip install "carousel-research[server]" ({exc})', file=sys.stderr)
+        return 1
+    import os
+
+    conn = Redis.from_url(os.environ.get("CAROUSEL_REDIS_URL", "redis://localhost:6379/0"))
+    # Forking after PyTorch is loaded is unreliable on macOS; run jobs in-process there.
+    cls = SimpleWorker if (args.simple or sys.platform == "darwin") else Worker
+    worker = cls([Queue(QUEUE, connection=conn)], connection=conn)
+    worker.work(burst=args.burst)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="carousel", description="CAROUSEL research radar tools.")
     ap.add_argument("--version", action="version", version=f"carousel {__version__}")
@@ -380,6 +432,20 @@ def build_parser() -> argparse.ArgumentParser:
     x.add_argument("--radar", action="append", help="Only this radar_id (repeatable)")
     x.add_argument("--url")
     db.set_defaults(func=cmd_db)
+
+    api = sub.add_parser("api", help="REST API v1 (Phase 1B); needs the [server] extra")
+    apis = api.add_subparsers(dest="action", required=True, metavar="ACTION")
+    sv = apis.add_parser("serve", help="Run the API (uvicorn); configure with CAROUSEL_* environment variables")
+    sv.add_argument("--host", default="127.0.0.1")
+    sv.add_argument("--port", type=int, default=8000)
+    op = apis.add_parser("openapi", help="Print or write the OpenAPI schema")
+    op.add_argument("--out", help="Write to this file instead of stdout")
+    api.set_defaults(func=cmd_api)
+
+    wk = sub.add_parser("worker", help="Run the scan worker (RQ); run exactly one")
+    wk.add_argument("--burst", action="store_true", help="Exit when the queue is empty")
+    wk.add_argument("--simple", action="store_true", help="Run jobs in-process (no fork); default on macOS")
+    wk.set_defaults(func=cmd_worker)
     return ap
 
 

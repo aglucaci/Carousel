@@ -99,6 +99,20 @@ class NormalizationTests(unittest.TestCase):
                          "escape of sars cov 2 beta variants cafe co")
         self.assertEqual(normalize_title(None), "")
 
+    def test_notices_are_recognized(self) -> None:
+        from carousel.ingestion.dedup import is_notice
+
+        # Found in a live scan: PubMed's newer "Retraction Notice" type and a "Statement of Retraction" title.
+        notice = paper({"source": "pubmed", "source_id": "1", "title": "Statement of Retraction: Circ_0092012 knockdown",
+                        "publication_types": ["Journal Article", "Retraction Notice"]}, "cp_n")
+        self.assertTrue(is_notice(notice))
+        by_type = paper({"source": "pubmed", "source_id": "2", "title": "A study of tumour escape",
+                         "publication_types": ["Retraction Notice"]}, "cp_t")
+        self.assertTrue(is_notice(by_type))
+        article = paper({"source": "pubmed", "source_id": "3", "title": "A study of tumour escape",
+                         "publication_types": ["Journal Article", "Retracted Publication"]}, "cp_a")
+        self.assertFalse(is_notice(article))  # the retracted article itself is flagged via is_retracted, not as a notice
+
     def test_family_names(self) -> None:
         for name in ("Ada Lovelace", "Lovelace A", "Lovelace, Ada", "Lovelace AB", "A. Lovelace"):
             self.assertEqual(family_name(name), "lovelace", name)

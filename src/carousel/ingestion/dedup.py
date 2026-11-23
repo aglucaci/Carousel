@@ -48,13 +48,13 @@ MIN_TITLE_TOKENS = 4
 
 _NOTICE = re.compile(
     r"^(?:erratum|errata|corrigendum|corrigenda|correction|author correction|publisher correction|"
-    r"retraction|retracted|retraction note|notice of retraction|expression of concern|"
+    r"retraction|retracted|retraction note|notice of retraction|statement of retraction|expression of concern|"
     r"editorial expression of concern|withdrawal|withdrawn|comment on|commentary on|reply to|"
     r"response to|addendum)\b"
 )
 _NOTICE_TYPES = frozenset({
-    "published erratum", "erratum", "retraction of publication", "retraction", "comment", "correction",
-    "expression of concern",
+    "published erratum", "erratum", "retraction of publication", "retraction notice", "retraction", "comment",
+    "correction", "expression of concern",
 })
 _GENERIC_TITLES = frozenset({
     "editorial", "introduction", "preface", "foreword", "correction", "erratum", "reply", "response",
