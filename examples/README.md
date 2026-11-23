@@ -1,11 +1,18 @@
 # Starter Radars
 
-These starter radar configurations show how ETHER should feel as a
-configurable research intelligence system. Each radar defines a topic, sources,
-query set, signal profile, scoring weights, and export outputs.
+Starter radar configurations for CAROUSEL. Each radar defines a topic, sources,
+query set, signal profile, ranking weights, and outputs. The schema is defined
+and validated by `carousel/config.py`.
 
-The current prototype may not parse every field yet. Treat these files as the
-product contract for the publishable CLI and web workflow.
+```bash
+pip install -e .
+carousel validate examples/*.yml          # check every template
+carousel show examples/viral_evolution.yml  # print the resolved config, defaults included
+```
+
+`radar_id` defaults to the file name (`viral_evolution.yml` becomes
+`viral-evolution`). Unknown fields, unknown sources, duplicate keys, and
+duplicate terms are rejected with line numbers.
 
 ## Included Templates
 
@@ -22,9 +29,11 @@ product contract for the publishable CLI and web workflow.
 
 ## Planned Commands
 
+These arrive with the connector and export work (see `CAROUSEL_PLAN.md`).
+
 ```bash
-ether build examples/cancer_evolution.yml
-ether clone examples/cancer_evolution.yml my_leukemia_radar.yml
-ether export results/cancer_evolution/ --format csv
-ether export results/cancer_evolution/ --format bibtex
+carousel build examples/cancer_evolution.yml
+carousel clone examples/cancer_evolution.yml my_leukemia_radar.yml
+carousel export results/cancer_evolution/ --format csv
+carousel export results/cancer_evolution/ --format bibtex
 ```

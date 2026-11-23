@@ -1,4 +1,2 @@
-pandas
-numpy
-duckdb
-lxml
+# Install the carousel package and its dependencies (see pyproject.toml).
+-e .
