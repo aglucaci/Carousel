@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use CAROUSEL, please cite it using the metadata below."
+type: software
+title: "CAROUSEL: An Open-Source Platform for Personalized Scientific Literature Discovery and Research Intelligence"
+abstract: >-
+  CAROUSEL is an open-source scientific literature intelligence platform that
+  continuously monitors scholarly publications, recommends relevant research
+  with transparent and reproducible ranking, and detects how a research field
+  is changing over time (Research Delta).
+authors:
+  - family-names: Lucaci
+    given-names: Alexander
+version: 0.1.0.dev0
+license: MIT
+repository-code: "https://github.com/aglucaci/Carousel"
+url: "https://aglucaci.github.io/Carousel/"
+keywords:
+  - scientific literature
+  - recommender systems
+  - research intelligence
+  - literature surveillance
+  - reproducibility

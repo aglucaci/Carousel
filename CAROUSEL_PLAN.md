@@ -51,7 +51,7 @@ Actions + Pages public demo.
 
 ```text
 src/carousel/
-  core/            config (RadarConfig, today's carousel/config.py), schemas, versions
+  core/            config (RadarConfig), schemas, versions
   connectors/      openalex, pubmed (Phase 1); europepmc, crossref, arxiv (Phase 2)
   ingestion/       normalize identifiers, canonical records, dedup, version links, provenance
   search/          lexical (BM25 / Postgres FTS), semantic (embeddings, pgvector), citation expansion
@@ -150,7 +150,7 @@ previous history.
 | --- | --- | --- |
 | 1 | ✅ One scheduled workflow, and snapshots on every run | Daily green run; snapshot is written (done 2026-11-23) |
 | 2 | ✅ Package, strict `RadarConfig`, `carousel validate` / `show`, CI | 8 examples validate; bad YAML gives file:line errors (done 2026-11-23) |
-| 3 | Move to the `src/carousel/` layout; config into `core/`; add `CITATION.cff` | CI green; `pip install -e .` and the CLI unchanged |
+| 3 | ✅ Move to the `src/carousel/` layout; config into `core/`; add `CITATION.cff` | CI green; `pip install -e .` and the CLI unchanged |
 | 4 | Canonical paper model and local store: identifiers, per-source records, all spec §4.1 dates, `first_seen` / `last_verified`, per-field provenance | Round-trip tests; one paper seen from two sources keeps both source records |
 | 5 | Connectors: **OpenAlex** (budget counter, cache, cursor paging, never full-corpus scans) and **PubMed** (ported from the legacy script) | Recorded-HTTP fixture tests; the source coverage of each query is recorded |
 | 6 | Dedup: DOI → PMID/PMCID/OpenAlex ID → (Phase 2: verified preprint links) → cautious title/author/year matching. Ambiguous pairs go to a review queue | Fixture suite of true merges, true non-merges, and ambiguous pairs; no automatic merge below threshold |
