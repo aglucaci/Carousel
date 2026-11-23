@@ -21,6 +21,8 @@ dev = ["pytest>=8"]
 # Real semantic retrieval (sentence-transformers + torch). Without it, CAROUSEL
 # falls back to the dependency-free, non-semantic HashingEmbedder.
 semantic = ["sentence-transformers>=3"]
+# Phase 1B: Postgres + pgvector storage, migrations, and imports.
+server = ["SQLAlchemy>=2.0", "alembic>=1.13", "psycopg[binary]>=3.1", "pgvector>=0.2.5"]
 
 [project.scripts]
 carousel = "carousel.cli:main"
@@ -37,7 +39,7 @@ where = ["src"]
 include = ["carousel*"]
 
 [tool.setuptools.package-data]
-carousel = ["site_assets/*"]
+carousel = ["site_assets/*", "database/migrations/*.mako", "database/migrations/env.py", "database/migrations/versions/*.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
