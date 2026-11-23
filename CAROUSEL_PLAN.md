@@ -242,7 +242,7 @@ Scientific question tracking is a research feature.
 
 ## 9. Open decisions
 
-1. **Phase 1 split.** This plan puts the engine (1A) before the web app (1B). The alternative is to build both together from the start.
+1. ~~**Phase 1 split.**~~ Settled (2026-11-23): engine first (1A), then the web app (1B).
 2. **Lab themes.** Keep the current hardcoded themes as `radars/lab_default.yml` (recommended, as a dogfooding case study), or drop them.
 3. **Manuscript framing.** Either retitle the JOSS draft for CAROUSEL now, or publish ETHER first and treat CAROUSEL as its successor.
 4. **Hosting for 1B.** Self-hosted only at first, or also a public instance (which needs quotas for embeddings, LLM calls, and the OpenAlex budget).
