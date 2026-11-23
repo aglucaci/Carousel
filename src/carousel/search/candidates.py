@@ -81,8 +81,12 @@ class CandidateSet:
 
 
 def profile_text(radar: "RadarConfig") -> str:
-    """The radar's interest profile as text (description + queries). Seed papers and feedback join in task 9."""
-    return " ".join(x for x in [radar.radar_name, radar.description or "", ". ".join(radar.queries)] if x).strip()
+    """The radar's interest profile as text: name, description, research question, queries.
+
+    Seed papers and feedback join the profile as vectors in task 9.
+    """
+    parts = [radar.radar_name, radar.description or "", radar.research_question or "", ". ".join(radar.queries)]
+    return " ".join(x for x in parts if x).strip()
 
 
 def _in_window(paper: CanonicalPaper, start: dt.date, end: dt.date) -> Optional[bool]:
@@ -225,5 +229,6 @@ def candidates_for_radar(
     start = as_of - dt.timedelta(days=radar.filters.days - 1)
     return generate_candidates(
         pool, list(radar.queries), profile=profile_text(radar), exclude=list(radar.exclude),
-        window=(start, as_of), store=store, embedder=embedder, source_hits=source_hits, **kw,
+        window=(start, as_of), publication_types=list(radar.publication_types) or None,
+        store=store, embedder=embedder, source_hits=source_hits, **kw,
     )
