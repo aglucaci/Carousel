@@ -37,6 +37,7 @@ changed in my field, why does it matter, and what should I read next?"**
 | --- | --- | --- |
 | **Daily literature radar** | [Live dashboard](https://aglucaci.github.io/Carousel/) | PubMed, 14-day rolling window, about 10 themes, ranked with per-paper score breakdowns. Rebuilt every day at 13:00 UTC |
 | **Run history (snapshots)** | [`snapshots` branch](https://github.com/aglucaci/Carousel/tree/snapshots) | Every run is stored as an immutable, versioned snapshot. History starts 2026-01-21, and earlier runs were recovered from git history |
+| **Paper store** | [`src/carousel/core/paper.py`](src/carousel/core/paper.py), [`src/carousel/database/local.py`](src/carousel/database/local.py) | Canonical paper records built from per-source records, with per-field provenance, separate publication / first-online / preprint dates, and CAROUSEL's own first-seen and last-verified times. Local SQLite store. Not yet wired into the daily radar |
 | **Radar configs** | [`examples/`](examples/), [`src/carousel/core/config.py`](src/carousel/core/config.py) | YAML radars with strict validation and `file:line` error messages |
 | **`carousel` CLI** | [`src/carousel/cli.py`](src/carousel/cli.py) | `validate` and `show` today. `scan`, `delta`, and `export` are next |
 | **Ranking evaluation** | [`scripts/validate_ranking.py`](scripts/validate_ranking.py) | Precision@K, Recall@K, and nDCG@K over expert-labeled rankings |
@@ -200,7 +201,8 @@ day they were recommended.
 ## Repository layout
 
 ```text
-src/carousel/        Python package (core/ holds the radar config models; cli.py)
+src/carousel/        Python package: core/ (radar config, identifiers, paper model),
+                     database/ (local SQLite paper store), cli.py
 examples/            Starter radar configs (validated in CI)
 scripts/
   daily_pubmed_watch_v2.py   current daily pipeline (being replaced by `carousel scan`)
