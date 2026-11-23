@@ -99,7 +99,9 @@ class SentenceTransformerEmbedder(Embedder):
             ) from exc
         self.model = SentenceTransformer(model_name, revision=revision, device=device)
         self.batch_size = batch_size
-        self.dim = int(self.model.get_sentence_embedding_dimension())
+        # Renamed in newer sentence-transformers; support both spellings.
+        get_dim = getattr(self.model, "get_embedding_dimension", None) or self.model.get_sentence_embedding_dimension
+        self.dim = int(get_dim())
         self.model_version = model_name + (f"@{revision}" if revision else "")
 
     def embed(self, texts: Sequence[str]) -> List[Vector]:  # pragma: no cover - needs model weights
