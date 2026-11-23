@@ -11,7 +11,7 @@
   <a href="https://github.com/aglucaci/Carousel/actions/workflows/ci.yml"><img src="https://github.com/aglucaci/Carousel/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://github.com/aglucaci/Carousel/actions/workflows/carousel-radar.yml"><img src="https://github.com/aglucaci/Carousel/actions/workflows/carousel-radar.yml/badge.svg" alt="CAROUSEL radar"></a>
   <a href="https://aglucaci.github.io/Carousel/"><img src="https://img.shields.io/badge/dashboard-live-13A89E" alt="Live dashboard"></a>
-  <img src="https://img.shields.io/badge/status-v0.1%20in%20progress-E3A72F" alt="Status: v0.1 in progress">
+  <img src="https://img.shields.io/badge/status-phase%201%20in%20progress-E3A72F" alt="Status: Phase 1 in progress">
 </p>
 
 CAROUSEL is an open-source platform for personalized scientific literature
@@ -22,9 +22,9 @@ your field since you last looked.
 The question it answers is not *"What papers were published?"* but **"What
 changed in my field, why does it matter, and what should I read next?"**
 
-> **Status: early development (v0.1 in progress).** A daily PubMed radar,
+> **Status: early development (Phase 1 in progress).** A daily PubMed radar,
 > its run history, and the radar config tooling work today. Multi-source
-> retrieval, the five-signal ranker, and Research Delta are being built. See
+> retrieval, the recommendation engine, and Research Delta are being built. See
 > [What works today](#what-works-today) and the [roadmap](#roadmap).
 > CAROUSEL grew out of the ETHER prototype, so you will still see that name in
 > the manuscript drafts and the current dashboard.
@@ -120,7 +120,7 @@ signal_profile:     # what counts as interesting, by category
     terms: [phylodynamics, molecular clock, genomic epidemiology]
     weight: 1.8
 
-ranking:            # relative priority of the five CAROUSEL signals
+ranking:            # weights for the interpretable ranker (evolving; see CAROUSEL_PLAN.md §4)
   relevance: 0.40
   novelty: 0.20
   momentum: 0.15
@@ -135,35 +135,35 @@ Validation rules:
 - Unknown fields, unknown sources, duplicate YAML keys, and duplicate terms are rejected with the line number.
 - `radar_id` defaults to the file name, so `viral_evolution.yml` becomes `viral-evolution`.
 - Each resolved config gets a short `config_hash`, which is recorded with results.
-- Sources: `pubmed`, `europepmc`, `biorxiv`, `medrxiv`, `crossref`, `openalex`, `arxiv`. The config schema accepts all of these, but only PubMed is fetched today. The other connectors are part of v0.1.
+- Sources: `pubmed`, `europepmc`, `biorxiv`, `medrxiv`, `crossref`, `openalex`, `arxiv`. The config schema accepts all of these, but only PubMed is fetched today. OpenAlex arrives in Phase 1, and Europe PMC, Crossref, and arXiv in Phase 2.
 
-## How ranking works
+## How recommendations work
 
-CAROUSEL ranks with independently measurable signals rather than an opaque AI
-rating. Every recommendation can show why it ranked where it did.
+CAROUSEL ranks with independently measurable stages rather than an opaque AI
+rating, and every recommendation records the features that put it where it is.
 
-| Signal | Meaning | Default weight |
-| --- | --- | --- |
-| **Relevance** | Match to the radar's queries and signal profile | 40% |
-| **Novelty** | Distinctiveness relative to the literature the radar has already seen | 20% |
-| **Momentum** | Recent, field-normalized growth in attention | 15% |
-| **Discovery** | Cross-disciplinary connections and useful diversity | 10% |
-| **Evidence** | Available methodological detail: methods, data and code availability, open access | 15% |
+| Stage | What it does |
+| --- | --- |
+| **Candidates** | Lexical retrieval (your terminology), semantic retrieval (embeddings), and later citation expansion from seed papers plus exploratory retrieval from neighboring fields. Results are merged, deduplicated, and hard-filtered |
+| **Relevance** | Similarity to the radar's interest profile (description, queries, seed papers, and your feedback), combined with lexical match |
+| **Novelty** | Distance from papers observed *before* this one, normalized within field and publication type. Novelty is not the same as relevance |
+| **Method match** | Overlap with the radar's **methods profile** (sequencing, omics, computational methods, data types). This later powers **Method Transfer**: useful methods from other fields |
+| **Selection** | An interpretable weighted score, then a diversity step (maximal marginal relevance) so the top 10 aren't near-duplicates. **Focused**, **Balanced**, and **Exploratory** modes set the precision/discovery trade-off |
 
-These are starting values, not tuned ones. Signals that are not available for
-a run, such as Momentum before enough history exists, are left out, and the
-other weights are rescaled to sum to 1. They are not counted as zero.
+Two other rules apply to every ranking:
 
-Retractions and corrections are handled as **explicit flags or exclusions**,
-never as a score penalty that a high-ranking paper could outweigh.
+- Retractions and corrections are **explicit flags or exclusions**, never a score penalty that a high-ranking paper could outweigh.
+- A paper counts as *new* only if CAROUSEL first observed it recently **and** it was recently published. An old paper that a database only just indexed is not a new discovery.
 
 > A CAROUSEL score is an estimated *priority under a stated configuration*. It
 > is **not** a measure of a paper's scientific quality or future impact.
+> Citation counts, venues, and AI scores are never presented as evidence of
+> validity.
 
 **Current state:** the live dashboard still uses the ETHER-era score
 (`ranking_version: 0.0.1-ether`). That score combines theme priority, regex
 signal matches, a venue boost, recency, and a cross-domain bonus. The
-five-signal ranker replaces it during v0.1.
+pipeline above replaces it in Phase 1.
 
 ## Run history and Research Delta
 
@@ -186,7 +186,7 @@ ORDER BY captured_at_utc;
 ```
 
 Snapshots are managed with [`scripts/snapshot.py`](scripts/snapshot.py)
-(`write`, `backfill`, `reindex`). The same history will drive Momentum and
+(`write`, `backfill`, `reindex`). The same history will drive trend detection and
 time-forward evaluation, which scores papers using only what was known on the
 day they were recommended.
 
@@ -210,7 +210,7 @@ tests/               unittest/pytest suite
 docs/                Generated GitHub Pages site (do not edit by hand)
 logo/                Logo SVG/PNG and the generator script
 manuscript/          Paper draft and validation plan
-CAROUSEL_PLAN.md     Implementation plan and v0.1 task list
+CAROUSEL_PLAN.md     Implementation plan: phases, tasks, done-when checks
 MANUSCRIPT_PLAN.md   Publication plan
 ```
 
@@ -219,22 +219,26 @@ MANUSCRIPT_PLAN.md   Publication plan
 The detailed plan, including what to keep from ETHER, sequencing, and
 done-when checks for each task, is in [`CAROUSEL_PLAN.md`](CAROUSEL_PLAN.md).
 
-| Release | Focus | Status |
+| Phase | Focus | Status |
 | --- | --- | --- |
-| **v0.1 Discovery MVP** | Radar configs, multi-source retrieval (PubMed, Europe PMC, Crossref), dedup, integrity flags, five-signal ranker, snapshots and Research Delta, "Why this paper?" explanations, exports (CSV, BibTeX, RIS, Markdown) | In progress: scheduling, snapshots, and the config/CLI are done |
-| **v0.2 Intelligence** | FastAPI + Postgres/pgvector backend, accounts and feedback, embeddings (relevance and novelty), email digests, Next.js frontend, OpenAlex and arXiv | Planned |
-| **v0.3 Research Radar** | Topic clusters, Momentum, Trends view, Research Bridges | Planned |
-| **v0.4 Workflow** | Zotero sync, shared radars, collections, reproducibility bundles | Planned |
-| **v1.0** | Validated early-signal methods, benchmarks across disciplines, public API | Planned |
+| **1. Functional MVP** | **Engine:** canonical paper records, OpenAlex + PubMed, careful dedup, lexical + semantic candidates, relevance/novelty/methods ranking with modes, `carousel scan` and a Python `Radar` API. **App:** FastAPI + Postgres/pgvector, Next.js (For You, Radars, Library, "Why this paper?"), save/dismiss, Docker Compose | In progress: scheduling, snapshots, and the config/CLI are done |
+| **2. Continuous intelligence** | Scheduled ingestion, Europe PMC + Crossref (retractions, corrections, preprint links), arXiv, versioned explanations, feedback learning, email/RSS digests, evidence-grounded summaries | Planned |
+| **3. Research Delta** | Topic clusters and observations, statistical trend detection (negative binomial, multiple-testing control), the **What's New** change log, **Trends** with baselines and uncertainty | Planned |
+| **4. Advanced discovery** | Method Transfer, literature graphs, Zotero, public API docs, collaborative radars, benchmark dataset, software paper | Planned |
+
+Deliberately out of scope at first: autonomous research agents, automatic
+systematic reviews, contradiction detection, a full corpus mirror, AI quality
+scores, and microservices.
 
 ## Evaluation
 
-CAROUSEL is designed to be evaluated, not just used. The validation plan
-([`manuscript/VALIDATION_PLAN.md`](manuscript/VALIDATION_PLAN.md)):
+CAROUSEL is designed to be evaluated, not just used. Three studies are
+planned (details in [`CAROUSEL_PLAN.md`](CAROUSEL_PLAN.md) §7 and
+[`manuscript/VALIDATION_PLAN.md`](manuscript/VALIDATION_PLAN.md)):
 
-- Benchmarks rankings against date-only, keyword-count, and PubMed-relevance baselines, plus ablations.
-- Uses expert-labeled case studies in cancer evolution, viral evolution, and metagenomics.
-- Reports Precision@K, nDCG@K, Recall@K, discovery latency, and time-forward performance.
+- **Recommendation usefulness:** P@5/10, nDCG@10, Recall@K, MRR, novelty, diversity, and expert-rated usefulness against keyword, recency, citation, and embedding-only baselines. Explicit judgments count for more than clicks.
+- **Early discovery:** replays at historical dates that use only the data available at that moment. Temporal leakage guards are tested code, and the immutable snapshots make the replays possible.
+- **Research Delta accuracy:** event precision and recall, detection latency, explanation faithfulness, and trend stability.
 
 CAROUSEL is a surveillance and prioritization layer. It does not replace
 systematic review.
