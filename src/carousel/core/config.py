@@ -19,7 +19,9 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+SUPPORTED_SCHEMA_VERSIONS = (1, 2)
+V2_FIELDS = ("mode", "methods_profile", "seed_papers", "publication_types", "research_question", "source_queries")
 
 _SLUG = re.compile(r"^[a-z0-9]+(?:[-_][a-z0-9]+)*$")
 _DATE_RANGE = re.compile(r"^last_(\d+)_days$")
@@ -110,11 +112,28 @@ class LegacyScoring(_Strict):
     source_weight: float = Field(ge=0)
 
 
+SIGNALS = ("relevance", "novelty", "method_match", "momentum", "discovery", "evidence")
+
+
+class Mode(str, Enum):
+    """Precision/discovery trade-off for selection (see carousel.ranking.MODES)."""
+
+    focused = "focused"
+    balanced = "balanced"
+    exploratory = "exploratory"
+
+
 class RankingWeights(_Strict):
-    """Weights for the five CAROUSEL signals. Defaults are the blueprint's starting values."""
+    """Weights for the CAROUSEL signals. Defaults are the blueprint's starting values.
+
+    ``method_match`` is new in schema v2. Signals a run can't compute yet
+    (momentum, discovery, evidence in Phase 1) are reported inactive and the
+    others are rescaled.
+    """
 
     relevance: float = Field(0.40, ge=0)
     novelty: float = Field(0.20, ge=0)
+    method_match: float = Field(0.10, ge=0)
     momentum: float = Field(0.15, ge=0)
     discovery: float = Field(0.10, ge=0)
     evidence: float = Field(0.15, ge=0)
@@ -126,7 +145,7 @@ class RankingWeights(_Strict):
         return self
 
     def as_dict(self) -> Dict[str, float]:
-        return {k: float(getattr(self, k)) for k in ("relevance", "novelty", "momentum", "discovery", "evidence")}
+        return {k: float(getattr(self, k)) for k in SIGNALS}
 
     def normalized(self, active: Optional[Sequence[str]] = None) -> Dict[str, float]:
         """Weights rescaled to sum to 1 over `active` signals (all by default).
@@ -154,13 +173,68 @@ class RadarConfig(_Strict):
     ranking: RankingWeights = Field(default_factory=RankingWeights)
     scoring: Optional[LegacyScoring] = None
     outputs: List[OutputFormat] = Field(default_factory=lambda: [OutputFormat.dashboard])
+    # ---- schema v2 ----
+    mode: Mode = Field(Mode.balanced, description="focused | balanced | exploratory")
+    research_question: str = Field("", description="Optional; joins the interest profile for relevance.")
+    methods_profile: List[str] = Field(
+        default_factory=list,
+        description="Methods, assays, data types to match (falls back to signal_profile.methods terms).",
+    )
+    seed_papers: List[str] = Field(default_factory=list, description="DOIs of papers that define the radar.")
+    publication_types: List[str] = Field(default_factory=list, description="Keep only these types (empty = all).")
+    source_queries: Dict[Source, List[str]] = Field(
+        default_factory=dict, description="Per-source query overrides, e.g. native PubMed syntax."
+    )
 
     @field_validator("schema_version")
     @classmethod
     def _schema(cls, v: int) -> int:
-        if v != SCHEMA_VERSION:
-            raise ValueError(f"unsupported schema_version {v}; this CAROUSEL reads version {SCHEMA_VERSION}")
+        if v not in SUPPORTED_SCHEMA_VERSIONS:
+            raise ValueError(
+                f"unsupported schema_version {v}; this CAROUSEL reads versions "
+                f"{', '.join(map(str, SUPPORTED_SCHEMA_VERSIONS))}"
+            )
         return v
+
+    @model_validator(mode="before")
+    @classmethod
+    def _v2_fields_need_v2(cls, data: Any) -> Any:
+        if isinstance(data, dict) and data.get("schema_version") == 1:
+            used = [f for f in V2_FIELDS if f in data]
+            if used:
+                raise ValueError(f"{', '.join(used)} need schema_version: 2 (or remove schema_version: 1)")
+        return data
+
+    @field_validator("methods_profile")
+    @classmethod
+    def _methods(cls, v: List[str]) -> List[str]:
+        return _clean_terms(v, "methods_profile", "method")
+
+    @field_validator("publication_types")
+    @classmethod
+    def _types(cls, v: List[str]) -> List[str]:
+        return _clean_terms(v, "publication_types", "publication type")
+
+    @field_validator("seed_papers")
+    @classmethod
+    def _seeds(cls, v: List[str]) -> List[str]:
+        from carousel.core.identifiers import IdentifierError, normalize_doi
+
+        out = []
+        for doi in v:
+            try:
+                out.append(normalize_doi(doi))
+            except IdentifierError as exc:
+                raise ValueError(str(exc)) from None
+        dupes = sorted({d for d in out if out.count(d) > 1})
+        if dupes:
+            raise ValueError(f"duplicate seed papers: {', '.join(dupes)}")
+        return out
+
+    @field_validator("source_queries")
+    @classmethod
+    def _source_queries(cls, v: Dict[Source, List[str]]) -> Dict[Source, List[str]]:
+        return {k: _clean_terms(q, f"source_queries.{k.value}", "query") for k, q in v.items()}
 
     @field_validator("radar_id")
     @classmethod
@@ -196,6 +270,13 @@ class RadarConfig(_Strict):
         return v
 
     @model_validator(mode="after")
+    def _source_queries_use_listed_sources(self) -> "RadarConfig":
+        extra = sorted(k.value for k in self.source_queries if k not in self.sources)
+        if extra:
+            raise ValueError(f"source_queries for sources not in `sources`: {', '.join(extra)}")
+        return self
+
+    @model_validator(mode="after")
     def _exclusions_do_not_cancel_queries(self) -> "RadarConfig":
         q = {s.casefold() for s in self.queries}
         clash = [e for e in self.exclude if e.casefold() in q]
@@ -204,6 +285,13 @@ class RadarConfig(_Strict):
         return self
 
     # ---- derived ----
+
+    def method_terms(self) -> List[str]:
+        """``methods_profile``, or the terms of a ``signal_profile`` category named ``methods``."""
+        if self.methods_profile:
+            return list(self.methods_profile)
+        methods = self.signal_profile.get("methods")
+        return list(methods.terms) if methods else []
 
     def config_hash(self) -> str:
         """Short, stable hash of the resolved config (defaults included)."""

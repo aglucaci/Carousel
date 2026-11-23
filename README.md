@@ -41,6 +41,7 @@ changed in my field, why does it matter, and what should I read next?"**
 | **Connectors** | [`src/carousel/connectors/`](src/carousel/connectors/) | PubMed and OpenAlex searches that return source records plus a coverage report (matches available, retrieved, truncated and why, requests, OpenAlex credits). Bounded windows only, with a per-run OpenAlex credit budget and an on-disk cache. Not yet wired into the daily radar |
 | **Duplicate detection** | [`src/carousel/ingestion/dedup.py`](src/carousel/ingestion/dedup.py), `carousel review` | Exact identifiers first (DOI, PMID, PMCID, OpenAlex, arXiv), then cautious title/author/year matching that merges automatically only when every check passes. Uncertain pairs, preprint/published versions, and identifier clashes go to a review queue; every merge is logged and can be split again |
 | **Candidate retrieval** | [`src/carousel/search/`](src/carousel/search/) | BM25 over titles and abstracts, semantic similarity to the radar's profile, and source-query hits, after recorded hard filters (retracted, date window, type, excluded terms). Embeddings are cached per paper and model version. Real semantic search needs `pip install "carousel-research[semantic]"` |
+| **Ranker** | [`src/carousel/ranking/`](src/carousel/ranking/) | `ranking_version` 0.1.0: relevance, novelty against only earlier-observed papers (guarded against temporal leakage), and method match; weighted by mode (focused / balanced / exploratory), then diversified with MMR. Every item carries its features and flags. Not yet wired into the daily radar (`carousel scan` is next) |
 | **Radar configs** | [`examples/`](examples/), [`src/carousel/core/config.py`](src/carousel/core/config.py) | YAML radars with strict validation and `file:line` error messages |
 | **`carousel` CLI** | [`src/carousel/cli.py`](src/carousel/cli.py) | `validate`, `show`, and `review` (duplicate review queue) today. `scan`, `delta`, and `export` are next |
 | **Ranking evaluation** | [`scripts/validate_ranking.py`](scripts/validate_ranking.py) | Precision@K, Recall@K, and nDCG@K over expert-labeled rankings |
@@ -68,7 +69,7 @@ carousel validate examples/*.yml
 ```
 
 ```text
-ok   examples/viral_evolution.yml  radar_id=viral-evolution sources=pubmed,biorxiv,medrxiv queries=5 signal_categories=3 window=90d hash=47e1d2439758
+ok   examples/viral_evolution.yml  radar_id=viral-evolution sources=pubmed,biorxiv,medrxiv queries=5 signal_categories=3 window=90d hash=ca11145c42f2
 ...
 8/8 valid
 ```
@@ -138,6 +139,13 @@ ranking:            # weights for the interpretable ranker (evolving; see CAROUS
   evidence: 0.15
 
 outputs: [dashboard, csv, bibtex]
+
+# schema_version 2 (optional; v1 files keep working)
+mode: balanced      # focused | balanced | exploratory
+research_question: "Which lineages escape current vaccines?"
+methods_profile: [deep mutational scanning, phylodynamics]   # default: signal_profile.methods
+seed_papers: ["10.1038/s41586-020-2012-7"]                  # DOIs that define the radar
+publication_types: [Journal Article, Preprint]               # keep only these
 ```
 
 Validation rules:
@@ -212,6 +220,7 @@ day they were recommended.
 ```text
 src/carousel/        Python package: core/ (radar config, identifiers, paper model),
                      connectors/ (PubMed, OpenAlex), ingestion/ (dedup), search/ (candidates),
+                     ranking/ (ranker),
                      database/ (local SQLite paper store), cli.py
 examples/            Starter radar configs (validated in CI)
 scripts/

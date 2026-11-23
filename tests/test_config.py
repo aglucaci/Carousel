@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from carousel import cli
-from carousel.core.config import ConfigError, RadarConfig, load_radar
+from carousel.core.config import SIGNALS, ConfigError, RadarConfig, load_radar
 
 REPO = Path(__file__).resolve().parents[1]
 
@@ -129,7 +129,7 @@ class ConfigTests(unittest.TestCase):
         self.assertIn("exclude terms also appear in queries", msg)
 
     def test_all_zero_ranking_rejected(self) -> None:
-        zero = "ranking:\n" + "".join(f"  {k}: 0\n" for k in ("relevance", "novelty", "momentum", "discovery", "evidence"))
+        zero = "ranking:\n" + "".join(f"  {k}: 0\n" for k in SIGNALS)
         self.assertIn("at least one ranking weight", self._error(MINIMAL + zero))
 
     def test_non_mapping_and_empty_files(self) -> None:
