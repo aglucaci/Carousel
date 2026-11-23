@@ -39,8 +39,9 @@ changed in my field, why does it matter, and what should I read next?"**
 | **Run history (snapshots)** | [`snapshots` branch](https://github.com/aglucaci/Carousel/tree/snapshots) | Every run is stored as an immutable, versioned snapshot. History starts 2026-01-21, and earlier runs were recovered from git history |
 | **Paper store** | [`src/carousel/core/paper.py`](src/carousel/core/paper.py), [`src/carousel/database/local.py`](src/carousel/database/local.py) | Canonical paper records built from per-source records, with per-field provenance, separate publication / first-online / preprint dates, and CAROUSEL's own first-seen and last-verified times. Local SQLite store. Not yet wired into the daily radar |
 | **Connectors** | [`src/carousel/connectors/`](src/carousel/connectors/) | PubMed and OpenAlex searches that return source records plus a coverage report (matches available, retrieved, truncated and why, requests, OpenAlex credits). Bounded windows only, with a per-run OpenAlex credit budget and an on-disk cache. Not yet wired into the daily radar |
+| **Duplicate detection** | [`src/carousel/ingestion/dedup.py`](src/carousel/ingestion/dedup.py), `carousel review` | Exact identifiers first (DOI, PMID, PMCID, OpenAlex, arXiv), then cautious title/author/year matching that merges automatically only when every check passes. Uncertain pairs, preprint/published versions, and identifier clashes go to a review queue; every merge is logged and can be split again |
 | **Radar configs** | [`examples/`](examples/), [`src/carousel/core/config.py`](src/carousel/core/config.py) | YAML radars with strict validation and `file:line` error messages |
-| **`carousel` CLI** | [`src/carousel/cli.py`](src/carousel/cli.py) | `validate` and `show` today. `scan`, `delta`, and `export` are next |
+| **`carousel` CLI** | [`src/carousel/cli.py`](src/carousel/cli.py) | `validate`, `show`, and `review` (duplicate review queue) today. `scan`, `delta`, and `export` are next |
 | **Ranking evaluation** | [`scripts/validate_ranking.py`](scripts/validate_ranking.py) | Precision@K, Recall@K, and nDCG@K over expert-labeled rankings |
 
 ## Quick start
@@ -203,7 +204,8 @@ day they were recommended.
 
 ```text
 src/carousel/        Python package: core/ (radar config, identifiers, paper model),
-                     connectors/ (PubMed, OpenAlex), database/ (local SQLite paper store), cli.py
+                     connectors/ (PubMed, OpenAlex), ingestion/ (dedup),
+                     database/ (local SQLite paper store), cli.py
 examples/            Starter radar configs (validated in CI)
 scripts/
   daily_pubmed_watch_v2.py   current daily pipeline (being replaced by `carousel scan`)

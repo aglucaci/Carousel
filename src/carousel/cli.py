@@ -4,13 +4,18 @@ carousel command-line interface.
     carousel validate RADAR.yml [RADAR.yml ...]   # check configs; exit 1 if any are invalid
     carousel show RADAR.yml [--format json|yaml]  # print the resolved config (defaults filled in)
 
-`build`, `delta`, and `export` arrive with the connector, snapshot, and export
-work (CAROUSEL_PLAN.md, v0.1 tasks 4, 8, 11).
+    carousel review list STORE.db [--status pending|merged|distinct|all] [--format text|json]
+    carousel review merge STORE.db KEEP_ID OTHER_ID [--note TEXT]    # same work
+    carousel review distinct STORE.db ID_A ID_B [--note TEXT]        # different works
+    carousel review split STORE.db SOURCE SOURCE_ID [--note TEXT]    # undo a wrong merge
+
+`scan`, `delta`, and `export` arrive with later Phase 1A tasks (CAROUSEL_PLAN.md).
 """
 
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import sys
 from typing import List, Optional
@@ -67,6 +72,52 @@ def cmd_show(args: argparse.Namespace) -> int:
     return 0
 
 
+def _open_store(path: str):
+    from pathlib import Path
+
+    from carousel.database import PaperStore
+
+    if not Path(path).exists():
+        raise FileNotFoundError(f"{path}: no such store")
+    return PaperStore(path)
+
+
+def cmd_review(args: argparse.Namespace) -> int:
+    from carousel.database import StoreError
+
+    try:
+        store = _open_store(args.store)
+    except (FileNotFoundError, StoreError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    try:
+        with store:
+            if args.action == "list":
+                items = store.review_queue(None if args.status == "all" else args.status)
+                if args.format == "json":
+                    print(json.dumps([dataclasses.asdict(i) for i in items], indent=2))
+                    return 0
+                for i in items:
+                    score = "  -  " if i.score is None else f"{i.score:.3f}"
+                    print(f"[{i.status}] {i.kind} score={score} reasons={','.join(i.reasons)}")
+                    print(f"    {i.paper_a}  {i.title_a or ''}")
+                    print(f"    {i.paper_b}  {i.title_b or ''}")
+                print(f"{len(items)} item(s)")
+            elif args.action == "merge":
+                paper = store.merge_papers(args.keep, args.other, note=args.note)
+                print(f"merged {args.other} into {paper.paper_id} ({len(paper.sources)} source records)")
+            elif args.action == "distinct":
+                store.mark_distinct(args.a, args.b, note=args.note)
+                print(f"marked {args.a} and {args.b} as different works")
+            elif args.action == "split":
+                left, new = store.split(args.source, args.source_id, note=args.note)
+                print(f"split {args.source}:{args.source_id} out of {left.paper_id} into {new.paper_id}")
+    except StoreError as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="carousel", description="CAROUSEL research radar tools.")
     ap.add_argument("--version", action="version", version=f"carousel {__version__}")
@@ -81,6 +132,28 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("path", metavar="RADAR.yml")
     s.add_argument("--format", choices=("yaml", "json"), default="yaml")
     s.set_defaults(func=cmd_show)
+
+    r = sub.add_parser("review", help="Review possible duplicate papers in a store")
+    rs = r.add_subparsers(dest="action", required=True, metavar="ACTION")
+    rl = rs.add_parser("list", help="List the review queue")
+    rl.add_argument("store", metavar="STORE.db")
+    rl.add_argument("--status", choices=("pending", "merged", "distinct", "superseded", "all"), default="pending")
+    rl.add_argument("--format", choices=("text", "json"), default="text")
+    rm = rs.add_parser("merge", help="Same work: move OTHER's records into KEEP")
+    rm.add_argument("store", metavar="STORE.db")
+    rm.add_argument("keep", metavar="KEEP_ID")
+    rm.add_argument("other", metavar="OTHER_ID")
+    rd = rs.add_parser("distinct", help="Different works: never merge or re-queue this pair")
+    rd.add_argument("store", metavar="STORE.db")
+    rd.add_argument("a", metavar="ID_A")
+    rd.add_argument("b", metavar="ID_B")
+    rp = rs.add_parser("split", help="Undo a wrong merge: give one source record its own paper")
+    rp.add_argument("store", metavar="STORE.db")
+    rp.add_argument("source")
+    rp.add_argument("source_id")
+    for x in (rm, rd, rp):
+        x.add_argument("--note", help="Why (kept in the queue and merge log)")
+    r.set_defaults(func=cmd_review)
     return ap
 
 

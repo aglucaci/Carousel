@@ -1,0 +1,205 @@
+# Labelled duplicate-detection pairs (plan task 6).
+#
+# Each pair is two source records that share NO identifier, so the decision
+# rests on title / authors / year / kind alone. `expect` is the correct
+# decision, `reason` the rule that should fire:
+#
+#   merge     same work, safe to merge automatically
+#   review    plausibly the same work, but a human should decide
+#   distinct  different works
+#
+# Add a pair whenever dedup gets something wrong in real data.
+
+# ------------------------------------------------------------------ merge
+- id: case_and_trailing_period
+  expect: merge
+  reason: all_gates_passed
+  a: {source: pubmed, source_id: "41000001", title: "Immune escape of SARS-CoV-2 variants in vaccinated cohorts.",
+      authors: [Ana Silva, Ben Okafor, Chen Wei], dates: {published: "2026-11", first_online: "2026-10-28"}}
+  b: {source: openalex, source_id: W5000000001, title: "Immune Escape of SARS-CoV-2 Variants in Vaccinated Cohorts",
+      authors: [Silva A, Okafor B, Wei C], dates: {published: "2026-10-28"}}
+
+- id: html_italics_in_title
+  expect: merge
+  reason: all_gates_passed
+  a: {source: pubmed, source_id: "41000002", title: "Kelch13 mutations and artemisinin resistance in <i>Plasmodium falciparum</i> from Uganda",
+      authors: [Grace Namuli, Peter Okello], dates: {published: "2026-09-14"}}
+  b: {source: openalex, source_id: W5000000002, title: "Kelch13 mutations and artemisinin resistance in Plasmodium falciparum from Uganda",
+      authors: [Grace Namuli, Peter Okello], dates: {published: "2026-09-14"}}
+
+- id: greek_letter_spelled_out
+  expect: merge
+  reason: all_gates_passed
+  a: {source: pubmed, source_id: "41000003", title: "TNF-α signalling drives epithelial barrier loss in colitis models",
+      authors: [Maria Rossi, Luca Bianchi], dates: {published: "2026-05"}}
+  b: {source: openalex, source_id: W5000000003, title: "TNF-alpha signalling drives epithelial barrier loss in colitis models",
+      authors: [Maria Rossi, Luca Bianchi], dates: {published: "2026-05-02"}}
+
+- id: accents_and_dashes
+  expect: merge
+  reason: all_gates_passed
+  a: {source: pubmed, source_id: "41000004", title: "Host–pathogen coevolution of coronaviruses in Iberian bat colonies",
+      authors: [José Müller, Inés Peña], dates: {published: "2026-02-10"}}
+  b: {source: openalex, source_id: W5000000004, title: "Host-pathogen coevolution of coronaviruses in Iberian bat colonies",
+      authors: [Jose Muller, Ines Pena], dates: {published: "2026-02-10"}}
+
+- id: epub_december_issue_january
+  expect: merge
+  reason: all_gates_passed
+  a: {source: pubmed, source_id: "41000005", title: "Single-cell atlas of tumour-infiltrating lymphocytes in pancreatic cancer",
+      authors: [Hana Kim, Joon Park], dates: {published: "2026-01", first_online: "2025-12-20"}}
+  b: {source: openalex, source_id: W5000000005, title: "Single-cell atlas of tumour-infiltrating lymphocytes in pancreatic cancer",
+      authors: [Hana Kim, Joon Park], dates: {published: "2026-01-15"}}
+
+- id: html_entity_ampersand
+  expect: merge
+  reason: all_gates_passed
+  a: {source: pubmed, source_id: "41000006", title: "Host &amp; microbe interactions shape antibiotic tolerance in biofilms",
+      authors: [Sara Lindqvist], dates: {published: "2026-07-01"}}
+  b: {source: openalex, source_id: W5000000006, title: "Host & microbe interactions shape antibiotic tolerance in biofilms",
+      authors: [Sara Lindqvist], dates: {published: "2026-07-01"}}
+
+- id: spelling_variant
+  expect: merge
+  reason: all_gates_passed
+  a: {source: pubmed, source_id: "41000007", title: "Interferon signalling heterogeneity predicts response to checkpoint blockade",
+      authors: [Olu Adeyemi, Kate Brown], dates: {published: "2026-03-03"}}
+  b: {source: openalex, source_id: W5000000007, title: "Interferon signaling heterogeneity predicts response to checkpoint blockade",
+      authors: [Olu Adeyemi, Kate Brown], dates: {published: "2026-03-03"}}
+
+# --------------------------------------------------------------- distinct
+- id: correction_notice
+  expect: distinct
+  reason: notice_vs_article
+  a: {source: pubmed, source_id: "41000101", title: "Correction: Immune escape of SARS-CoV-2 variants in vaccinated cohorts",
+      authors: [Ana Silva, Ben Okafor], dates: {published: "2026-12-01"}, publication_types: [Published Erratum]}
+  b: {source: openalex, source_id: W5000000101, title: "Immune escape of SARS-CoV-2 variants in vaccinated cohorts",
+      authors: [Ana Silva, Ben Okafor], dates: {published: "2026-10-28"}}
+
+- id: retraction_note
+  expect: distinct
+  reason: notice_vs_article
+  a: {source: openalex, source_id: W5000000102, title: "Retraction Note: Gut microbiome signatures of early-onset colorectal cancer",
+      authors: [Lena Fischer], dates: {published: "2026-08-01"}}
+  b: {source: pubmed, source_id: "41000102", title: "Gut microbiome signatures of early-onset colorectal cancer",
+      authors: [Lena Fischer], dates: {published: "2026-06-01"}}
+
+- id: series_parts
+  expect: distinct
+  reason: number_or_part_differs
+  a: {source: pubmed, source_id: "41000103", title: "Global burden of antimicrobial resistance in children, part I",
+      authors: [Amit Shah], dates: {published: "2026-04-01"}}
+  b: {source: openalex, source_id: W5000000103, title: "Global burden of antimicrobial resistance in children, part II",
+      authors: [Amit Shah], dates: {published: "2026-04-01"}}
+
+- id: pandemic_waves
+  expect: distinct
+  reason: number_or_part_differs
+  a: {source: pubmed, source_id: "41000104", title: "SARS-CoV-2 seroprevalence among healthcare workers in Lombardy during wave 1",
+      authors: [Paolo Conti], dates: {published: "2021-02-01"}}
+  b: {source: openalex, source_id: W5000000104, title: "SARS-CoV-2 seroprevalence among healthcare workers in Lombardy during wave 2",
+      authors: [Paolo Conti], dates: {published: "2021-09-01"}}
+
+- id: generic_editorial
+  expect: distinct
+  reason: title_too_generic
+  a: {source: pubmed, source_id: "41000105", title: "Editorial", authors: [Jane Doe], dates: {published: "2026-01-01"}}
+  b: {source: openalex, source_id: W5000000105, title: "Editorial", authors: [Jane Doe], dates: {published: "2026-01-01"}}
+
+- id: same_title_different_groups_with_dois
+  expect: distinct
+  reason: identifier_conflict
+  a: {source: pubmed, source_id: "41000106", title: "Machine learning for antimicrobial peptide discovery",
+      identifiers: {doi: 10.1016/j.cell.2026.01.001}, authors: [Ravi Kumar, Mei Lin], dates: {published: "2026-01-20"}}
+  b: {source: openalex, source_id: W5000000106, title: "Machine learning for antimicrobial peptide discovery",
+      identifiers: {doi: 10.1093/nar/gkab999}, authors: [Tom Becker, Anna Novak], dates: {published: "2026-02-11"}}
+
+- id: same_title_different_authors_no_ids
+  expect: distinct
+  reason: different_authors
+  a: {source: pubmed, source_id: "41000107", title: "A review of CRISPR-based diagnostics for infectious diseases",
+      authors: [Lucy Hart, Sam Cole], dates: {published: "2026-05-05"}}
+  b: {source: openalex, source_id: W5000000107, title: "A review of CRISPR-based diagnostics for infectious diseases",
+      authors: [Diego Ruiz, Ana Torres], dates: {published: "2026-06-01"}}
+
+- id: same_title_decade_apart
+  expect: distinct
+  reason: years_too_far_apart
+  a: {source: pubmed, source_id: "41000108", title: "The human microbiome in health and disease",
+      authors: [Rob Knight], dates: {published: "2012-03-01"}}
+  b: {source: openalex, source_id: W5000000108, title: "The human microbiome in health and disease",
+      authors: [Rob Knight], dates: {published: "2024-03-01"}}
+
+- id: sibling_topics
+  expect: distinct
+  reason: title_dissimilar
+  a: {source: pubmed, source_id: "41000109", title: "Antigenic drift of influenza A H3N2 hemagglutinin in South Asia",
+      authors: [Nina Rao], dates: {published: "2026-03-01"}}
+  b: {source: openalex, source_id: W5000000109, title: "Antigenic drift of influenza B Victoria lineage neuraminidase in West Africa",
+      authors: [Nina Rao], dates: {published: "2026-03-01"}}
+
+# ----------------------------------------------------------------- review
+- id: preprint_and_published_version
+  expect: review
+  reason: possible_preprint_version
+  a: {source: biorxiv, source_id: "10.1101/2026.03.02.123456", title: "Convergent evolution of immune escape in persistent norovirus infections",
+      identifiers: {doi: 10.1101/2026.03.02.123456}, authors: [Ellen Zhou, Mark Davies], publication_types: [preprint],
+      dates: {preprint_posted: "2026-03-02"}}
+  b: {source: pubmed, source_id: "41000201", title: "Convergent evolution of immune escape in persistent norovirus infections",
+      identifiers: {doi: 10.1038/s41564-026-01234-5}, authors: [Ellen Zhou, Mark Davies], dates: {published: "2026-10-01"}}
+
+- id: subtitle_dropped
+  expect: review
+  reason: below_auto_merge_threshold
+  a: {source: pubmed, source_id: "41000202", title: "Wastewater surveillance of SARS-CoV-2 variants across 12 US cities: a longitudinal study",
+      authors: [Kim Lee, Pat Moore], dates: {published: "2026-06-01"}}
+  b: {source: openalex, source_id: W5000000202, title: "Wastewater surveillance of SARS-CoV-2 variants across 12 US cities",
+      authors: [Kim Lee, Pat Moore], dates: {published: "2026-06-01"}}
+
+- id: reworded_title
+  expect: review
+  reason: below_auto_merge_threshold
+  a: {source: pubmed, source_id: "41000203", title: "Phylodynamics of mpox clade Ib spread in central Africa",
+      authors: [Didier Mbala, Aisha Bello], dates: {published: "2026-07-01"}}
+  b: {source: openalex, source_id: W5000000203, title: "Phylodynamic analysis of mpox clade Ib spread in Central Africa",
+      authors: [Didier Mbala, Aisha Bello], dates: {published: "2026-07-01"}}
+
+- id: author_order_changed
+  expect: review
+  reason: first_author_differs
+  a: {source: pubmed, source_id: "41000204", title: "Metagenomic detection of novel arenaviruses in urban rodents",
+      authors: [Chloe Martin, Ivan Petrov, Yuki Sato], dates: {published: "2026-04-04"}}
+  b: {source: openalex, source_id: W5000000204, title: "Metagenomic detection of novel arenaviruses in urban rodents",
+      authors: [Ivan Petrov, Chloe Martin, Yuki Sato], dates: {published: "2026-04-04"}}
+
+- id: authors_missing
+  expect: review
+  reason: authors_missing
+  a: {source: pubmed, source_id: "41000205", title: "Deep mutational scanning of the RSV fusion protein antigenic sites",
+      authors: [Laura Gomez], dates: {published: "2026-08-08"}}
+  b: {source: openalex, source_id: W5000000205, title: "Deep mutational scanning of the RSV fusion protein antigenic sites",
+      dates: {published: "2026-08-08"}}
+
+- id: two_dois_same_authors
+  expect: review
+  reason: identifier_conflict
+  a: {source: openalex, source_id: W5000000206, title: "Pricing antimicrobial stewardship in hospital procurement",
+      identifiers: {doi: 10.2139/ssrn.4999999}, authors: [Omar Haddad, Lisa Grant], dates: {published: "2026-01-10"}}
+  b: {source: pubmed, source_id: "41000206", title: "Pricing antimicrobial stewardship in hospital procurement",
+      identifiers: {doi: 10.1016/j.jhin.2026.02.003}, authors: [Omar Haddad, Lisa Grant], dates: {published: "2026-03-01"}}
+
+- id: same_source_listed_twice
+  expect: review
+  reason: same_source_twice
+  a: {source: pubmed, source_id: "41000207", title: "Seasonal dynamics of tick-borne encephalitis virus in Baltic forests",
+      authors: [Marta Kowalska], dates: {published: "2026-05-15"}}
+  b: {source: pubmed, source_id: "41000208", title: "Seasonal dynamics of tick-borne encephalitis virus in Baltic forests",
+      authors: [Marta Kowalska], dates: {published: "2026-05-15"}}
+
+- id: year_missing
+  expect: review
+  reason: year_missing
+  a: {source: pubmed, source_id: "41000209", title: "Spatial transcriptomics of granulomas in tuberculosis lung lesions",
+      authors: [Femi Ade], dates: {published: "2026-02-02"}}
+  b: {source: openalex, source_id: W5000000209, title: "Spatial transcriptomics of granulomas in tuberculosis lung lesions",
+      authors: [Femi Ade]}
