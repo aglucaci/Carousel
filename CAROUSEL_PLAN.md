@@ -169,7 +169,7 @@ ranking → save papers → see what changed next time.**
 | --- | --- | --- |
 | 1 | ✅ **Fix scheduling first:** merge the two workflows into one matrix job over `radars/*.yml`, with distinct output paths, and re-enable it | One run per radar per day, no clobbering, and a green run in Actions |
 | 2 | ✅ Start snapshotting immediately: a thin wrapper that saves each run's JSON to the snapshots branch, even before the refactor | Snapshots accumulate daily (this starts the clock on Momentum and evaluation) |
-| 3 | Create the `pyproject.toml` package skeleton, the `carousel` CLI, and Pydantic `RadarConfig` that loads `examples/*.yml` | `carousel build examples/viral_evolution.yml` validates the config and fails clearly on bad YAML |
+| 3 | ✅ Create the `pyproject.toml` package skeleton, the `carousel` CLI, and Pydantic `RadarConfig` that loads `examples/*.yml` | `carousel validate examples/*.yml` passes, and bad YAML fails with file:line errors (unknown fields, sources, duplicate keys/terms). CI runs tests and validation on every PR. `carousel build` arrives with task 4 |
 | 4 | Port the PubMed connector into `connectors/pubmed.py` and add Europe PMC (bioRxiv/medRxiv) | Example configs' `sources:` are honored, and connector tests run against recorded HTTP fixtures |
 | 5 | Add `normalize.py` + `dedupe.py` (DOI > PMID > PMCID > arXiv > OpenAlex, then title+first-author fallback) | A paper hit by 3 themes and 2 sources appears once, and the tests cover the merge rules |
 | 6 | Add the Crossref connector for DOI enrichment, integrity flags, and preprint↔journal relations | A known retracted DOI fixture is flagged and excluded by default |

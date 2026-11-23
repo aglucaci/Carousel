@@ -47,11 +47,14 @@ signal_profile:
       - virome
     weight: 2.5
 
-scoring:
-  topic_relevance_weight: 0.35
-  recency_weight: 0.20
-  signal_weight: 0.35
-  source_weight: 0.10
+# Relative priority of the five CAROUSEL signals (rescaled to sum to 1 over
+# the signals active in a run). Blueprint starting values, not tuned.
+ranking:
+  relevance: 0.40
+  novelty: 0.20
+  momentum: 0.15
+  discovery: 0.10
+  evidence: 0.15
 
 outputs:
   - dashboard

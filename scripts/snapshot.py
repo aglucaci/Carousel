@@ -204,7 +204,8 @@ def cmd_backfill(args: argparse.Namespace) -> int:
             payload,
             radar_id=args.radar_id,
             source="git-backfill",
-            fallback_time=dt.datetime.fromisoformat(committed_iso),
+            # git prints UTC as a trailing "Z", which fromisoformat rejects before Python 3.11.
+            fallback_time=dt.datetime.fromisoformat(committed_iso.replace("Z", "+00:00")),
             provenance={"git_commit": sha, "commit_message": subject, "committed_at": committed_iso},
         )
         _, ok = write_envelope(root, env)
