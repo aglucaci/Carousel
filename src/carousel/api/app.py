@@ -18,6 +18,7 @@ with a job ID to poll at ``/jobs/{id}``.
 from __future__ import annotations
 
 import dataclasses
+import datetime as dt
 import hmac
 import os
 from typing import Any, Iterator, List, Optional
@@ -177,6 +178,13 @@ def create_app(settings: Optional[Settings] = None, *, queue: Any = None) -> Fas
     def topics(radar_id: str, version: Optional[str] = None, s: Session = Depends(session)) -> Any:
         """The radar's topic model (the active one, or a given version): topics, sizes, and the refit mapping."""
         return services.radar_topics(s, radar_id, version)
+
+    @app.get(f"{API_PREFIX}/radars/{{radar_id}}/topics/series", response_model=schemas.TopicSeriesOut,
+             tags=["research delta"])
+    def topic_series(radar_id: str, as_of: Optional[dt.datetime] = None, source: Optional[str] = None,
+                     s: Session = Depends(session)) -> Any:
+        """Weekly topic counts with the field denominator, as known at ``as_of`` (default now; never later data)."""
+        return services.topic_series(s, radar_id, as_of, source)
 
     @app.get(f"{API_PREFIX}/radars/{{radar_id}}/events", response_model=List[schemas.EventOut], tags=["research delta"])
     def events(radar_id: str, run_id: Optional[str] = None, limit: int = Query(100, ge=1, le=500),

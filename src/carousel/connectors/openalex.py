@@ -146,9 +146,10 @@ def _phrase(term: str) -> str:
 
 def build_search(query: SearchQuery) -> str:
     """Radar terms -> OpenAlex boolean search: ("a b" OR c) NOT ("d e")."""
+    require = " AND (" + " OR ".join(_phrase(t) for t in query.require) + ")" if query.require else ""
     if query.native:
-        return query.native
-    s = "(" + " OR ".join(_phrase(t) for t in query.terms) + ")"
+        return f"({query.native}){require}" if require else query.native
+    s = "(" + " OR ".join(_phrase(t) for t in query.terms) + ")" + require
     if query.exclude:
         s += " NOT (" + " OR ".join(_phrase(t) for t in query.exclude) + ")"
     return s
@@ -178,6 +179,14 @@ class OpenAlexConnector(Connector):
     def _filter(self, query: SearchQuery) -> str:
         f = f"from_publication_date:{query.start.isoformat()},to_publication_date:{query.end.isoformat()}"
         return f + (f",type:{'|'.join(self.work_types)}" if self.work_types else "")
+
+    def count(self, query: SearchQuery) -> "CountResult":
+        before = self._snapshot_stats()
+        search = build_search(query)
+        params = {"search.title_and_abstract": search, "filter": self._filter(query), "select": "id", "per_page": 1}
+        data = self.client.get(self._request(params), cost=SEARCH_CREDITS).json()
+        return self._count_result(query, before, f"search.title_and_abstract={search} filter={self._filter(query)}",
+                                  "publication date", (data.get("meta") or {}).get("count"))
 
     def search(self, query: SearchQuery) -> SearchResult:
         before = self._snapshot_stats()

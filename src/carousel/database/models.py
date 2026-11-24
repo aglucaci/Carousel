@@ -341,15 +341,32 @@ class TopicMapping(Base):
 
 
 class TopicObservation(Base):
+    """One count request's answer (carousel.intelligence.observations): append-only, never updated.
+
+    ``topic_key`` is the topic's lineage ID, or ``__field__`` for the radar's denominator (then ``topic_id`` is
+    NULL). ``count`` is NULL when the request failed (``status = 'error'``).
+    """
+
     __tablename__ = "topic_observations"
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
-    topic_id: Mapped[int] = mapped_column(ForeignKey("topics.id", ondelete="CASCADE"), index=True)
+    topic_id: Mapped[Optional[int]] = mapped_column(ForeignKey("topics.id", ondelete="CASCADE"), index=True)
     window_start: Mapped[dt.date] = mapped_column(Date)
     window_end: Mapped[dt.date] = mapped_column(Date)
-    count: Mapped[int] = mapped_column(Integer)
+    count: Mapped[Optional[int]] = mapped_column(Integer)
+    radar_id: Mapped[Optional[str]] = mapped_column(ForeignKey("radars.id", ondelete="CASCADE"), index=True)
+    topic_key: Mapped[Optional[str]] = mapped_column(Text)
+    source: Mapped[Optional[str]] = mapped_column(String(16))
+    status: Mapped[Optional[str]] = mapped_column(String(8))
+    query: Mapped[Optional[str]] = mapped_column(Text)
+    cost: Mapped[Optional[float]] = mapped_column(Float)
+    error: Mapped[Optional[str]] = mapped_column(Text)
     coverage: Mapped[Dict[str, Any]] = mapped_column(server_default="{}")
     classifier_version: Mapped[str] = mapped_column(Text)
     observed_at: Mapped[dt.datetime] = _now()
+    __table_args__ = (
+        UniqueConstraint("radar_id", "classifier_version", "topic_key", "source", "window_start", "observed_at"),
+        Index("ix_topic_observations_series", "radar_id", "source", "window_start"),
+    )
 
 
 class ResearchEvent(Base):

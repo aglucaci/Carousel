@@ -69,6 +69,8 @@ def build_query(query: SearchQuery) -> str:
     """``((ti:"a" OR abs:"a" OR ...) ANDNOT (...)) AND submittedDate:[YYYYMMDD0000 TO YYYYMMDD2359]``."""
     core = query.native or " OR ".join(_phrase(t) for t in query.terms)
     core = f"({core})"
+    if query.require:
+        core = f"({core} AND ({' OR '.join(_phrase(t) for t in query.require)}))"
     if query.exclude and not query.native:
         core = f"({core} ANDNOT ({' OR '.join(_phrase(t) for t in query.exclude)}))"
     return f"{core} AND submittedDate:[{query.start:%Y%m%d}0000 TO {query.end:%Y%m%d}2359]"
@@ -132,6 +134,15 @@ class ArxivConnector(Connector):
             client = HttpClient(UrllibTransport(timeout=60.0), min_interval=MIN_INTERVAL,
                                 budget=Budget(budget_requests, unit="requests"))
         super().__init__(client)
+
+    def count(self, query: SearchQuery) -> "CountResult":
+        before = self._snapshot_stats()
+        q = build_query(query)
+        # max_results=0 makes arXiv answer HTTP 500; one result is the cheapest page that carries the total.
+        root = _feed(self.client.get(Request.build(API, {"search_query": q, "start": 0, "max_results": 1})).text())
+        found = root.find("os:totalResults", NS)
+        return self._count_result(query, before, q, "first submission date (submittedDate)",
+                                  found.text.strip() if found is not None and found.text else None)
 
     def search(self, query: SearchQuery) -> SearchResult:
         before = self._snapshot_stats()

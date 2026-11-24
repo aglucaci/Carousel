@@ -1,0 +1,768 @@
+{
+ "recorded_at_utc": "2026-11-24T19:57:56Z",
+ "user_agent": "carousel/0.1.0.dev0",
+ "interactions": [
+  {
+   "request": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?datetype=pdat&db=pubmed&maxdate=2026%2F11%2F22&mindate=2026%2F11%2F16&retmode=json&rettype=count&term=%28%28immune+escape%29+OR+%28antigenic+drift%29%29+NOT+%28%22case+report%22%5BTitle%2FAbstract%5D%29&tool=carousel",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json; charset=UTF-8",
+     "x-ratelimit-limit": "3",
+     "x-ratelimit-remaining": "2"
+    },
+    "body": "{\"header\":{\"type\":\"esearch\",\"version\":\"0.3\"},\"esearchresult\":{\"count\":\"39\"}}\n"
+   }
+  },
+  {
+   "request": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?datetype=pdat&db=pubmed&maxdate=2026%2F11%2F22&mindate=2026%2F11%2F16&retmode=json&rettype=count&term=%28%28immune+escape%29+OR+%28antigenic+drift%29%29+AND+%28%28sars+cov%29+OR+%28spike%29+OR+%28omicron%29+OR+%28neutralizing%29%29+NOT+%28%22case+report%22%5BTitle%2FAbstract%5D%29&tool=carousel",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json; charset=UTF-8",
+     "x-ratelimit-limit": "3",
+     "x-ratelimit-remaining": "1"
+    },
+    "body": "{\"header\":{\"type\":\"esearch\",\"version\":\"0.3\"},\"esearchresult\":{\"count\":\"4\"}}\n"
+   }
+  },
+  {
+   "request": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?datetype=pdat&db=pubmed&maxdate=2026%2F11%2F22&mindate=2026%2F11%2F16&retmode=json&rettype=count&term=%28%28immune+escape%29+OR+%28antigenic+drift%29%29+AND+%28%28influenza%29+OR+%28hemagglutinin%29+OR+%28h3n2%29+OR+%28vaccine%29%29+NOT+%28%22case+report%22%5BTitle%2FAbstract%5D%29&tool=carousel",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json; charset=UTF-8",
+     "x-ratelimit-limit": "3",
+     "x-ratelimit-remaining": "0"
+    },
+    "body": "{\"header\":{\"type\":\"esearch\",\"version\":\"0.3\"},\"esearchresult\":{\"count\":\"7\"}}\n"
+   }
+  },
+  {
+   "request": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=1&query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-16+TO+2026-11-22%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&resultType=idlist",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json;charset=UTF-8"
+    },
+    "body": "{\"version\":\"6.9\",\"hitCount\":22,\"nextCursorMark\":\"AoIIQIEVCCg1Njk0NTcwMg==\",\"nextPageUrl\":\"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-16+TO+2026-11-22%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&cursorMark=AoIIQIEVCCg1Njk0NTcwMg%3D%3D&resultType=idlist&pageSize=1&format=json\",\"request\":{\"queryString\":\"((TITLE_ABS:\\\"immune escape\\\" OR TITLE_ABS:\\\"antigenic drift\\\") NOT (TITLE_ABS:\\\"case report\\\")) AND (FIRST_PDATE:[2026-11-16 TO 2026-11-22]) AND (SRC:MED OR SRC:PMC OR SRC:PPR)\",\"resultType\":\"idlist\",\"cursorMark\":\"*\",\"pageSize\":1,\"sort\":\"\",\"synonym\":false},\"resultList\":{\"result\":[{\"id\":\"43052423\",\"source\":\"MED\",\"pmid\":\"43052423\"}]}}"
+   }
+  },
+  {
+   "request": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=1&query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+AND+%28TITLE_ABS%3A%22sars+cov%22+OR+TITLE_ABS%3A%22spike%22+OR+TITLE_ABS%3A%22omicron%22+OR+TITLE_ABS%3A%22neutralizing%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-16+TO+2026-11-22%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&resultType=idlist",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json;charset=UTF-8"
+    },
+    "body": "{\"version\":\"6.9\",\"hitCount\":0,\"request\":{\"queryString\":\"((TITLE_ABS:\\\"immune escape\\\" OR TITLE_ABS:\\\"antigenic drift\\\") AND (TITLE_ABS:\\\"sars cov\\\" OR TITLE_ABS:\\\"spike\\\" OR TITLE_ABS:\\\"omicron\\\" OR TITLE_ABS:\\\"neutralizing\\\") NOT (TITLE_ABS:\\\"case report\\\")) AND (FIRST_PDATE:[2026-11-16 TO 2026-11-22]) AND (SRC:MED OR SRC:PMC OR SRC:PPR)\",\"resultType\":\"idlist\",\"cursorMark\":\"*\",\"pageSize\":1,\"sort\":\"\",\"synonym\":false},\"resultList\":{\"result\":[]}}"
+   }
+  },
+  {
+   "request": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=1&query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+AND+%28TITLE_ABS%3A%22influenza%22+OR+TITLE_ABS%3A%22hemagglutinin%22+OR+TITLE_ABS%3A%22h3n2%22+OR+TITLE_ABS%3A%22vaccine%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-16+TO+2026-11-22%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&resultType=idlist",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json;charset=UTF-8"
+    },
+    "body": "{\"version\":\"6.9\",\"hitCount\":2,\"nextCursorMark\":\"AoIIQQFNSyg1NjkyNjc0Mg==\",\"nextPageUrl\":\"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+AND+%28TITLE_ABS%3A%22influenza%22+OR+TITLE_ABS%3A%22hemagglutinin%22+OR+TITLE_ABS%3A%22h3n2%22+OR+TITLE_ABS%3A%22vaccine%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-16+TO+2026-11-22%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&cursorMark=AoIIQQFNSyg1NjkyNjc0Mg%3D%3D&resultType=idlist&pageSize=1&format=json\",\"request\":{\"queryString\":\"((TITLE_ABS:\\\"immune escape\\\" OR TITLE_ABS:\\\"antigenic drift\\\") AND (TITLE_ABS:\\\"influenza\\\" OR TITLE_ABS:\\\"hemagglutinin\\\" OR TITLE_ABS:\\\"h3n2\\\" OR TITLE_ABS:\\\"vaccine\\\") NOT (TITLE_ABS:\\\"case report\\\")) AND (FIRST_PDATE:[2026-11-16 TO 2026-11-22]) AND (SRC:MED OR SRC:PMC OR SRC:PPR)\",\"resultType\":\"idlist\",\"cursorMark\":\"*\",\"pageSize\":1,\"sort\":\"\",\"synonym\":false},\"resultList\":{\"result\":[{\"id\":\"43037057\",\"source\":\"MED\",\"pmid\":\"43037057\",\"pmcid\":\"PMC13767620\",\"fullTextIdList\":{\"fullTextId\":[\"PMC13767620\"]}}]}}"
+   }
+  },
+  {
+   "request": "https://api.openalex.org/works?filter=from_publication_date%3A2026-11-16%2Cto_publication_date%3A2026-11-22%2Ctype%3Aarticle%7Cpreprint%7Creview%7Cletter&per_page=1&search.title_and_abstract=%28%22immune+escape%22+OR+%22antigenic+drift%22%29+NOT+%28%22case+report%22%29&select=id",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json",
+     "x-ratelimit-cost-usd": "0.001",
+     "x-ratelimit-credits-used": "10",
+     "x-ratelimit-limit": "1000",
+     "x-ratelimit-limit-usd": "0.1",
+     "x-ratelimit-onetime-remaining": "0",
+     "x-ratelimit-prepaid-remaining-usd": "0",
+     "x-ratelimit-remaining": "970",
+     "x-ratelimit-remaining-usd": "0.097",
+     "x-ratelimit-reset": "15693"
+    },
+    "body": "{\"meta\": {\"notice\": \"No API key, so this request shares one free daily budget ($0.10) with everyone on your network's IP address. Get a free key with its own $1/day at https://openalex.org/settings/api and add api_key=YOUR_KEY to your requests. An AI agent can get one for its user in one call: POST https://api.openalex.org/api-keys with {\\\"email\\\": \\\"<your user's email>\\\"}; we email them a link, and the key works once they click it. Docs for agents: https://help.openalex.org/llms.txt\", \"count\": 53, \"db_response_time_ms\": 36, \"page\": 1, \"per_page\": 1, \"groups_count\": null, \"x_query\": {\"oql\": \"get works from 2026-11-16 through 2026-11-22 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"x_new_oql\": \"get works from 2026-11-16 through 2026-11-22 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"oqo\": {\"get_rows\": \"works\", \"filter_rows\": [{\"column_id\": \"from_publication_date\", \"value\": \"2026-11-16\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"case report\\\"\", \"operator\": \"has\", \"is_negated\": true}, {\"column_id\": \"to_publication_date\", \"value\": \"2026-11-22\"}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"antigenic drift\\\"\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"immune escape\\\"\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"type\", \"value\": \"article\"}, {\"column_id\": \"type\", \"value\": \"letter\"}, {\"column_id\": \"type\", \"value\": \"preprint\"}, {\"column_id\": \"type\", \"value\": \"review\"}]}]}, \"url\": \"/works?filter=from_publication_date:2026-11-16,title_and_abstract.search:%21%22case report%22,to_publication_date:2026-11-22,title_and_abstract.search:%22antigenic drift%22|%22immune escape%22,type:article|letter|preprint|review&per_page=1\", \"order\": \"best matches first\", \"order_default\": true}, \"cost_usd\": 0.001}, \"results\": [{\"id\": \"https://openalex.org/W7223110345\"}], \"group_by\": []}"
+   }
+  },
+  {
+   "request": "https://api.openalex.org/works?filter=from_publication_date%3A2026-11-16%2Cto_publication_date%3A2026-11-22%2Ctype%3Aarticle%7Cpreprint%7Creview%7Cletter&per_page=1&search.title_and_abstract=%28%22immune+escape%22+OR+%22antigenic+drift%22%29+AND+%28%22sars+cov%22+OR+spike+OR+omicron+OR+neutralizing%29+NOT+%28%22case+report%22%29&select=id",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json",
+     "x-ratelimit-cost-usd": "0.001",
+     "x-ratelimit-credits-used": "10",
+     "x-ratelimit-limit": "1000",
+     "x-ratelimit-limit-usd": "0.1",
+     "x-ratelimit-onetime-remaining": "0",
+     "x-ratelimit-prepaid-remaining-usd": "0",
+     "x-ratelimit-remaining": "960",
+     "x-ratelimit-remaining-usd": "0.096",
+     "x-ratelimit-reset": "15693"
+    },
+    "body": "{\"meta\": {\"notice\": \"No API key, so this request shares one free daily budget ($0.10) with everyone on your network's IP address. Get a free key with its own $1/day at https://openalex.org/settings/api and add api_key=YOUR_KEY to your requests. An AI agent can get one for its user in one call: POST https://api.openalex.org/api-keys with {\\\"email\\\": \\\"<your user's email>\\\"}; we email them a link, and the key works once they click it. Docs for agents: https://help.openalex.org/llms.txt\", \"count\": 5, \"db_response_time_ms\": 66, \"page\": 1, \"per_page\": 1, \"groups_count\": null, \"x_query\": {\"oql\": \"get works from 2026-11-16 through 2026-11-22 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") AND (stemmed \\\"sars cov\\\" OR neutralizing OR omicron OR spike) NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"x_new_oql\": \"get works from 2026-11-16 through 2026-11-22 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") AND (stemmed \\\"sars cov\\\" OR neutralizing OR omicron OR spike) NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"oqo\": {\"get_rows\": \"works\", \"filter_rows\": [{\"column_id\": \"from_publication_date\", \"value\": \"2026-11-16\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"case report\\\"\", \"operator\": \"has\", \"is_negated\": true}, {\"column_id\": \"to_publication_date\", \"value\": \"2026-11-22\"}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"antigenic drift\\\"\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"immune escape\\\"\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"sars cov\\\"\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"neutralizing\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"omicron\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"spike\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"type\", \"value\": \"article\"}, {\"column_id\": \"type\", \"value\": \"letter\"}, {\"column_id\": \"type\", \"value\": \"preprint\"}, {\"column_id\": \"type\", \"value\": \"review\"}]}]}, \"url\": \"/works?filter=from_publication_date:2026-11-16,title_and_abstract.search:%21%22case report%22,to_publication_date:2026-11-22,title_and_abstract.search:%22antigenic drift%22|%22immune escape%22,title_and_abstract.search:%22sars cov%22|neutralizing|omicron|spike,type:article|letter|preprint|review&per_page=1\", \"order\": \"best matches first\", \"order_default\": true}, \"cost_usd\": 0.001}, \"results\": [{\"id\": \"https://openalex.org/W7236672021\"}], \"group_by\": []}"
+   }
+  },
+  {
+   "request": "https://api.openalex.org/works?filter=from_publication_date%3A2026-11-16%2Cto_publication_date%3A2026-11-22%2Ctype%3Aarticle%7Cpreprint%7Creview%7Cletter&per_page=1&search.title_and_abstract=%28%22immune+escape%22+OR+%22antigenic+drift%22%29+AND+%28influenza+OR+hemagglutinin+OR+h3n2+OR+vaccine%29+NOT+%28%22case+report%22%29&select=id",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json",
+     "x-ratelimit-cost-usd": "0.001",
+     "x-ratelimit-credits-used": "10",
+     "x-ratelimit-limit": "1000",
+     "x-ratelimit-limit-usd": "0.1",
+     "x-ratelimit-onetime-remaining": "0",
+     "x-ratelimit-prepaid-remaining-usd": "0",
+     "x-ratelimit-remaining": "950",
+     "x-ratelimit-remaining-usd": "0.095",
+     "x-ratelimit-reset": "15692"
+    },
+    "body": "{\"meta\": {\"notice\": \"No API key, so this request shares one free daily budget ($0.10) with everyone on your network's IP address. Get a free key with its own $1/day at https://openalex.org/settings/api and add api_key=YOUR_KEY to your requests. An AI agent can get one for its user in one call: POST https://api.openalex.org/api-keys with {\\\"email\\\": \\\"<your user's email>\\\"}; we email them a link, and the key works once they click it. Docs for agents: https://help.openalex.org/llms.txt\", \"count\": 8, \"db_response_time_ms\": 33, \"page\": 1, \"per_page\": 1, \"groups_count\": null, \"x_query\": {\"oql\": \"get works from 2026-11-16 through 2026-11-22 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") AND (h3n2 OR hemagglutinin OR influenza OR vaccine) NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"x_new_oql\": \"get works from 2026-11-16 through 2026-11-22 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") AND (h3n2 OR hemagglutinin OR influenza OR vaccine) NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"oqo\": {\"get_rows\": \"works\", \"filter_rows\": [{\"column_id\": \"from_publication_date\", \"value\": \"2026-11-16\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"case report\\\"\", \"operator\": \"has\", \"is_negated\": true}, {\"column_id\": \"to_publication_date\", \"value\": \"2026-11-22\"}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"antigenic drift\\\"\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"immune escape\\\"\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"h3n2\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"hemagglutinin\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"influenza\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"vaccine\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"type\", \"value\": \"article\"}, {\"column_id\": \"type\", \"value\": \"letter\"}, {\"column_id\": \"type\", \"value\": \"preprint\"}, {\"column_id\": \"type\", \"value\": \"review\"}]}]}, \"url\": \"/works?filter=from_publication_date:2026-11-16,title_and_abstract.search:%21%22case report%22,to_publication_date:2026-11-22,title_and_abstract.search:%22antigenic drift%22|%22immune escape%22,title_and_abstract.search:h3n2|hemagglutinin|influenza|vaccine,type:article|letter|preprint|review&per_page=1\", \"order\": \"best matches first\", \"order_default\": true}, \"cost_usd\": 0.001}, \"results\": [{\"id\": \"https://openalex.org/W7236808071\"}], \"group_by\": []}"
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611160000+TO+202611222359%5D&start=0",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/atom+xml; charset=utf-8"
+    },
+    "body": "<?xml version='1.0' encoding='UTF-8'?>\n<feed xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\" xmlns:arxiv=\"http://arxiv.org/schemas/atom\" xmlns=\"http://www.w3.org/2005/Atom\">\n  <id>https://arxiv.org/api/QfjjxoZ0KKfl2ZGzpaX+oFtTAKY</id>\n  <title>arXiv Query: search_query=( (ti:\"immune escape\" OR abs:\"immune escape\" OR ti:\"antigenic drift\" OR abs:\"antigenic drift\") ANDNOT (ti:\"case report\" OR abs:\"case report\") ) AND submittedDate:\"202611160000 TO 202611222359\"&amp;id_list=&amp;start=0&amp;max_results=1</title>\n  <updated>2026-11-24T19:50:33Z</updated>\n  <link href=\"https://arxiv.org/api/query?search_query=((ti:%22immune+escape%22+OR+(abs:%22immune+escape%22+OR+(ti:%22antigenic+drift%22+OR+abs:%22antigenic+drift%22)))+ANDNOT+(ti:%22case+report%22+OR+abs:%22case+report%22))+AND+submittedDate:%22202611160000+TO+202611222359%22&amp;start=0&amp;max_results=1&amp;id_list=\" type=\"application/atom+xml\"/>\n  <opensearch:itemsPerPage>1</opensearch:itemsPerPage>\n  <opensearch:totalResults>0</opensearch:totalResults>\n  <opensearch:startIndex>0</opensearch:startIndex>\n</feed>\n"
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22sars+cov%22+OR+abs%3A%22sars+cov%22+OR+ti%3A%22spike%22+OR+abs%3A%22spike%22+OR+ti%3A%22omicron%22+OR+abs%3A%22omicron%22+OR+ti%3A%22neutralizing%22+OR+abs%3A%22neutralizing%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611160000+TO+202611222359%5D&start=0",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/atom+xml; charset=utf-8"
+    },
+    "body": "<?xml version='1.0' encoding='UTF-8'?>\n<feed xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\" xmlns:arxiv=\"http://arxiv.org/schemas/atom\" xmlns=\"http://www.w3.org/2005/Atom\">\n  <id>https://arxiv.org/api/bkjQQCfKotbeP6GJnj6D9C3uURs</id>\n  <title>arXiv Query: search_query=( ( (ti:\"immune escape\" OR abs:\"immune escape\" OR ti:\"antigenic drift\" OR abs:\"antigenic drift\") AND (ti:\"sars cov\" OR abs:\"sars cov\" OR ti:\"spike\" OR abs:\"spike\" OR ti:\"omicron\" OR abs:\"omicron\" OR ti:\"neutralizing\" OR abs:\"neutralizing\") ) ANDNOT (ti:\"case report\" OR abs:\"case report\") ) AND submittedDate:\"202611160000 TO 202611222359\"&amp;id_list=&amp;start=0&amp;max_results=1</title>\n  <updated>2026-11-24T19:50:36Z</updated>\n  <link href=\"https://arxiv.org/api/query?search_query=(((ti:%22immune+escape%22+OR+(abs:%22immune+escape%22+OR+(ti:%22antigenic+drift%22+OR+abs:%22antigenic+drift%22)))+AND+(ti:%22sars+cov%22+OR+(abs:%22sars+cov%22+OR+(ti:%22spike%22+OR+(abs:%22spike%22+OR+(ti:%22omicron%22+OR+(abs:%22omicron%22+OR+(ti:%22neutralizing%22+OR+abs:%22neutralizing%22))))))))+ANDNOT+(ti:%22case+report%22+OR+abs:%22case+report%22))+AND+submittedDate:%22202611160000+TO+202611222359%22&amp;start=0&amp;max_results=1&amp;id_list=\" type=\"application/atom+xml\"/>\n  <opensearch:itemsPerPage>1</opensearch:itemsPerPage>\n  <opensearch:totalResults>0</opensearch:totalResults>\n  <opensearch:startIndex>0</opensearch:startIndex>\n</feed>\n"
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22influenza%22+OR+abs%3A%22influenza%22+OR+ti%3A%22hemagglutinin%22+OR+abs%3A%22hemagglutinin%22+OR+ti%3A%22h3n2%22+OR+abs%3A%22h3n2%22+OR+ti%3A%22vaccine%22+OR+abs%3A%22vaccine%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611160000+TO+202611222359%5D&start=0",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/atom+xml; charset=utf-8"
+    },
+    "body": "<?xml version='1.0' encoding='UTF-8'?>\n<feed xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\" xmlns:arxiv=\"http://arxiv.org/schemas/atom\" xmlns=\"http://www.w3.org/2005/Atom\">\n  <id>https://arxiv.org/api/X+VcPM28YEqFMmwnWj3HkB3BwGU</id>\n  <title>arXiv Query: search_query=( ( (ti:\"immune escape\" OR abs:\"immune escape\" OR ti:\"antigenic drift\" OR abs:\"antigenic drift\") AND (ti:\"influenza\" OR abs:\"influenza\" OR ti:\"hemagglutinin\" OR abs:\"hemagglutinin\" OR ti:\"h3n2\" OR abs:\"h3n2\" OR ti:\"vaccine\" OR abs:\"vaccine\") ) ANDNOT (ti:\"case report\" OR abs:\"case report\") ) AND submittedDate:\"202611160000 TO 202611222359\"&amp;id_list=&amp;start=0&amp;max_results=1</title>\n  <updated>2026-11-24T19:50:39Z</updated>\n  <link href=\"https://arxiv.org/api/query?search_query=(((ti:%22immune+escape%22+OR+(abs:%22immune+escape%22+OR+(ti:%22antigenic+drift%22+OR+abs:%22antigenic+drift%22)))+AND+(ti:%22influenza%22+OR+(abs:%22influenza%22+OR+(ti:%22hemagglutinin%22+OR+(abs:%22hemagglutinin%22+OR+(ti:%22h3n2%22+OR+(abs:%22h3n2%22+OR+(ti:%22vaccine%22+OR+abs:%22vaccine%22))))))))+ANDNOT+(ti:%22case+report%22+OR+abs:%22case+report%22))+AND+submittedDate:%22202611160000+TO+202611222359%22&amp;start=0&amp;max_results=1&amp;id_list=\" type=\"application/atom+xml\"/>\n  <opensearch:itemsPerPage>1</opensearch:itemsPerPage>\n  <opensearch:totalResults>0</opensearch:totalResults>\n  <opensearch:startIndex>0</opensearch:startIndex>\n</feed>\n"
+   }
+  },
+  {
+   "request": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?datetype=pdat&db=pubmed&maxdate=2026%2F11%2F15&mindate=2026%2F11%2F09&retmode=json&rettype=count&term=%28%28immune+escape%29+OR+%28antigenic+drift%29%29+NOT+%28%22case+report%22%5BTitle%2FAbstract%5D%29&tool=carousel",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json; charset=UTF-8",
+     "x-ratelimit-limit": "3",
+     "x-ratelimit-remaining": "2"
+    },
+    "body": "{\"header\":{\"type\":\"esearch\",\"version\":\"0.3\"},\"esearchresult\":{\"count\":\"61\"}}\n"
+   }
+  },
+  {
+   "request": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?datetype=pdat&db=pubmed&maxdate=2026%2F11%2F15&mindate=2026%2F11%2F09&retmode=json&rettype=count&term=%28%28immune+escape%29+OR+%28antigenic+drift%29%29+AND+%28%28sars+cov%29+OR+%28spike%29+OR+%28omicron%29+OR+%28neutralizing%29%29+NOT+%28%22case+report%22%5BTitle%2FAbstract%5D%29&tool=carousel",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json; charset=UTF-8",
+     "x-ratelimit-limit": "3",
+     "x-ratelimit-remaining": "1"
+    },
+    "body": "{\"header\":{\"type\":\"esearch\",\"version\":\"0.3\"},\"esearchresult\":{\"count\":\"10\"}}\n"
+   }
+  },
+  {
+   "request": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?datetype=pdat&db=pubmed&maxdate=2026%2F11%2F15&mindate=2026%2F11%2F09&retmode=json&rettype=count&term=%28%28immune+escape%29+OR+%28antigenic+drift%29%29+AND+%28%28influenza%29+OR+%28hemagglutinin%29+OR+%28h3n2%29+OR+%28vaccine%29%29+NOT+%28%22case+report%22%5BTitle%2FAbstract%5D%29&tool=carousel",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json; charset=UTF-8",
+     "x-ratelimit-limit": "3",
+     "x-ratelimit-remaining": "0"
+    },
+    "body": "{\"header\":{\"type\":\"esearch\",\"version\":\"0.3\"},\"esearchresult\":{\"count\":\"15\"}}\n"
+   }
+  },
+  {
+   "request": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=1&query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-09+TO+2026-11-15%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&resultType=idlist",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json;charset=UTF-8"
+    },
+    "body": "{\"version\":\"6.9\",\"hitCount\":25,\"nextCursorMark\":\"AoIIQH0UGyg1Njg4NDg0OQ==\",\"nextPageUrl\":\"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-09+TO+2026-11-15%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&cursorMark=AoIIQH0UGyg1Njg4NDg0OQ%3D%3D&resultType=idlist&pageSize=1&format=json\",\"request\":{\"queryString\":\"((TITLE_ABS:\\\"immune escape\\\" OR TITLE_ABS:\\\"antigenic drift\\\") NOT (TITLE_ABS:\\\"case report\\\")) AND (FIRST_PDATE:[2026-11-09 TO 2026-11-15]) AND (SRC:MED OR SRC:PMC OR SRC:PPR)\",\"resultType\":\"idlist\",\"cursorMark\":\"*\",\"pageSize\":1,\"sort\":\"\",\"synonym\":false},\"resultList\":{\"result\":[{\"id\":\"PPR1363404\",\"source\":\"PPR\"}]}}"
+   }
+  },
+  {
+   "request": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=1&query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+AND+%28TITLE_ABS%3A%22sars+cov%22+OR+TITLE_ABS%3A%22spike%22+OR+TITLE_ABS%3A%22omicron%22+OR+TITLE_ABS%3A%22neutralizing%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-09+TO+2026-11-15%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&resultType=idlist",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json;charset=UTF-8"
+    },
+    "body": "{\"version\":\"6.9\",\"hitCount\":5,\"nextCursorMark\":\"AoIIQQDeFCg1NjcyMDA2Mg==\",\"nextPageUrl\":\"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+AND+%28TITLE_ABS%3A%22sars+cov%22+OR+TITLE_ABS%3A%22spike%22+OR+TITLE_ABS%3A%22omicron%22+OR+TITLE_ABS%3A%22neutralizing%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-09+TO+2026-11-15%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&cursorMark=AoIIQQDeFCg1NjcyMDA2Mg%3D%3D&resultType=idlist&pageSize=1&format=json\",\"request\":{\"queryString\":\"((TITLE_ABS:\\\"immune escape\\\" OR TITLE_ABS:\\\"antigenic drift\\\") AND (TITLE_ABS:\\\"sars cov\\\" OR TITLE_ABS:\\\"spike\\\" OR TITLE_ABS:\\\"omicron\\\" OR TITLE_ABS:\\\"neutralizing\\\") NOT (TITLE_ABS:\\\"case report\\\")) AND (FIRST_PDATE:[2026-11-09 TO 2026-11-15]) AND (SRC:MED OR SRC:PMC OR SRC:PPR)\",\"resultType\":\"idlist\",\"cursorMark\":\"*\",\"pageSize\":1,\"sort\":\"\",\"synonym\":false},\"resultList\":{\"result\":[{\"id\":\"42891974\",\"source\":\"MED\",\"pmid\":\"42891974\",\"pmcid\":\"PMC13757790\",\"fullTextIdList\":{\"fullTextId\":[\"PMC13757790\"]}}]}}"
+   }
+  },
+  {
+   "request": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=1&query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+AND+%28TITLE_ABS%3A%22influenza%22+OR+TITLE_ABS%3A%22hemagglutinin%22+OR+TITLE_ABS%3A%22h3n2%22+OR+TITLE_ABS%3A%22vaccine%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-09+TO+2026-11-15%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&resultType=idlist",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json;charset=UTF-8"
+    },
+    "body": "{\"version\":\"6.9\",\"hitCount\":5,\"nextCursorMark\":\"AoIIQLisKCg1NjkwMDAwNA==\",\"nextPageUrl\":\"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+AND+%28TITLE_ABS%3A%22influenza%22+OR+TITLE_ABS%3A%22hemagglutinin%22+OR+TITLE_ABS%3A%22h3n2%22+OR+TITLE_ABS%3A%22vaccine%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-09+TO+2026-11-15%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&cursorMark=AoIIQLisKCg1NjkwMDAwNA%3D%3D&resultType=idlist&pageSize=1&format=json\",\"request\":{\"queryString\":\"((TITLE_ABS:\\\"immune escape\\\" OR TITLE_ABS:\\\"antigenic drift\\\") AND (TITLE_ABS:\\\"influenza\\\" OR TITLE_ABS:\\\"hemagglutinin\\\" OR TITLE_ABS:\\\"h3n2\\\" OR TITLE_ABS:\\\"vaccine\\\") NOT (TITLE_ABS:\\\"case report\\\")) AND (FIRST_PDATE:[2026-11-09 TO 2026-11-15]) AND (SRC:MED OR SRC:PMC OR SRC:PPR)\",\"resultType\":\"idlist\",\"cursorMark\":\"*\",\"pageSize\":1,\"sort\":\"\",\"synonym\":false},\"resultList\":{\"result\":[{\"id\":\"43014058\",\"source\":\"MED\",\"pmid\":\"43014058\"}]}}"
+   }
+  },
+  {
+   "request": "https://api.openalex.org/works?filter=from_publication_date%3A2026-11-09%2Cto_publication_date%3A2026-11-15%2Ctype%3Aarticle%7Cpreprint%7Creview%7Cletter&per_page=1&search.title_and_abstract=%28%22immune+escape%22+OR+%22antigenic+drift%22%29+NOT+%28%22case+report%22%29&select=id",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json",
+     "x-ratelimit-cost-usd": "0.001",
+     "x-ratelimit-credits-used": "10",
+     "x-ratelimit-limit": "1000",
+     "x-ratelimit-limit-usd": "0.1",
+     "x-ratelimit-onetime-remaining": "0",
+     "x-ratelimit-prepaid-remaining-usd": "0",
+     "x-ratelimit-remaining": "940",
+     "x-ratelimit-remaining-usd": "0.094",
+     "x-ratelimit-reset": "15451"
+    },
+    "body": "{\"meta\": {\"notice\": \"No API key, so this request shares one free daily budget ($0.10) with everyone on your network's IP address. Get a free key with its own $1/day at https://openalex.org/settings/api and add api_key=YOUR_KEY to your requests. An AI agent can get one for its user in one call: POST https://api.openalex.org/api-keys with {\\\"email\\\": \\\"<your user's email>\\\"}; we email them a link, and the key works once they click it. Docs for agents: https://help.openalex.org/llms.txt\", \"count\": 41, \"db_response_time_ms\": 35, \"page\": 1, \"per_page\": 1, \"groups_count\": null, \"x_query\": {\"oql\": \"get works from 2026-11-09 through 2026-11-15 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"x_new_oql\": \"get works from 2026-11-09 through 2026-11-15 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"oqo\": {\"get_rows\": \"works\", \"filter_rows\": [{\"column_id\": \"from_publication_date\", \"value\": \"2026-11-09\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"case report\\\"\", \"operator\": \"has\", \"is_negated\": true}, {\"column_id\": \"to_publication_date\", \"value\": \"2026-11-15\"}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"antigenic drift\\\"\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"immune escape\\\"\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"type\", \"value\": \"article\"}, {\"column_id\": \"type\", \"value\": \"letter\"}, {\"column_id\": \"type\", \"value\": \"preprint\"}, {\"column_id\": \"type\", \"value\": \"review\"}]}]}, \"url\": \"/works?filter=from_publication_date:2026-11-09,title_and_abstract.search:%21%22case report%22,to_publication_date:2026-11-15,title_and_abstract.search:%22antigenic drift%22|%22immune escape%22,type:article|letter|preprint|review&per_page=1\", \"order\": \"best matches first\", \"order_default\": true}, \"cost_usd\": 0.001}, \"results\": [{\"id\": \"https://openalex.org/W7225784533\"}], \"group_by\": []}"
+   }
+  },
+  {
+   "request": "https://api.openalex.org/works?filter=from_publication_date%3A2026-11-09%2Cto_publication_date%3A2026-11-15%2Ctype%3Aarticle%7Cpreprint%7Creview%7Cletter&per_page=1&search.title_and_abstract=%28%22immune+escape%22+OR+%22antigenic+drift%22%29+AND+%28%22sars+cov%22+OR+spike+OR+omicron+OR+neutralizing%29+NOT+%28%22case+report%22%29&select=id",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json",
+     "x-ratelimit-cost-usd": "0.001",
+     "x-ratelimit-credits-used": "10",
+     "x-ratelimit-limit": "1000",
+     "x-ratelimit-limit-usd": "0.1",
+     "x-ratelimit-onetime-remaining": "0",
+     "x-ratelimit-prepaid-remaining-usd": "0",
+     "x-ratelimit-remaining": "930",
+     "x-ratelimit-remaining-usd": "0.093",
+     "x-ratelimit-reset": "15450"
+    },
+    "body": "{\"meta\": {\"notice\": \"No API key, so this request shares one free daily budget ($0.10) with everyone on your network's IP address. Get a free key with its own $1/day at https://openalex.org/settings/api and add api_key=YOUR_KEY to your requests. An AI agent can get one for its user in one call: POST https://api.openalex.org/api-keys with {\\\"email\\\": \\\"<your user's email>\\\"}; we email them a link, and the key works once they click it. Docs for agents: https://help.openalex.org/llms.txt\", \"count\": 6, \"db_response_time_ms\": 34, \"page\": 1, \"per_page\": 1, \"groups_count\": null, \"x_query\": {\"oql\": \"get works from 2026-11-09 through 2026-11-15 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") AND (stemmed \\\"sars cov\\\" OR neutralizing OR omicron OR spike) NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"x_new_oql\": \"get works from 2026-11-09 through 2026-11-15 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") AND (stemmed \\\"sars cov\\\" OR neutralizing OR omicron OR spike) NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"oqo\": {\"get_rows\": \"works\", \"filter_rows\": [{\"column_id\": \"from_publication_date\", \"value\": \"2026-11-09\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"case report\\\"\", \"operator\": \"has\", \"is_negated\": true}, {\"column_id\": \"to_publication_date\", \"value\": \"2026-11-15\"}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"antigenic drift\\\"\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"immune escape\\\"\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"sars cov\\\"\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"neutralizing\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"omicron\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"spike\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"type\", \"value\": \"article\"}, {\"column_id\": \"type\", \"value\": \"letter\"}, {\"column_id\": \"type\", \"value\": \"preprint\"}, {\"column_id\": \"type\", \"value\": \"review\"}]}]}, \"url\": \"/works?filter=from_publication_date:2026-11-09,title_and_abstract.search:%21%22case report%22,to_publication_date:2026-11-15,title_and_abstract.search:%22antigenic drift%22|%22immune escape%22,title_and_abstract.search:%22sars cov%22|neutralizing|omicron|spike,type:article|letter|preprint|review&per_page=1\", \"order\": \"best matches first\", \"order_default\": true}, \"cost_usd\": 0.001}, \"results\": [{\"id\": \"https://openalex.org/W7225784533\"}], \"group_by\": []}"
+   }
+  },
+  {
+   "request": "https://api.openalex.org/works?filter=from_publication_date%3A2026-11-09%2Cto_publication_date%3A2026-11-15%2Ctype%3Aarticle%7Cpreprint%7Creview%7Cletter&per_page=1&search.title_and_abstract=%28%22immune+escape%22+OR+%22antigenic+drift%22%29+AND+%28influenza+OR+hemagglutinin+OR+h3n2+OR+vaccine%29+NOT+%28%22case+report%22%29&select=id",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json",
+     "x-ratelimit-cost-usd": "0.001",
+     "x-ratelimit-credits-used": "10",
+     "x-ratelimit-limit": "1000",
+     "x-ratelimit-limit-usd": "0.1",
+     "x-ratelimit-onetime-remaining": "0",
+     "x-ratelimit-prepaid-remaining-usd": "0",
+     "x-ratelimit-remaining": "920",
+     "x-ratelimit-remaining-usd": "0.092",
+     "x-ratelimit-reset": "15449"
+    },
+    "body": "{\"meta\": {\"notice\": \"No API key, so this request shares one free daily budget ($0.10) with everyone on your network's IP address. Get a free key with its own $1/day at https://openalex.org/settings/api and add api_key=YOUR_KEY to your requests. An AI agent can get one for its user in one call: POST https://api.openalex.org/api-keys with {\\\"email\\\": \\\"<your user's email>\\\"}; we email them a link, and the key works once they click it. Docs for agents: https://help.openalex.org/llms.txt\", \"count\": 8, \"db_response_time_ms\": 36, \"page\": 1, \"per_page\": 1, \"groups_count\": null, \"x_query\": {\"oql\": \"get works from 2026-11-09 through 2026-11-15 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") AND (h3n2 OR hemagglutinin OR influenza OR vaccine) NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"x_new_oql\": \"get works from 2026-11-09 through 2026-11-15 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") AND (h3n2 OR hemagglutinin OR influenza OR vaccine) NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"oqo\": {\"get_rows\": \"works\", \"filter_rows\": [{\"column_id\": \"from_publication_date\", \"value\": \"2026-11-09\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"case report\\\"\", \"operator\": \"has\", \"is_negated\": true}, {\"column_id\": \"to_publication_date\", \"value\": \"2026-11-15\"}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"antigenic drift\\\"\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"immune escape\\\"\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"h3n2\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"hemagglutinin\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"influenza\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"vaccine\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"type\", \"value\": \"article\"}, {\"column_id\": \"type\", \"value\": \"letter\"}, {\"column_id\": \"type\", \"value\": \"preprint\"}, {\"column_id\": \"type\", \"value\": \"review\"}]}]}, \"url\": \"/works?filter=from_publication_date:2026-11-09,title_and_abstract.search:%21%22case report%22,to_publication_date:2026-11-15,title_and_abstract.search:%22antigenic drift%22|%22immune escape%22,title_and_abstract.search:h3n2|hemagglutinin|influenza|vaccine,type:article|letter|preprint|review&per_page=1\", \"order\": \"best matches first\", \"order_default\": true}, \"cost_usd\": 0.001}, \"results\": [{\"id\": \"https://openalex.org/W7225784533\"}], \"group_by\": []}"
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611090000+TO+202611152359%5D&start=0",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/atom+xml; charset=utf-8"
+    },
+    "body": "<?xml version='1.0' encoding='UTF-8'?>\n<feed xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\" xmlns:arxiv=\"http://arxiv.org/schemas/atom\" xmlns=\"http://www.w3.org/2005/Atom\">\n  <id>https://arxiv.org/api/PVf7mPsHp8AihPjUfj1+p0iWEFw</id>\n  <title>arXiv Query: search_query=( (ti:\"immune escape\" OR abs:\"immune escape\" OR ti:\"antigenic drift\" OR abs:\"antigenic drift\") ANDNOT (ti:\"case report\" OR abs:\"case report\") ) AND submittedDate:\"202611090000 TO 202611152359\"&amp;id_list=&amp;start=0&amp;max_results=1</title>\n  <updated>2026-11-24T19:50:44Z</updated>\n  <link href=\"https://arxiv.org/api/query?search_query=((ti:%22immune+escape%22+OR+(abs:%22immune+escape%22+OR+(ti:%22antigenic+drift%22+OR+abs:%22antigenic+drift%22)))+ANDNOT+(ti:%22case+report%22+OR+abs:%22case+report%22))+AND+submittedDate:%22202611090000+TO+202611152359%22&amp;start=0&amp;max_results=1&amp;id_list=\" type=\"application/atom+xml\"/>\n  <opensearch:itemsPerPage>1</opensearch:itemsPerPage>\n  <opensearch:totalResults>2</opensearch:totalResults>\n  <opensearch:startIndex>0</opensearch:startIndex>\n  <entry>\n    <id>http://arxiv.org/abs/2611.19270v1</id>\n    <title>Arginine metabolism drives tumor immune escape by shaping an immunosuppressive microenvironment</title>\n    <updated>2026-11-14T08:58:25Z</updated>\n    <link href=\"https://arxiv.org/abs/2611.19270v1\" rel=\"alternate\" type=\"text/html\"/>\n    <link href=\"https://arxiv.org/pdf/2611.19270v1\" rel=\"related\" type=\"application/pdf\" title=\"pdf\"/>\n    <summary>The tumor microenvironment evolves through the ``elimination-equilibrium-escape'' paradigm, yet the quantitative mechanisms by which metabolic reprogramming contributes to immune evasion remain unclear. We develop a mathematical model of tumor-immune interactions to investigate how arginine metabolism shapes an immunosuppressive microenvironment. We establish the positivity and boundedness of solutions and analyze the existence and stability of equilibrium states. The model is calibrated using tumor growth data from three mouse cohorts and reproduces tumor growth patterns under distinct immune conditions. The calibrated model predicts faster tumor growth in immunocompetent mice than in immunodeficient controls, with macrophage dynamics accounting for this difference. It further predicts that arginine administration promotes tumor progression by enhancing macrophage polarization and weakening T cell-mediated tumor control. To account for interindividual heterogeneity, we develop the TVInfABC algorithm to generate a virtual mouse cohort. Moreover, our analysis indicates that tumor-associated macrophages can promote transitions from immunologically ``hot'' to ``cold'' states. Systematic pharmacodynamic simulations further uncover a synergy between arginine depletion (anti-ARG1) and immune checkpoint blockade (anti-PD-1/PD-L1). These results provide a mathematical basis for studying metabolic-immune interactions and for evaluating mechanism-based combination therapies.</summary>\n    <category term=\"q-bio.TO\" scheme=\"http://arxiv.org/schemas/atom\"/>\n    <published>2026-11-14T08:58:25Z</published>\n    <arxiv:comment>24 pages, 7 figures</arxiv:comment>\n    <arxiv:primary_category term=\"q-bio.TO\"/>\n    <author>\n      <name>Chenghang Li</name>\n    </author>\n    <author>\n      <name>Haifeng Zhang</name>\n    </author>\n    <author>\n      <name>Yipu Qu</name>\n    </author>\n    <author>\n      <name>Jinzhi Lei</name>\n    </author>\n  </entry>\n</feed>\n"
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22sars+cov%22+OR+abs%3A%22sars+cov%22+OR+ti%3A%22spike%22+OR+abs%3A%22spike%22+OR+ti%3A%22omicron%22+OR+abs%3A%22omicron%22+OR+ti%3A%22neutralizing%22+OR+abs%3A%22neutralizing%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611090000+TO+202611152359%5D&start=0",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/atom+xml; charset=utf-8"
+    },
+    "body": "<?xml version='1.0' encoding='UTF-8'?>\n<feed xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\" xmlns:arxiv=\"http://arxiv.org/schemas/atom\" xmlns=\"http://www.w3.org/2005/Atom\">\n  <id>https://arxiv.org/api/OKG3RqqDH2r9tMBUr3FCUlrUbyM</id>\n  <title>arXiv Query: search_query=( ( (ti:\"immune escape\" OR abs:\"immune escape\" OR ti:\"antigenic drift\" OR abs:\"antigenic drift\") AND (ti:\"sars cov\" OR abs:\"sars cov\" OR ti:\"spike\" OR abs:\"spike\" OR ti:\"omicron\" OR abs:\"omicron\" OR ti:\"neutralizing\" OR abs:\"neutralizing\") ) ANDNOT (ti:\"case report\" OR abs:\"case report\") ) AND submittedDate:\"202611090000 TO 202611152359\"&amp;id_list=&amp;start=0&amp;max_results=1</title>\n  <updated>2026-11-24T19:50:47Z</updated>\n  <link href=\"https://arxiv.org/api/query?search_query=(((ti:%22immune+escape%22+OR+(abs:%22immune+escape%22+OR+(ti:%22antigenic+drift%22+OR+abs:%22antigenic+drift%22)))+AND+(ti:%22sars+cov%22+OR+(abs:%22sars+cov%22+OR+(ti:%22spike%22+OR+(abs:%22spike%22+OR+(ti:%22omicron%22+OR+(abs:%22omicron%22+OR+(ti:%22neutralizing%22+OR+abs:%22neutralizing%22))))))))+ANDNOT+(ti:%22case+report%22+OR+abs:%22case+report%22))+AND+submittedDate:%22202611090000+TO+202611152359%22&amp;start=0&amp;max_results=1&amp;id_list=\" type=\"application/atom+xml\"/>\n  <opensearch:itemsPerPage>1</opensearch:itemsPerPage>\n  <opensearch:totalResults>0</opensearch:totalResults>\n  <opensearch:startIndex>0</opensearch:startIndex>\n</feed>\n"
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22influenza%22+OR+abs%3A%22influenza%22+OR+ti%3A%22hemagglutinin%22+OR+abs%3A%22hemagglutinin%22+OR+ti%3A%22h3n2%22+OR+abs%3A%22h3n2%22+OR+ti%3A%22vaccine%22+OR+abs%3A%22vaccine%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611090000+TO+202611152359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22influenza%22+OR+abs%3A%22influenza%22+OR+ti%3A%22hemagglutinin%22+OR+abs%3A%22hemagglutinin%22+OR+ti%3A%22h3n2%22+OR+abs%3A%22h3n2%22+OR+ti%3A%22vaccine%22+OR+abs%3A%22vaccine%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611090000+TO+202611152359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22influenza%22+OR+abs%3A%22influenza%22+OR+ti%3A%22hemagglutinin%22+OR+abs%3A%22hemagglutinin%22+OR+ti%3A%22h3n2%22+OR+abs%3A%22h3n2%22+OR+ti%3A%22vaccine%22+OR+abs%3A%22vaccine%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611090000+TO+202611152359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22influenza%22+OR+abs%3A%22influenza%22+OR+ti%3A%22hemagglutinin%22+OR+abs%3A%22hemagglutinin%22+OR+ti%3A%22h3n2%22+OR+abs%3A%22h3n2%22+OR+ti%3A%22vaccine%22+OR+abs%3A%22vaccine%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611090000+TO+202611152359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22influenza%22+OR+abs%3A%22influenza%22+OR+ti%3A%22hemagglutinin%22+OR+abs%3A%22hemagglutinin%22+OR+ti%3A%22h3n2%22+OR+abs%3A%22h3n2%22+OR+ti%3A%22vaccine%22+OR+abs%3A%22vaccine%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611090000+TO+202611152359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?datetype=pdat&db=pubmed&maxdate=2026%2F11%2F08&mindate=2026%2F11%2F02&retmode=json&rettype=count&term=%28%28immune+escape%29+OR+%28antigenic+drift%29%29+NOT+%28%22case+report%22%5BTitle%2FAbstract%5D%29&tool=carousel",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json; charset=UTF-8",
+     "x-ratelimit-limit": "3",
+     "x-ratelimit-remaining": "2"
+    },
+    "body": "{\"header\":{\"type\":\"esearch\",\"version\":\"0.3\"},\"esearchresult\":{\"count\":\"60\"}}\n"
+   }
+  },
+  {
+   "request": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?datetype=pdat&db=pubmed&maxdate=2026%2F11%2F08&mindate=2026%2F11%2F02&retmode=json&rettype=count&term=%28%28immune+escape%29+OR+%28antigenic+drift%29%29+AND+%28%28sars+cov%29+OR+%28spike%29+OR+%28omicron%29+OR+%28neutralizing%29%29+NOT+%28%22case+report%22%5BTitle%2FAbstract%5D%29&tool=carousel",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json; charset=UTF-8",
+     "x-ratelimit-limit": "3",
+     "x-ratelimit-remaining": "1"
+    },
+    "body": "{\"header\":{\"type\":\"esearch\",\"version\":\"0.3\"},\"esearchresult\":{\"count\":\"8\"}}\n"
+   }
+  },
+  {
+   "request": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?datetype=pdat&db=pubmed&maxdate=2026%2F11%2F08&mindate=2026%2F11%2F02&retmode=json&rettype=count&term=%28%28immune+escape%29+OR+%28antigenic+drift%29%29+AND+%28%28influenza%29+OR+%28hemagglutinin%29+OR+%28h3n2%29+OR+%28vaccine%29%29+NOT+%28%22case+report%22%5BTitle%2FAbstract%5D%29&tool=carousel",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json; charset=UTF-8",
+     "x-ratelimit-limit": "3",
+     "x-ratelimit-remaining": "0"
+    },
+    "body": "{\"header\":{\"type\":\"esearch\",\"version\":\"0.3\"},\"esearchresult\":{\"count\":\"12\"}}\n"
+   }
+  },
+  {
+   "request": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=1&query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-02+TO+2026-11-08%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&resultType=idlist",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json;charset=UTF-8"
+    },
+    "body": "{\"version\":\"6.9\",\"hitCount\":31,\"nextCursorMark\":\"AoIIQLPIJCg1Njg0ODc4Ng==\",\"nextPageUrl\":\"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-02+TO+2026-11-08%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&cursorMark=AoIIQLPIJCg1Njg0ODc4Ng%3D%3D&resultType=idlist&pageSize=1&format=json\",\"request\":{\"queryString\":\"((TITLE_ABS:\\\"immune escape\\\" OR TITLE_ABS:\\\"antigenic drift\\\") NOT (TITLE_ABS:\\\"case report\\\")) AND (FIRST_PDATE:[2026-11-02 TO 2026-11-08]) AND (SRC:MED OR SRC:PMC OR SRC:PPR)\",\"resultType\":\"idlist\",\"cursorMark\":\"*\",\"pageSize\":1,\"sort\":\"\",\"synonym\":false},\"resultList\":{\"result\":[{\"id\":\"PPR1357878\",\"source\":\"PPR\"}]}}"
+   }
+  },
+  {
+   "request": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=1&query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+AND+%28TITLE_ABS%3A%22sars+cov%22+OR+TITLE_ABS%3A%22spike%22+OR+TITLE_ABS%3A%22omicron%22+OR+TITLE_ABS%3A%22neutralizing%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-02+TO+2026-11-08%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&resultType=idlist",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json;charset=UTF-8"
+    },
+    "body": "{\"version\":\"6.9\",\"hitCount\":4,\"nextCursorMark\":\"AoIIQOVmACg1Njg0ODc4Ng==\",\"nextPageUrl\":\"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+AND+%28TITLE_ABS%3A%22sars+cov%22+OR+TITLE_ABS%3A%22spike%22+OR+TITLE_ABS%3A%22omicron%22+OR+TITLE_ABS%3A%22neutralizing%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-02+TO+2026-11-08%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&cursorMark=AoIIQOVmACg1Njg0ODc4Ng%3D%3D&resultType=idlist&pageSize=1&format=json\",\"request\":{\"queryString\":\"((TITLE_ABS:\\\"immune escape\\\" OR TITLE_ABS:\\\"antigenic drift\\\") AND (TITLE_ABS:\\\"sars cov\\\" OR TITLE_ABS:\\\"spike\\\" OR TITLE_ABS:\\\"omicron\\\" OR TITLE_ABS:\\\"neutralizing\\\") NOT (TITLE_ABS:\\\"case report\\\")) AND (FIRST_PDATE:[2026-11-02 TO 2026-11-08]) AND (SRC:MED OR SRC:PMC OR SRC:PPR)\",\"resultType\":\"idlist\",\"cursorMark\":\"*\",\"pageSize\":1,\"sort\":\"\",\"synonym\":false},\"resultList\":{\"result\":[{\"id\":\"PPR1357878\",\"source\":\"PPR\"}]}}"
+   }
+  },
+  {
+   "request": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=1&query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+AND+%28TITLE_ABS%3A%22influenza%22+OR+TITLE_ABS%3A%22hemagglutinin%22+OR+TITLE_ABS%3A%22h3n2%22+OR+TITLE_ABS%3A%22vaccine%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-02+TO+2026-11-08%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&resultType=idlist",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json;charset=UTF-8"
+    },
+    "body": "{\"version\":\"6.9\",\"hitCount\":4,\"nextCursorMark\":\"AoIIQR2B4yg1Njg0ODc4Ng==\",\"nextPageUrl\":\"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+AND+%28TITLE_ABS%3A%22influenza%22+OR+TITLE_ABS%3A%22hemagglutinin%22+OR+TITLE_ABS%3A%22h3n2%22+OR+TITLE_ABS%3A%22vaccine%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-11-02+TO+2026-11-08%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&cursorMark=AoIIQR2B4yg1Njg0ODc4Ng%3D%3D&resultType=idlist&pageSize=1&format=json\",\"request\":{\"queryString\":\"((TITLE_ABS:\\\"immune escape\\\" OR TITLE_ABS:\\\"antigenic drift\\\") AND (TITLE_ABS:\\\"influenza\\\" OR TITLE_ABS:\\\"hemagglutinin\\\" OR TITLE_ABS:\\\"h3n2\\\" OR TITLE_ABS:\\\"vaccine\\\") NOT (TITLE_ABS:\\\"case report\\\")) AND (FIRST_PDATE:[2026-11-02 TO 2026-11-08]) AND (SRC:MED OR SRC:PMC OR SRC:PPR)\",\"resultType\":\"idlist\",\"cursorMark\":\"*\",\"pageSize\":1,\"sort\":\"\",\"synonym\":false},\"resultList\":{\"result\":[{\"id\":\"PPR1357878\",\"source\":\"PPR\"}]}}"
+   }
+  },
+  {
+   "request": "https://api.openalex.org/works?filter=from_publication_date%3A2026-11-02%2Cto_publication_date%3A2026-11-08%2Ctype%3Aarticle%7Cpreprint%7Creview%7Cletter&per_page=1&search.title_and_abstract=%28%22immune+escape%22+OR+%22antigenic+drift%22%29+NOT+%28%22case+report%22%29&select=id",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json",
+     "x-ratelimit-cost-usd": "0.001",
+     "x-ratelimit-credits-used": "10",
+     "x-ratelimit-limit": "1000",
+     "x-ratelimit-limit-usd": "0.1",
+     "x-ratelimit-onetime-remaining": "0",
+     "x-ratelimit-prepaid-remaining-usd": "0",
+     "x-ratelimit-remaining": "910",
+     "x-ratelimit-remaining-usd": "0.091",
+     "x-ratelimit-reset": "15228"
+    },
+    "body": "{\"meta\": {\"notice\": \"No API key, so this request shares one free daily budget ($0.10) with everyone on your network's IP address. Get a free key with its own $1/day at https://openalex.org/settings/api and add api_key=YOUR_KEY to your requests. An AI agent can get one for its user in one call: POST https://api.openalex.org/api-keys with {\\\"email\\\": \\\"<your user's email>\\\"}; we email them a link, and the key works once they click it. Docs for agents: https://help.openalex.org/llms.txt\", \"count\": 38, \"db_response_time_ms\": 46, \"page\": 1, \"per_page\": 1, \"groups_count\": null, \"x_query\": {\"oql\": \"get works from 2026-11-02 through 2026-11-08 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"x_new_oql\": \"get works from 2026-11-02 through 2026-11-08 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"oqo\": {\"get_rows\": \"works\", \"filter_rows\": [{\"column_id\": \"from_publication_date\", \"value\": \"2026-11-02\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"case report\\\"\", \"operator\": \"has\", \"is_negated\": true}, {\"column_id\": \"to_publication_date\", \"value\": \"2026-11-08\"}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"antigenic drift\\\"\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"immune escape\\\"\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"type\", \"value\": \"article\"}, {\"column_id\": \"type\", \"value\": \"letter\"}, {\"column_id\": \"type\", \"value\": \"preprint\"}, {\"column_id\": \"type\", \"value\": \"review\"}]}]}, \"url\": \"/works?filter=from_publication_date:2026-11-02,title_and_abstract.search:%21%22case report%22,to_publication_date:2026-11-08,title_and_abstract.search:%22antigenic drift%22|%22immune escape%22,type:article|letter|preprint|review&per_page=1\", \"order\": \"best matches first\", \"order_default\": true}, \"cost_usd\": 0.001}, \"results\": [{\"id\": \"https://openalex.org/W7225419779\"}], \"group_by\": []}"
+   }
+  },
+  {
+   "request": "https://api.openalex.org/works?filter=from_publication_date%3A2026-11-02%2Cto_publication_date%3A2026-11-08%2Ctype%3Aarticle%7Cpreprint%7Creview%7Cletter&per_page=1&search.title_and_abstract=%28%22immune+escape%22+OR+%22antigenic+drift%22%29+AND+%28%22sars+cov%22+OR+spike+OR+omicron+OR+neutralizing%29+NOT+%28%22case+report%22%29&select=id",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json",
+     "x-ratelimit-cost-usd": "0.001",
+     "x-ratelimit-credits-used": "10",
+     "x-ratelimit-limit": "1000",
+     "x-ratelimit-limit-usd": "0.1",
+     "x-ratelimit-onetime-remaining": "0",
+     "x-ratelimit-prepaid-remaining-usd": "0",
+     "x-ratelimit-remaining": "900",
+     "x-ratelimit-remaining-usd": "0.09",
+     "x-ratelimit-reset": "15227"
+    },
+    "body": "{\"meta\": {\"notice\": \"No API key, so this request shares one free daily budget ($0.10) with everyone on your network's IP address. Get a free key with its own $1/day at https://openalex.org/settings/api and add api_key=YOUR_KEY to your requests. An AI agent can get one for its user in one call: POST https://api.openalex.org/api-keys with {\\\"email\\\": \\\"<your user's email>\\\"}; we email them a link, and the key works once they click it. Docs for agents: https://help.openalex.org/llms.txt\", \"count\": 7, \"db_response_time_ms\": 38, \"page\": 1, \"per_page\": 1, \"groups_count\": null, \"x_query\": {\"oql\": \"get works from 2026-11-02 through 2026-11-08 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") AND (stemmed \\\"sars cov\\\" OR neutralizing OR omicron OR spike) NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"x_new_oql\": \"get works from 2026-11-02 through 2026-11-08 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") AND (stemmed \\\"sars cov\\\" OR neutralizing OR omicron OR spike) NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"oqo\": {\"get_rows\": \"works\", \"filter_rows\": [{\"column_id\": \"from_publication_date\", \"value\": \"2026-11-02\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"case report\\\"\", \"operator\": \"has\", \"is_negated\": true}, {\"column_id\": \"to_publication_date\", \"value\": \"2026-11-08\"}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"antigenic drift\\\"\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"immune escape\\\"\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"sars cov\\\"\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"neutralizing\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"omicron\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"spike\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"type\", \"value\": \"article\"}, {\"column_id\": \"type\", \"value\": \"letter\"}, {\"column_id\": \"type\", \"value\": \"preprint\"}, {\"column_id\": \"type\", \"value\": \"review\"}]}]}, \"url\": \"/works?filter=from_publication_date:2026-11-02,title_and_abstract.search:%21%22case report%22,to_publication_date:2026-11-08,title_and_abstract.search:%22antigenic drift%22|%22immune escape%22,title_and_abstract.search:%22sars cov%22|neutralizing|omicron|spike,type:article|letter|preprint|review&per_page=1\", \"order\": \"best matches first\", \"order_default\": true}, \"cost_usd\": 0.001}, \"results\": [{\"id\": \"https://openalex.org/W7225595297\"}], \"group_by\": []}"
+   }
+  },
+  {
+   "request": "https://api.openalex.org/works?filter=from_publication_date%3A2026-11-02%2Cto_publication_date%3A2026-11-08%2Ctype%3Aarticle%7Cpreprint%7Creview%7Cletter&per_page=1&search.title_and_abstract=%28%22immune+escape%22+OR+%22antigenic+drift%22%29+AND+%28influenza+OR+hemagglutinin+OR+h3n2+OR+vaccine%29+NOT+%28%22case+report%22%29&select=id",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json",
+     "x-ratelimit-cost-usd": "0.001",
+     "x-ratelimit-credits-used": "10",
+     "x-ratelimit-limit": "1000",
+     "x-ratelimit-limit-usd": "0.1",
+     "x-ratelimit-onetime-remaining": "0",
+     "x-ratelimit-prepaid-remaining-usd": "0",
+     "x-ratelimit-remaining": "890",
+     "x-ratelimit-remaining-usd": "0.089",
+     "x-ratelimit-reset": "15226"
+    },
+    "body": "{\"meta\": {\"notice\": \"No API key, so this request shares one free daily budget ($0.10) with everyone on your network's IP address. Get a free key with its own $1/day at https://openalex.org/settings/api and add api_key=YOUR_KEY to your requests. An AI agent can get one for its user in one call: POST https://api.openalex.org/api-keys with {\\\"email\\\": \\\"<your user's email>\\\"}; we email them a link, and the key works once they click it. Docs for agents: https://help.openalex.org/llms.txt\", \"count\": 6, \"db_response_time_ms\": 90, \"page\": 1, \"per_page\": 1, \"groups_count\": null, \"x_query\": {\"oql\": \"get works from 2026-11-02 through 2026-11-08 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") AND (h3n2 OR hemagglutinin OR influenza OR vaccine) NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"x_new_oql\": \"get works from 2026-11-02 through 2026-11-08 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") AND (h3n2 OR hemagglutinin OR influenza OR vaccine) NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"oqo\": {\"get_rows\": \"works\", \"filter_rows\": [{\"column_id\": \"from_publication_date\", \"value\": \"2026-11-02\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"case report\\\"\", \"operator\": \"has\", \"is_negated\": true}, {\"column_id\": \"to_publication_date\", \"value\": \"2026-11-08\"}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"antigenic drift\\\"\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"immune escape\\\"\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"h3n2\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"hemagglutinin\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"influenza\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"vaccine\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"type\", \"value\": \"article\"}, {\"column_id\": \"type\", \"value\": \"letter\"}, {\"column_id\": \"type\", \"value\": \"preprint\"}, {\"column_id\": \"type\", \"value\": \"review\"}]}]}, \"url\": \"/works?filter=from_publication_date:2026-11-02,title_and_abstract.search:%21%22case report%22,to_publication_date:2026-11-08,title_and_abstract.search:%22antigenic drift%22|%22immune escape%22,title_and_abstract.search:h3n2|hemagglutinin|influenza|vaccine,type:article|letter|preprint|review&per_page=1\", \"order\": \"best matches first\", \"order_default\": true}, \"cost_usd\": 0.001}, \"results\": [{\"id\": \"https://openalex.org/W7225419417\"}], \"group_by\": []}"
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611020000+TO+202611082359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611020000+TO+202611082359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611020000+TO+202611082359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611020000+TO+202611082359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611020000+TO+202611082359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22sars+cov%22+OR+abs%3A%22sars+cov%22+OR+ti%3A%22spike%22+OR+abs%3A%22spike%22+OR+ti%3A%22omicron%22+OR+abs%3A%22omicron%22+OR+ti%3A%22neutralizing%22+OR+abs%3A%22neutralizing%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611020000+TO+202611082359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22sars+cov%22+OR+abs%3A%22sars+cov%22+OR+ti%3A%22spike%22+OR+abs%3A%22spike%22+OR+ti%3A%22omicron%22+OR+abs%3A%22omicron%22+OR+ti%3A%22neutralizing%22+OR+abs%3A%22neutralizing%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611020000+TO+202611082359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22sars+cov%22+OR+abs%3A%22sars+cov%22+OR+ti%3A%22spike%22+OR+abs%3A%22spike%22+OR+ti%3A%22omicron%22+OR+abs%3A%22omicron%22+OR+ti%3A%22neutralizing%22+OR+abs%3A%22neutralizing%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611020000+TO+202611082359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22sars+cov%22+OR+abs%3A%22sars+cov%22+OR+ti%3A%22spike%22+OR+abs%3A%22spike%22+OR+ti%3A%22omicron%22+OR+abs%3A%22omicron%22+OR+ti%3A%22neutralizing%22+OR+abs%3A%22neutralizing%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611020000+TO+202611082359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22sars+cov%22+OR+abs%3A%22sars+cov%22+OR+ti%3A%22spike%22+OR+abs%3A%22spike%22+OR+ti%3A%22omicron%22+OR+abs%3A%22omicron%22+OR+ti%3A%22neutralizing%22+OR+abs%3A%22neutralizing%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611020000+TO+202611082359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22influenza%22+OR+abs%3A%22influenza%22+OR+ti%3A%22hemagglutinin%22+OR+abs%3A%22hemagglutinin%22+OR+ti%3A%22h3n2%22+OR+abs%3A%22h3n2%22+OR+ti%3A%22vaccine%22+OR+abs%3A%22vaccine%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611020000+TO+202611082359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22influenza%22+OR+abs%3A%22influenza%22+OR+ti%3A%22hemagglutinin%22+OR+abs%3A%22hemagglutinin%22+OR+ti%3A%22h3n2%22+OR+abs%3A%22h3n2%22+OR+ti%3A%22vaccine%22+OR+abs%3A%22vaccine%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611020000+TO+202611082359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22influenza%22+OR+abs%3A%22influenza%22+OR+ti%3A%22hemagglutinin%22+OR+abs%3A%22hemagglutinin%22+OR+ti%3A%22h3n2%22+OR+abs%3A%22h3n2%22+OR+ti%3A%22vaccine%22+OR+abs%3A%22vaccine%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611020000+TO+202611082359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22influenza%22+OR+abs%3A%22influenza%22+OR+ti%3A%22hemagglutinin%22+OR+abs%3A%22hemagglutinin%22+OR+ti%3A%22h3n2%22+OR+abs%3A%22h3n2%22+OR+ti%3A%22vaccine%22+OR+abs%3A%22vaccine%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611020000+TO+202611082359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22influenza%22+OR+abs%3A%22influenza%22+OR+ti%3A%22hemagglutinin%22+OR+abs%3A%22hemagglutinin%22+OR+ti%3A%22h3n2%22+OR+abs%3A%22h3n2%22+OR+ti%3A%22vaccine%22+OR+abs%3A%22vaccine%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202611020000+TO+202611082359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?datetype=pdat&db=pubmed&maxdate=2026%2F11%2F01&mindate=2026%2F10%2F26&retmode=json&rettype=count&term=%28%28immune+escape%29+OR+%28antigenic+drift%29%29+NOT+%28%22case+report%22%5BTitle%2FAbstract%5D%29&tool=carousel",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json; charset=UTF-8",
+     "x-ratelimit-limit": "3",
+     "x-ratelimit-remaining": "2"
+    },
+    "body": "{\"header\":{\"type\":\"esearch\",\"version\":\"0.3\"},\"esearchresult\":{\"count\":\"124\"}}\n"
+   }
+  },
+  {
+   "request": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?datetype=pdat&db=pubmed&maxdate=2026%2F11%2F01&mindate=2026%2F10%2F26&retmode=json&rettype=count&term=%28%28immune+escape%29+OR+%28antigenic+drift%29%29+AND+%28%28sars+cov%29+OR+%28spike%29+OR+%28omicron%29+OR+%28neutralizing%29%29+NOT+%28%22case+report%22%5BTitle%2FAbstract%5D%29&tool=carousel",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json; charset=UTF-8",
+     "x-ratelimit-limit": "3",
+     "x-ratelimit-remaining": "1"
+    },
+    "body": "{\"header\":{\"type\":\"esearch\",\"version\":\"0.3\"},\"esearchresult\":{\"count\":\"12\"}}\n"
+   }
+  },
+  {
+   "request": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?datetype=pdat&db=pubmed&maxdate=2026%2F11%2F01&mindate=2026%2F10%2F26&retmode=json&rettype=count&term=%28%28immune+escape%29+OR+%28antigenic+drift%29%29+AND+%28%28influenza%29+OR+%28hemagglutinin%29+OR+%28h3n2%29+OR+%28vaccine%29%29+NOT+%28%22case+report%22%5BTitle%2FAbstract%5D%29&tool=carousel",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json; charset=UTF-8",
+     "x-ratelimit-limit": "3",
+     "x-ratelimit-remaining": "0"
+    },
+    "body": "{\"header\":{\"type\":\"esearch\",\"version\":\"0.3\"},\"esearchresult\":{\"count\":\"20\"}}\n"
+   }
+  },
+  {
+   "request": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=1&query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-10-26+TO+2026-11-01%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&resultType=idlist",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json;charset=UTF-8"
+    },
+    "body": "{\"version\":\"6.9\",\"hitCount\":45,\"nextCursorMark\":\"AoIIQKpLkSg1NjkxNzM5OQ==\",\"nextPageUrl\":\"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-10-26+TO+2026-11-01%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&cursorMark=AoIIQKpLkSg1NjkxNzM5OQ%3D%3D&resultType=idlist&pageSize=1&format=json\",\"request\":{\"queryString\":\"((TITLE_ABS:\\\"immune escape\\\" OR TITLE_ABS:\\\"antigenic drift\\\") NOT (TITLE_ABS:\\\"case report\\\")) AND (FIRST_PDATE:[2026-10-26 TO 2026-11-01]) AND (SRC:MED OR SRC:PMC OR SRC:PPR)\",\"resultType\":\"idlist\",\"cursorMark\":\"*\",\"pageSize\":1,\"sort\":\"\",\"synonym\":false},\"resultList\":{\"result\":[{\"id\":\"43028016\",\"source\":\"MED\",\"pmid\":\"43028016\",\"pmcid\":\"PMC13763251\",\"fullTextIdList\":{\"fullTextId\":[\"PMC13763251\"]}}]}}"
+   }
+  },
+  {
+   "request": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=1&query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+AND+%28TITLE_ABS%3A%22sars+cov%22+OR+TITLE_ABS%3A%22spike%22+OR+TITLE_ABS%3A%22omicron%22+OR+TITLE_ABS%3A%22neutralizing%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-10-26+TO+2026-11-01%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&resultType=idlist",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json;charset=UTF-8"
+    },
+    "body": "{\"version\":\"6.9\",\"hitCount\":2,\"nextCursorMark\":\"AoIIQTb/BSg1NjkxNzM5OQ==\",\"nextPageUrl\":\"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+AND+%28TITLE_ABS%3A%22sars+cov%22+OR+TITLE_ABS%3A%22spike%22+OR+TITLE_ABS%3A%22omicron%22+OR+TITLE_ABS%3A%22neutralizing%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-10-26+TO+2026-11-01%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&cursorMark=AoIIQTb%2FBSg1NjkxNzM5OQ%3D%3D&resultType=idlist&pageSize=1&format=json\",\"request\":{\"queryString\":\"((TITLE_ABS:\\\"immune escape\\\" OR TITLE_ABS:\\\"antigenic drift\\\") AND (TITLE_ABS:\\\"sars cov\\\" OR TITLE_ABS:\\\"spike\\\" OR TITLE_ABS:\\\"omicron\\\" OR TITLE_ABS:\\\"neutralizing\\\") NOT (TITLE_ABS:\\\"case report\\\")) AND (FIRST_PDATE:[2026-10-26 TO 2026-11-01]) AND (SRC:MED OR SRC:PMC OR SRC:PPR)\",\"resultType\":\"idlist\",\"cursorMark\":\"*\",\"pageSize\":1,\"sort\":\"\",\"synonym\":false},\"resultList\":{\"result\":[{\"id\":\"43028016\",\"source\":\"MED\",\"pmid\":\"43028016\",\"pmcid\":\"PMC13763251\",\"fullTextIdList\":{\"fullTextId\":[\"PMC13763251\"]}}]}}"
+   }
+  },
+  {
+   "request": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=1&query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+AND+%28TITLE_ABS%3A%22influenza%22+OR+TITLE_ABS%3A%22hemagglutinin%22+OR+TITLE_ABS%3A%22h3n2%22+OR+TITLE_ABS%3A%22vaccine%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-10-26+TO+2026-11-01%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&resultType=idlist",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json;charset=UTF-8"
+    },
+    "body": "{\"version\":\"6.9\",\"hitCount\":7,\"nextCursorMark\":\"AoIIQQ3QDSg1NjgwNzk0Mg==\",\"nextPageUrl\":\"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=%28%28TITLE_ABS%3A%22immune+escape%22+OR+TITLE_ABS%3A%22antigenic+drift%22%29+AND+%28TITLE_ABS%3A%22influenza%22+OR+TITLE_ABS%3A%22hemagglutinin%22+OR+TITLE_ABS%3A%22h3n2%22+OR+TITLE_ABS%3A%22vaccine%22%29+NOT+%28TITLE_ABS%3A%22case+report%22%29%29+AND+%28FIRST_PDATE%3A%5B2026-10-26+TO+2026-11-01%5D%29+AND+%28SRC%3AMED+OR+SRC%3APMC+OR+SRC%3APPR%29&cursorMark=AoIIQQ3QDSg1NjgwNzk0Mg%3D%3D&resultType=idlist&pageSize=1&format=json\",\"request\":{\"queryString\":\"((TITLE_ABS:\\\"immune escape\\\" OR TITLE_ABS:\\\"antigenic drift\\\") AND (TITLE_ABS:\\\"influenza\\\" OR TITLE_ABS:\\\"hemagglutinin\\\" OR TITLE_ABS:\\\"h3n2\\\" OR TITLE_ABS:\\\"vaccine\\\") NOT (TITLE_ABS:\\\"case report\\\")) AND (FIRST_PDATE:[2026-10-26 TO 2026-11-01]) AND (SRC:MED OR SRC:PMC OR SRC:PPR)\",\"resultType\":\"idlist\",\"cursorMark\":\"*\",\"pageSize\":1,\"sort\":\"\",\"synonym\":false},\"resultList\":{\"result\":[{\"id\":\"PPR1353445\",\"source\":\"PPR\"}]}}"
+   }
+  },
+  {
+   "request": "https://api.openalex.org/works?filter=from_publication_date%3A2026-10-26%2Cto_publication_date%3A2026-11-01%2Ctype%3Aarticle%7Cpreprint%7Creview%7Cletter&per_page=1&search.title_and_abstract=%28%22immune+escape%22+OR+%22antigenic+drift%22%29+NOT+%28%22case+report%22%29&select=id",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json",
+     "x-ratelimit-cost-usd": "0.001",
+     "x-ratelimit-credits-used": "10",
+     "x-ratelimit-limit": "1000",
+     "x-ratelimit-limit-usd": "0.1",
+     "x-ratelimit-onetime-remaining": "0",
+     "x-ratelimit-prepaid-remaining-usd": "0",
+     "x-ratelimit-remaining": "880",
+     "x-ratelimit-remaining-usd": "0.088",
+     "x-ratelimit-reset": "15095"
+    },
+    "body": "{\"meta\": {\"notice\": \"No API key, so this request shares one free daily budget ($0.10) with everyone on your network's IP address. Get a free key with its own $1/day at https://openalex.org/settings/api and add api_key=YOUR_KEY to your requests. An AI agent can get one for its user in one call: POST https://api.openalex.org/api-keys with {\\\"email\\\": \\\"<your user's email>\\\"}; we email them a link, and the key works once they click it. Docs for agents: https://help.openalex.org/llms.txt\", \"count\": 70, \"db_response_time_ms\": 33, \"page\": 1, \"per_page\": 1, \"groups_count\": null, \"x_query\": {\"oql\": \"get works from 2026-10-26 through 2026-11-01 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"x_new_oql\": \"get works from 2026-10-26 through 2026-11-01 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"oqo\": {\"get_rows\": \"works\", \"filter_rows\": [{\"column_id\": \"from_publication_date\", \"value\": \"2026-10-26\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"case report\\\"\", \"operator\": \"has\", \"is_negated\": true}, {\"column_id\": \"to_publication_date\", \"value\": \"2026-11-01\"}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"antigenic drift\\\"\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"immune escape\\\"\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"type\", \"value\": \"article\"}, {\"column_id\": \"type\", \"value\": \"letter\"}, {\"column_id\": \"type\", \"value\": \"preprint\"}, {\"column_id\": \"type\", \"value\": \"review\"}]}]}, \"url\": \"/works?filter=from_publication_date:2026-10-26,title_and_abstract.search:%21%22case report%22,to_publication_date:2026-11-01,title_and_abstract.search:%22antigenic drift%22|%22immune escape%22,type:article|letter|preprint|review&per_page=1\", \"order\": \"best matches first\", \"order_default\": true}, \"cost_usd\": 0.001}, \"results\": [{\"id\": \"https://openalex.org/W7224797069\"}], \"group_by\": []}"
+   }
+  },
+  {
+   "request": "https://api.openalex.org/works?filter=from_publication_date%3A2026-10-26%2Cto_publication_date%3A2026-11-01%2Ctype%3Aarticle%7Cpreprint%7Creview%7Cletter&per_page=1&search.title_and_abstract=%28%22immune+escape%22+OR+%22antigenic+drift%22%29+AND+%28%22sars+cov%22+OR+spike+OR+omicron+OR+neutralizing%29+NOT+%28%22case+report%22%29&select=id",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json",
+     "x-ratelimit-cost-usd": "0.001",
+     "x-ratelimit-credits-used": "10",
+     "x-ratelimit-limit": "1000",
+     "x-ratelimit-limit-usd": "0.1",
+     "x-ratelimit-onetime-remaining": "0",
+     "x-ratelimit-prepaid-remaining-usd": "0",
+     "x-ratelimit-remaining": "870",
+     "x-ratelimit-remaining-usd": "0.087",
+     "x-ratelimit-reset": "15094"
+    },
+    "body": "{\"meta\": {\"notice\": \"No API key, so this request shares one free daily budget ($0.10) with everyone on your network's IP address. Get a free key with its own $1/day at https://openalex.org/settings/api and add api_key=YOUR_KEY to your requests. An AI agent can get one for its user in one call: POST https://api.openalex.org/api-keys with {\\\"email\\\": \\\"<your user's email>\\\"}; we email them a link, and the key works once they click it. Docs for agents: https://help.openalex.org/llms.txt\", \"count\": 6, \"db_response_time_ms\": 44, \"page\": 1, \"per_page\": 1, \"groups_count\": null, \"x_query\": {\"oql\": \"get works from 2026-10-26 through 2026-11-01 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") AND (stemmed \\\"sars cov\\\" OR neutralizing OR omicron OR spike) NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"x_new_oql\": \"get works from 2026-10-26 through 2026-11-01 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") AND (stemmed \\\"sars cov\\\" OR neutralizing OR omicron OR spike) NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"oqo\": {\"get_rows\": \"works\", \"filter_rows\": [{\"column_id\": \"from_publication_date\", \"value\": \"2026-10-26\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"case report\\\"\", \"operator\": \"has\", \"is_negated\": true}, {\"column_id\": \"to_publication_date\", \"value\": \"2026-11-01\"}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"antigenic drift\\\"\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"immune escape\\\"\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"sars cov\\\"\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"neutralizing\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"omicron\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"spike\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"type\", \"value\": \"article\"}, {\"column_id\": \"type\", \"value\": \"letter\"}, {\"column_id\": \"type\", \"value\": \"preprint\"}, {\"column_id\": \"type\", \"value\": \"review\"}]}]}, \"url\": \"/works?filter=from_publication_date:2026-10-26,title_and_abstract.search:%21%22case report%22,to_publication_date:2026-11-01,title_and_abstract.search:%22antigenic drift%22|%22immune escape%22,title_and_abstract.search:%22sars cov%22|neutralizing|omicron|spike,type:article|letter|preprint|review&per_page=1\", \"order\": \"best matches first\", \"order_default\": true}, \"cost_usd\": 0.001}, \"results\": [{\"id\": \"https://openalex.org/W7131811082\"}], \"group_by\": []}"
+   }
+  },
+  {
+   "request": "https://api.openalex.org/works?filter=from_publication_date%3A2026-10-26%2Cto_publication_date%3A2026-11-01%2Ctype%3Aarticle%7Cpreprint%7Creview%7Cletter&per_page=1&search.title_and_abstract=%28%22immune+escape%22+OR+%22antigenic+drift%22%29+AND+%28influenza+OR+hemagglutinin+OR+h3n2+OR+vaccine%29+NOT+%28%22case+report%22%29&select=id",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/json",
+     "x-ratelimit-cost-usd": "0.001",
+     "x-ratelimit-credits-used": "10",
+     "x-ratelimit-limit": "1000",
+     "x-ratelimit-limit-usd": "0.1",
+     "x-ratelimit-onetime-remaining": "0",
+     "x-ratelimit-prepaid-remaining-usd": "0",
+     "x-ratelimit-remaining": "860",
+     "x-ratelimit-remaining-usd": "0.086",
+     "x-ratelimit-reset": "15093"
+    },
+    "body": "{\"meta\": {\"notice\": \"No API key, so this request shares one free daily budget ($0.10) with everyone on your network's IP address. Get a free key with its own $1/day at https://openalex.org/settings/api and add api_key=YOUR_KEY to your requests. An AI agent can get one for its user in one call: POST https://api.openalex.org/api-keys with {\\\"email\\\": \\\"<your user's email>\\\"}; we email them a link, and the key works once they click it. Docs for agents: https://help.openalex.org/llms.txt\", \"count\": 11, \"db_response_time_ms\": 28, \"page\": 1, \"per_page\": 1, \"groups_count\": null, \"x_query\": {\"oql\": \"get works from 2026-10-26 through 2026-11-01 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") AND (h3n2 OR hemagglutinin OR influenza OR vaccine) NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"x_new_oql\": \"get works from 2026-10-26 through 2026-11-01 with ((stemmed \\\"antigenic drift\\\" OR stemmed \\\"immune escape\\\") AND (h3n2 OR hemagglutinin OR influenza OR vaccine) NOT stemmed \\\"case report\\\") in the title or abstract where type is ([article](article) or [letter](letter) or [preprint](preprint) or [review](review))\", \"oqo\": {\"get_rows\": \"works\", \"filter_rows\": [{\"column_id\": \"from_publication_date\", \"value\": \"2026-10-26\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"case report\\\"\", \"operator\": \"has\", \"is_negated\": true}, {\"column_id\": \"to_publication_date\", \"value\": \"2026-11-01\"}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"antigenic drift\\\"\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"\\\"immune escape\\\"\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"title_and_abstract.search\", \"value\": \"h3n2\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"hemagglutinin\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"influenza\", \"operator\": \"has\"}, {\"column_id\": \"title_and_abstract.search\", \"value\": \"vaccine\", \"operator\": \"has\"}]}, {\"join\": \"or\", \"filters\": [{\"column_id\": \"type\", \"value\": \"article\"}, {\"column_id\": \"type\", \"value\": \"letter\"}, {\"column_id\": \"type\", \"value\": \"preprint\"}, {\"column_id\": \"type\", \"value\": \"review\"}]}]}, \"url\": \"/works?filter=from_publication_date:2026-10-26,title_and_abstract.search:%21%22case report%22,to_publication_date:2026-11-01,title_and_abstract.search:%22antigenic drift%22|%22immune escape%22,title_and_abstract.search:h3n2|hemagglutinin|influenza|vaccine,type:article|letter|preprint|review&per_page=1\", \"order\": \"best matches first\", \"order_default\": true}, \"cost_usd\": 0.001}, \"results\": [{\"id\": \"https://openalex.org/W7224797069\"}], \"group_by\": []}"
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202610260000+TO+202611012359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202610260000+TO+202611012359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202610260000+TO+202611012359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202610260000+TO+202611012359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202610260000+TO+202611012359%5D&start=0",
+   "response": {
+    "status": 429,
+    "headers": {},
+    "body": ""
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22sars+cov%22+OR+abs%3A%22sars+cov%22+OR+ti%3A%22spike%22+OR+abs%3A%22spike%22+OR+ti%3A%22omicron%22+OR+abs%3A%22omicron%22+OR+ti%3A%22neutralizing%22+OR+abs%3A%22neutralizing%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202610260000+TO+202611012359%5D&start=0",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/atom+xml; charset=utf-8"
+    },
+    "body": "<?xml version='1.0' encoding='UTF-8'?>\n<feed xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\" xmlns:arxiv=\"http://arxiv.org/schemas/atom\" xmlns=\"http://www.w3.org/2005/Atom\">\n  <id>https://arxiv.org/api/aR/O6CxyhHGi85hs/nrYNuGRCng</id>\n  <title>arXiv Query: search_query=( ( (ti:\"immune escape\" OR abs:\"immune escape\" OR ti:\"antigenic drift\" OR abs:\"antigenic drift\") AND (ti:\"sars cov\" OR abs:\"sars cov\" OR ti:\"spike\" OR abs:\"spike\" OR ti:\"omicron\" OR abs:\"omicron\" OR ti:\"neutralizing\" OR abs:\"neutralizing\") ) ANDNOT (ti:\"case report\" OR abs:\"case report\") ) AND submittedDate:\"202610260000 TO 202611012359\"&amp;id_list=&amp;start=0&amp;max_results=1</title>\n  <updated>2026-11-24T19:53:29Z</updated>\n  <link href=\"https://arxiv.org/api/query?search_query=(((ti:%22immune+escape%22+OR+(abs:%22immune+escape%22+OR+(ti:%22antigenic+drift%22+OR+abs:%22antigenic+drift%22)))+AND+(ti:%22sars+cov%22+OR+(abs:%22sars+cov%22+OR+(ti:%22spike%22+OR+(abs:%22spike%22+OR+(ti:%22omicron%22+OR+(abs:%22omicron%22+OR+(ti:%22neutralizing%22+OR+abs:%22neutralizing%22))))))))+ANDNOT+(ti:%22case+report%22+OR+abs:%22case+report%22))+AND+submittedDate:%22202610260000+TO+202611012359%22&amp;start=0&amp;max_results=1&amp;id_list=\" type=\"application/atom+xml\"/>\n  <opensearch:itemsPerPage>1</opensearch:itemsPerPage>\n  <opensearch:totalResults>0</opensearch:totalResults>\n  <opensearch:startIndex>0</opensearch:startIndex>\n</feed>\n"
+   }
+  },
+  {
+   "request": "https://export.arxiv.org/api/query?max_results=1&search_query=%28%28%28ti%3A%22immune+escape%22+OR+abs%3A%22immune+escape%22+OR+ti%3A%22antigenic+drift%22+OR+abs%3A%22antigenic+drift%22%29+AND+%28ti%3A%22influenza%22+OR+abs%3A%22influenza%22+OR+ti%3A%22hemagglutinin%22+OR+abs%3A%22hemagglutinin%22+OR+ti%3A%22h3n2%22+OR+abs%3A%22h3n2%22+OR+ti%3A%22vaccine%22+OR+abs%3A%22vaccine%22%29%29+ANDNOT+%28ti%3A%22case+report%22+OR+abs%3A%22case+report%22%29%29+AND+submittedDate%3A%5B202610260000+TO+202611012359%5D&start=0",
+   "response": {
+    "status": 200,
+    "headers": {
+     "content-type": "application/atom+xml; charset=utf-8"
+    },
+    "body": "<?xml version='1.0' encoding='UTF-8'?>\n<feed xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\" xmlns:arxiv=\"http://arxiv.org/schemas/atom\" xmlns=\"http://www.w3.org/2005/Atom\">\n  <id>https://arxiv.org/api/3iOGPMdFng7J6whlfYqVyKWssmM</id>\n  <title>arXiv Query: search_query=( ( (ti:\"immune escape\" OR abs:\"immune escape\" OR ti:\"antigenic drift\" OR abs:\"antigenic drift\") AND (ti:\"influenza\" OR abs:\"influenza\" OR ti:\"hemagglutinin\" OR abs:\"hemagglutinin\" OR ti:\"h3n2\" OR abs:\"h3n2\" OR ti:\"vaccine\" OR abs:\"vaccine\") ) ANDNOT (ti:\"case report\" OR abs:\"case report\") ) AND submittedDate:\"202610260000 TO 202611012359\"&amp;id_list=&amp;start=0&amp;max_results=1</title>\n  <updated>2026-11-24T19:53:32Z</updated>\n  <link href=\"https://arxiv.org/api/query?search_query=(((ti:%22immune+escape%22+OR+(abs:%22immune+escape%22+OR+(ti:%22antigenic+drift%22+OR+abs:%22antigenic+drift%22)))+AND+(ti:%22influenza%22+OR+(abs:%22influenza%22+OR+(ti:%22hemagglutinin%22+OR+(abs:%22hemagglutinin%22+OR+(ti:%22h3n2%22+OR+(abs:%22h3n2%22+OR+(ti:%22vaccine%22+OR+abs:%22vaccine%22))))))))+ANDNOT+(ti:%22case+report%22+OR+abs:%22case+report%22))+AND+submittedDate:%22202610260000+TO+202611012359%22&amp;start=0&amp;max_results=1&amp;id_list=\" type=\"application/atom+xml\"/>\n  <opensearch:itemsPerPage>1</opensearch:itemsPerPage>\n  <opensearch:totalResults>0</opensearch:totalResults>\n  <opensearch:startIndex>0</opensearch:startIndex>\n</feed>\n"
+   }
+  }
+ ]
+}

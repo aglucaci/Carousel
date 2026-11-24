@@ -12,6 +12,7 @@ carousel command-line interface.
     carousel extract PAPER_ID [--store S] [--provider rules|anthropic] [--text FILE] [--format text|json]
     carousel consent list|grant|revoke [PROVIDER] [--text public|private] [--store S]
     carousel topics list|fit|papers RADAR_ID [--store S] [--k K] [--topic TOPIC_ID]
+    carousel topics observe RADAR_ID --config RADAR.yml [--weeks N] [--budget N]   # weekly counts per topic
     carousel review link STORE.db PREPRINT_ID PUBLISHED_ID [--note TEXT]   # versions of one work, kept apart
     carousel review unlink STORE.db ID_A ID_B [--note TEXT]          # not versions of one work
 
@@ -387,7 +388,26 @@ def cmd_topics(args: argparse.Namespace) -> int:
         model = store.active_topic_model(args.radar)
         if model is None:
             print(f"no topic model for radar {args.radar!r} yet (it is fitted after enough scans, or: carousel topics fit)")
-            return 0 if args.action != "papers" else 1
+            return 0 if args.action not in ("papers", "observe") else 1
+        if args.action == "observe":
+            from carousel.connectors import CONNECTORS
+            from carousel.core.config import load_radar
+            from carousel.intelligence.observations import COUNTING_SOURCES, observe
+
+            if not args.config:
+                print("FAIL observe needs the radar's config: --config RADAR.yml", file=sys.stderr)
+                return 1
+            cfg = load_radar(args.config)
+            if cfg.radar_id != args.radar:
+                print(f"FAIL {args.config} is radar {cfg.radar_id!r}, not {args.radar!r}", file=sys.stderr)
+                return 1
+            conns = {s.value: CONNECTORS[s.value]() for s in cfg.sources if s.value in COUNTING_SOURCES}
+            stats = observe(store, cfg, model, conns, at=dt.datetime.now(dt.timezone.utc), weeks=args.weeks,
+                            budget=args.budget)
+            print(f"observed {stats['weeks']} week(s) from {', '.join(stats['sources']) or 'no counting source'}: "
+                  f"{stats['ok']} counts, {stats['errors']} failed requests"
+                  + (" (stopped at the request budget)" if stats["truncated"] else ""))
+            return 0 if not stats["errors"] else 1
         if args.action == "list":
             placed = store.paper_topics(model.classifier_version)
             counts: dict = {}
@@ -696,13 +716,16 @@ def build_parser() -> argparse.ArgumentParser:
     co.set_defaults(func=cmd_consent)
 
     tp = sub.add_parser("topics", help="A radar's topics: list them, fit a new version, or list a topic's papers")
-    tp.add_argument("action", choices=("list", "fit", "papers"))
+    tp.add_argument("action", choices=("list", "fit", "papers", "observe"))
     tp.add_argument("radar", metavar="RADAR_ID")
     tp.add_argument("--store", default="carousel.db")
     tp.add_argument("--k", type=int, help="fit: number of topics (default: chosen by silhouette)")
     tp.add_argument("--embedder", choices=("auto", "semantic", "hashing"), default="auto",
                     help="fit: embeddings to cluster (default: semantic when installed)")
     tp.add_argument("--topic", metavar="TOPIC_ID", help="papers: the topic")
+    tp.add_argument("--config", metavar="RADAR.yml", help="observe: the radar's config (its queries are the field)")
+    tp.add_argument("--weeks", type=int, default=12, help="observe: complete weeks to count, newest first (default 12)")
+    tp.add_argument("--budget", type=int, default=400, help="observe: most count requests to send (default 400)")
     tp.set_defaults(func=cmd_topics)
 
     ru = sub.add_parser("runs", help="List stored runs")

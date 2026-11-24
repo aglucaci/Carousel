@@ -768,3 +768,29 @@ def radar_topics(s: Session, radar_id: str, version: Optional[str] = None) -> Di
         "mapping": [{"relation": x.relation, "from_topic": x.from_topic, "to_topic": x.to_topic,
                      "shared_members": x.shared_members, "centroid_similarity": x.centroid_similarity} for x in mapping],
     }
+
+
+def topic_series(s: Session, radar_id: str, as_of: Optional[dt.datetime] = None,
+                 source: Optional[str] = None) -> Dict[str, Any]:
+    """Each topic's weekly counts and the field denominator, as known at ``as_of`` (default: now)."""
+    from carousel.intelligence.observations import FIELD, counts_as_of, series
+
+    model = radar_topics(s, radar_id)
+    as_of = as_of or dt.datetime.now(dt.timezone.utc)
+    q = select(m.TopicObservation).where(m.TopicObservation.radar_id == radar_id,
+                                         m.TopicObservation.classifier_version == model["classifier_version"])
+    if source:
+        q = q.where(m.TopicObservation.source == source)
+    rows = [{"source": o.source, "topic_id": o.topic_key, "period_start": o.window_start.isoformat(),
+             "period_end": o.window_end.isoformat(), "count": o.count, "status": o.status,
+             "observed_at": o.observed_at.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")}
+            for o in s.scalars(q)]
+    known = counts_as_of(rows, as_of)
+    sources = sorted({k[0] for k in known})
+    return {
+        "radar_id": radar_id, "classifier_version": model["classifier_version"], "as_of": as_of, "sources": sources,
+        "field": {src: [{"week": w.isoformat(), "count": r["count"], "observed_at": r["observed_at"]}
+                        for (sr, tp, w), r in sorted(known.items()) if sr == src and tp == FIELD] for src in sources},
+        "topics": [{"topic_id": t["topic_id"], "label": t["label"],
+                    "series": {src: series(known, src, t["topic_id"]) for src in sources}} for t in model["topics"]],
+    }

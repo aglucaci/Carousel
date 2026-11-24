@@ -189,10 +189,11 @@ def _phrase(term: str) -> str:
 
 def build_query(query: SearchQuery) -> str:
     """Radar terms -> Europe PMC syntax over titles and abstracts, in the date window, from MED/PMC/PPR."""
+    require = (" AND (" + " OR ".join(f"TITLE_ABS:{_phrase(t)}" for t in query.require) + ")") if query.require else ""
     if query.native:
-        core = f"({query.native})"
+        core = f"({query.native}){require}"
     else:
-        core = "(" + " OR ".join(f"TITLE_ABS:{_phrase(t)}" for t in query.terms) + ")"
+        core = "(" + " OR ".join(f"TITLE_ABS:{_phrase(t)}" for t in query.terms) + ")" + require
         if query.exclude:
             core += " NOT (" + " OR ".join(f"TITLE_ABS:{_phrase(t)}" for t in query.exclude) + ")"
     window = f"FIRST_PDATE:[{query.start.isoformat()} TO {query.end.isoformat()}]"
@@ -265,6 +266,13 @@ class EuropePMCConnector(Connector):
         super().__init__(client)
 
     # ---- search ----
+
+    def count(self, query: SearchQuery) -> "CountResult":
+        before = self._snapshot_stats()
+        q = build_query(query)
+        params = {"query": q, "resultType": "idlist", "format": "json", "pageSize": 1}
+        data = self.client.get(Request.build(f"{REST}/search", params)).json()
+        return self._count_result(query, before, q, "first publication date (FIRST_PDATE)", data.get("hitCount"))
 
     def search(self, query: SearchQuery) -> SearchResult:
         before = self._snapshot_stats()
