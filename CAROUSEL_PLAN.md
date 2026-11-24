@@ -190,6 +190,18 @@ were recommended.
   - explicit consent is required before private text leaves the deployment
 - arXiv connector.
 
+| # | Task | Done when |
+| --- | --- | --- |
+| 15 | ✅ Scheduled scans per radar (daily or weekly), pause/resume that keeps history; label each recommendation newly published vs newly observed | A paused radar is never scanned on schedule and keeps its runs; scheduled runs are recorded as such; arrivals are tested against the previous run (done 2026-11-24: `workers/schedule.py` + `carousel scheduler` (UTC periods; a manual scan in the period counts; a per-period Redis guard and a queued/running check, so ticks are idempotent across schedulers), Alembic `0002` (`radars.schedule` daily/weekly, `recommendation_runs.trigger`), `PATCH /radars/{id}`, `next_scan_at`, `arrival` on ranked items and `newly_published` / `newly_observed` on delta; web: schedule and pause controls, arrival badges; Compose `scheduler` service; verified live: a daily radar got its scheduled scan on the first tick) |
+| 16 | Crossref connector: DOI metadata, `update-to` corrections and retractions (incl. Retraction Watch), preprint relations | Recorded-HTTP fixture tests; a retraction flags the paper |
+| 17 | Europe PMC connector: abstracts, open-access full text where licensed, annotations | Recorded-HTTP fixture tests; licence recorded per text |
+| 18 | Preprint↔publication linking without collapsing the records | Fixture pairs; linked records stay separate and show each other |
+| 19 | Versioned recommendation explanations; feedback-adjusted interest profile | Explanations carry a version; relevant/irrelevant feedback measurably changes the next ranking |
+| 20 | Digests: email, RSS, Markdown | A scan produces each digest; failed deliveries are recorded |
+| 21 | First Research Delta events: new publication, publication revision | Events are reproducible from stored runs and link their evidence |
+| 22 | Grounded extraction schema (spec §7) behind a provider-agnostic interface | Abstract-only coverage stated; each claim cites its passage; cached per paper and model version; consent required before private text leaves |
+| 23 | arXiv connector | Recorded-HTTP fixture tests |
+
 ### Phase 3 — Research Delta
 
 **Acceptance (spec):** topic events are reproducible, explainable, supported by

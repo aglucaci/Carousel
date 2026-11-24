@@ -159,6 +159,14 @@ def create_app(settings: Optional[Settings] = None, *, queue: Any = None) -> Fas
     def get_radar(radar_id: str, s: Session = Depends(session)) -> Any:
         return services.radar_detail(s, radar_id)
 
+    @app.patch(f"{API_PREFIX}/radars/{{radar_id}}", response_model=schemas.RadarOut, tags=["radars"],
+               dependencies=[Depends(require_token)])
+    def update_radar(radar_id: str, body: schemas.RadarPatch, s: Session = Depends(session)) -> Any:
+        """Set the scan schedule, or pause and resume scheduled scans. History is never deleted."""
+        out = services.update_radar(s, radar_id, body.model_dump(include=body.model_fields_set))
+        s.commit()
+        return out
+
     # ---- runs and jobs ----
 
     @app.post(f"{API_PREFIX}/radars/{{radar_id}}/runs", response_model=schemas.JobOut, status_code=202,
@@ -170,7 +178,7 @@ def create_app(settings: Optional[Settings] = None, *, queue: Any = None) -> Fas
         body = body or schemas.ScanRequest()
         # Only the scan settings go on the queue: the worker takes the database URL (a credential)
         # and the store path from its own environment, so they never sit in Redis or its logs.
-        return job_out(enqueue_scan(queue, radar_id, **body.model_dump(exclude_none=True)))
+        return job_out(enqueue_scan(queue, radar_id, trigger="manual", **body.model_dump(exclude_none=True)))
 
     @app.get(f"{API_PREFIX}/jobs/{{job_id}}", response_model=schemas.JobOut, tags=["runs"])
     def get_job(job_id: str) -> Any:

@@ -82,10 +82,13 @@ class Radar(Base):
     title: Mapped[str] = mapped_column(Text)
     description: Mapped[str] = mapped_column(Text, server_default="")
     state: Mapped[str] = mapped_column(String(16), server_default="active")
-    schedule: Mapped[Optional[str]] = mapped_column(Text)  # cron expression; NULL = manual
+    schedule: Mapped[Optional[str]] = mapped_column(Text)  # 'daily' | 'weekly' (UTC periods); NULL = manual only
     created_at: Mapped[dt.datetime] = _now()
     updated_at: Mapped[dt.datetime] = _now()
-    __table_args__ = (CheckConstraint("state IN ('active', 'paused', 'archived')", name="state"),)
+    __table_args__ = (
+        CheckConstraint("state IN ('active', 'paused', 'archived')", name="state"),
+        CheckConstraint("schedule IN ('daily', 'weekly')", name="schedule"),
+    )
 
 
 class RadarVersion(Base):
@@ -273,7 +276,12 @@ class RecommendationRun(Base):
     coverage: Mapped[List[Any]] = mapped_column()
     ranking: Mapped[Dict[str, Any]] = mapped_column()
     notes: Mapped[List[Any]] = mapped_column(server_default="[]")
-    __table_args__ = (Index("ix_recommendation_runs_radar_executed", "radar_id", "executed_at"),)
+    # What started the run: 'manual' (API/web), 'scheduled' (carousel scheduler); NULL = CLI or imported.
+    trigger: Mapped[Optional[str]] = mapped_column(String(16))
+    __table_args__ = (
+        Index("ix_recommendation_runs_radar_executed", "radar_id", "executed_at"),
+        CheckConstraint("trigger IN ('manual', 'scheduled')", name="trigger"),
+    )
 
 
 class RecommendationItem(Base):

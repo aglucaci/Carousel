@@ -20,6 +20,7 @@ carousel command-line interface.
     carousel db import-store STORE.db | import-snapshots CHECKOUT    # copy Phase 1A data into Postgres
     carousel api serve [--host H --port P] | api openapi [--out F]   # REST API v1
     carousel worker [--burst]                                        # scan worker (RQ on Redis)
+    carousel scheduler [--once] [--interval SECONDS]                 # enqueue daily/weekly radar scans
 """
 
 from __future__ import annotations
@@ -335,6 +336,36 @@ def cmd_worker(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_scheduler(args: argparse.Namespace) -> int:
+    try:
+        from redis import Redis
+        from rq import Queue
+        from sqlalchemy.orm import sessionmaker
+
+        from carousel.database import postgres
+        from carousel.workers import schedule
+        from carousel.workers.scan import QUEUE
+    except ImportError as exc:
+        print(f'FAIL the scheduler needs the server extra: pip install "carousel-research[server]" ({exc})', file=sys.stderr)
+        return 1
+    import logging
+    import os
+
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
+    try:
+        sessions = sessionmaker(postgres.engine())
+    except ValueError as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    queue = Queue(QUEUE, connection=Redis.from_url(os.environ.get("CAROUSEL_REDIS_URL", "redis://localhost:6379/0")))
+    if args.once:
+        jobs = schedule.tick(sessions, queue)
+        print(f"enqueued {len(jobs)} scheduled scan(s)" + "".join(f"\n  {j.meta.get('radar_id')}  {j.id}" for j in jobs))
+        return 0
+    schedule.run_forever(sessions, queue, interval=args.interval)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="carousel", description="CAROUSEL research radar tools.")
     ap.add_argument("--version", action="version", version=f"carousel {__version__}")
@@ -446,6 +477,11 @@ def build_parser() -> argparse.ArgumentParser:
     wk.add_argument("--burst", action="store_true", help="Exit when the queue is empty")
     wk.add_argument("--simple", action="store_true", help="Run jobs in-process (no fork); default on macOS")
     wk.set_defaults(func=cmd_worker)
+
+    sc = sub.add_parser("scheduler", help="Enqueue scheduled (daily/weekly) radar scans; reads CAROUSEL_DATABASE_URL and CAROUSEL_REDIS_URL")
+    sc.add_argument("--once", action="store_true", help="Check once, enqueue what is due, and exit (for cron)")
+    sc.add_argument("--interval", type=float, default=60.0, help="Seconds between checks (default 60)")
+    sc.set_defaults(func=cmd_scheduler)
     return ap
 
 

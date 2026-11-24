@@ -61,12 +61,12 @@ class PostgresTestCase(unittest.TestCase):
 
 class MigrationTests(PostgresTestCase):
     def test_up_down_up_and_no_drift(self) -> None:
-        self.assertEqual(postgres.current(URL), "0001")
+        self.assertEqual(postgres.current(URL), "0002")
         postgres.downgrade(URL)
         self.assertIsNone(postgres.current(URL))
         self.assertEqual(inspect(postgres.engine(URL)).get_table_names(), ["alembic_version"])
         postgres.upgrade(URL)
-        self.assertEqual(postgres.current(URL), "0001")
+        self.assertEqual(postgres.current(URL), "0002")
 
         from alembic.autogenerate import compare_metadata
         from alembic.runtime.migration import MigrationContext
@@ -244,7 +244,7 @@ class CliTests(PostgresTestCase):
 
     def test_db_commands(self) -> None:
         code, out, _ = self.run_cli("db", "current", "--url", URL)
-        self.assertEqual((code, out.strip()), (0, "0001"))
+        self.assertEqual((code, out.strip()), (0, "0002"))
         root = SnapshotImportTests.make_snapshots(self)
         code, out, err = self.run_cli("db", "import-snapshots", str(root), "--url", URL)
         self.assertEqual(code, 0, err)

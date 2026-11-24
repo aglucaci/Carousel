@@ -15,7 +15,16 @@ class _Out(BaseModel):
 class RadarIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
     config: Dict[str, Any] = Field(description="A radar config, as in a radar YAML file (validated as RadarConfig)")
-    schedule: Optional[str] = Field(None, description="Cron expression for scheduled scans; omit for manual only")
+    schedule: Optional[Literal["daily", "weekly"]] = Field(
+        None, description="Scan automatically once per UTC day or week (`carousel scheduler`); omit for manual only")
+
+
+class RadarPatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    schedule: Optional[Literal["daily", "weekly"]] = Field(
+        None, description="daily | weekly, or null for manual scans only. Omit to leave unchanged")
+    state: Optional[Literal["active", "paused"]] = Field(
+        None, description="paused stops scheduled scans and keeps all history; manual scans still work")
 
 
 class RunSummary(_Out):
@@ -34,6 +43,8 @@ class RunSummary(_Out):
     n_items: int
     coverage: List[Dict[str, Any]] = Field(description="What each source returned for this run, and what it did not")
     notes: List[str] = []
+    trigger: Optional[Literal["manual", "scheduled"]] = Field(
+        None, description="What started the run; null for runs from the CLI or imported history")
 
 
 class RunDetail(RunSummary):
@@ -52,6 +63,8 @@ class RadarOut(_Out):
     config: Optional[Dict[str, Any]] = None
     n_runs: int
     latest_run: Optional[RunSummary] = None
+    next_scan_at: Optional[dt.datetime] = Field(
+        None, description="When the scheduler will next scan this radar (now, if due); null if manual or paused")
 
 
 class ProposalIn(BaseModel):
@@ -117,11 +130,16 @@ class RankedItem(_Out):
     dismissed: bool = Field(description="Dismissed since this run (feedback applies from the next run)")
     saved: bool = Field(False, description="In the radar's saved list now")
     feedback: List[str] = Field([], description="Feedback actions currently on for this paper in this radar")
+    arrival: Optional[Literal["newly_published", "newly_observed", "seen_before"]] = Field(
+        None, description="Relative to the radar's earlier runs: published since the previous scan, older but "
+                          "seen by this radar for the first time, or seen before. Null on a radar's first run")
 
 
 class RankedPapersOut(_Out):
     run: RunSummary
     items: List[RankedItem]
+    previous_run_id: Optional[str] = Field(None, description="The run before this one, which arrivals compare with")
+    arrivals: Optional[Dict[str, int]] = Field(None, description="Count of items per arrival; null on the first run")
 
 
 class Moved(_Out):
@@ -137,6 +155,8 @@ class DeltaOut(_Out):
     entered: List[str]
     left: List[str]
     moved: List[Moved]
+    newly_published: List[str] = Field([], description="Recommended papers published after the previous run's as_of")
+    newly_observed: List[str] = Field([], description="Recommended papers older than that, new to this radar")
 
 
 class PaperOut(_Out):

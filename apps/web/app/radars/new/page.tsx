@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { ScanOptionsFields } from "@/components/Scan";
 import { Badge, Button, Card, ErrorNote, PageHeader, fmtDate, sourceName } from "@/components/ui";
-import { client, type Proposal, type ScanOptions } from "@/lib/api";
+import { client, type Proposal, type ScanOptions, type Schedule } from "@/lib/api";
 
 const lines = (s: string) =>
   s
@@ -47,6 +47,7 @@ export default function NewRadarPage() {
   const [mode, setMode] = useState("balanced");
   const [proposal, setProposal] = useState<Proposal | undefined>();
   const [scanNow, setScanNow] = useState(true);
+  const [schedule, setSchedule] = useState<Schedule | "">("");
   const [scanOpts, setScanOpts] = useState<ScanOptions>({});
   const [error, setError] = useState<Error | undefined>();
   const [working, setWorking] = useState(false);
@@ -82,7 +83,7 @@ export default function NewRadarPage() {
     setWorking(true);
     setError(undefined);
     try {
-      const radar = await client.createRadar(proposal.config);
+      const radar = await client.createRadar(proposal.config, schedule || null);
       const path = `/radars/${encodeURIComponent(radar.radar_id)}`;
       if (scanNow) {
         const job = await client.scan(radar.radar_id, scanOpts);
@@ -170,6 +171,20 @@ export default function NewRadarPage() {
             ))}
           </Card>
           <Card className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <label htmlFor="schedule">Scan automatically</label>
+              <select
+                id="schedule"
+                value={schedule}
+                onChange={(e) => setSchedule(e.target.value as Schedule | "")}
+                className="rounded-md border border-border bg-surface px-2 py-1.5"
+              >
+                <option value="">No, only when I start a scan</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly (Mondays)</option>
+              </select>
+              <span className="text-xs text-muted">You can change this or pause it later.</span>
+            </div>
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={scanNow} onChange={(e) => setScanNow(e.target.checked)} />
               Run the first scan now

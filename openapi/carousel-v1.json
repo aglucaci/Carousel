@@ -24,6 +24,24 @@
             "title": "Moved",
             "type": "array"
           },
+          "newly_observed": {
+            "default": [],
+            "description": "Recommended papers older than that, new to this radar",
+            "items": {
+              "type": "string"
+            },
+            "title": "Newly Observed",
+            "type": "array"
+          },
+          "newly_published": {
+            "default": [],
+            "description": "Recommended papers published after the previous run's as_of",
+            "items": {
+              "type": "string"
+            },
+            "title": "Newly Published",
+            "type": "array"
+          },
           "previous_run_id": {
             "anyOf": [
               {
@@ -770,13 +788,17 @@
           "schedule": {
             "anyOf": [
               {
+                "enum": [
+                  "daily",
+                  "weekly"
+                ],
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Cron expression for scheduled scans; omit for manual only",
+            "description": "Scan automatically once per UTC day or week (`carousel scheduler`); omit for manual only",
             "title": "Schedule"
           }
         },
@@ -822,6 +844,19 @@
           "n_runs": {
             "title": "N Runs",
             "type": "integer"
+          },
+          "next_scan_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the scheduler will next scan this radar (now, if due); null if manual or paused",
+            "title": "Next Scan At"
           },
           "owner_id": {
             "anyOf": [
@@ -875,8 +910,64 @@
         "title": "RadarOut",
         "type": "object"
       },
+      "RadarPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "schedule": {
+            "anyOf": [
+              {
+                "enum": [
+                  "daily",
+                  "weekly"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "daily | weekly, or null for manual scans only. Omit to leave unchanged",
+            "title": "Schedule"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "enum": [
+                  "active",
+                  "paused"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "paused stops scheduled scans and keeps all history; manual scans still work",
+            "title": "State"
+          }
+        },
+        "title": "RadarPatch",
+        "type": "object"
+      },
       "RankedItem": {
         "properties": {
+          "arrival": {
+            "anyOf": [
+              {
+                "enum": [
+                  "newly_published",
+                  "newly_observed",
+                  "seen_before"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Relative to the radar's earlier runs: published since the previous scan, older but seen by this radar for the first time, or seen before. Null on a radar's first run",
+            "title": "Arrival"
+          },
           "dismissed": {
             "description": "Dismissed since this run (feedback applies from the next run)",
             "title": "Dismissed",
@@ -952,12 +1043,39 @@
       },
       "RankedPapersOut": {
         "properties": {
+          "arrivals": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Count of items per arrival; null on the first run",
+            "title": "Arrivals"
+          },
           "items": {
             "items": {
               "$ref": "#/components/schemas/RankedItem"
             },
             "title": "Items",
             "type": "array"
+          },
+          "previous_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The run before this one, which arrivals compare with",
+            "title": "Previous Run Id"
           },
           "run": {
             "$ref": "#/components/schemas/RunSummary"
@@ -1063,6 +1181,22 @@
           "status": {
             "title": "Status",
             "type": "string"
+          },
+          "trigger": {
+            "anyOf": [
+              {
+                "enum": [
+                  "manual",
+                  "scheduled"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What started the run; null for runs from the CLI or imported history",
+            "title": "Trigger"
           }
         },
         "required": [
@@ -1170,6 +1304,22 @@
           "status": {
             "title": "Status",
             "type": "string"
+          },
+          "trigger": {
+            "anyOf": [
+              {
+                "enum": [
+                  "manual",
+                  "scheduled"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What started the run; null for runs from the CLI or imported history",
+            "title": "Trigger"
           }
         },
         "required": [
@@ -1911,6 +2061,75 @@
           }
         },
         "summary": "Get Radar",
+        "tags": [
+          "radars"
+        ]
+      },
+      "patch": {
+        "description": "Set the scan schedule, or pause and resume scheduled scans. History is never deleted.",
+        "operationId": "update_radar_api_v1_radars__radar_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "radar_id",
+            "required": true,
+            "schema": {
+              "title": "Radar Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Bearer token, when the server sets one",
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Bearer token, when the server sets one",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RadarPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RadarOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Radar",
         "tags": [
           "radars"
         ]

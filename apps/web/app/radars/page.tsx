@@ -33,7 +33,10 @@ export default function RadarsPage() {
                       {r.title}
                     </Link>
                   </h2>
-                  {r.state !== "active" && <Badge>{r.state}</Badge>}
+                  <span className="flex shrink-0 gap-1">
+                    {r.schedule && <Badge tone={r.state === "active" ? "good" : "neutral"}>{r.schedule}</Badge>}
+                    {r.state !== "active" && <Badge tone="warn">{r.state}</Badge>}
+                  </span>
                 </div>
                 {r.description && <p className="mt-1 text-sm text-muted">{r.description}</p>}
                 <p className="mt-2 text-sm text-muted">

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Features, PaperSummary } from "@/lib/api";
+import type { Arrival, Features, PaperSummary } from "@/lib/api";
 import { Badge, Button, Flag, Meter, fmtDate } from "./ui";
 
 export function authorsLine(authors?: string[]) {
@@ -38,7 +38,7 @@ export function PaperCard({
   paper,
   features,
   flags,
-  isNew,
+  arrival,
   saved,
   dismissed,
   busy,
@@ -50,7 +50,7 @@ export function PaperCard({
   paper: PaperSummary;
   features: Features;
   flags: string[];
-  isNew?: boolean;
+  arrival?: Arrival | null;
   saved: boolean;
   dismissed: boolean;
   busy?: boolean;
@@ -83,11 +83,16 @@ export function PaperCard({
             </div>
           </div>
           <PaperMeta paper={paper} />
-          {(isNew || flags.length > 0 || paper.is_retracted) && (
+          {((arrival && arrival !== "seen_before") || flags.length > 0) && (
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {isNew && (
-                <Badge tone="accent" title="Not in this radar's previous run">
-                  New this run
+              {arrival === "newly_published" && (
+                <Badge tone="accent" title="Published after the previous scan's window ended">
+                  Newly published
+                </Badge>
+              )}
+              {arrival === "newly_observed" && (
+                <Badge title="Published before the previous scan, but this radar sees it for the first time (for example, indexed late)">
+                  Newly observed
                 </Badge>
               )}
               {flags.map((f) => (

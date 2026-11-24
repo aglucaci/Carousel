@@ -3,22 +3,28 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import { PaperCard } from "@/components/PaperCard";
 import { WhyDrawer } from "@/components/WhyDrawer";
 import { ButtonLink, Empty, ErrorNote, Loading, PageHeader, coverageLine, fmtDate, fmtDateTime } from "@/components/ui";
-import { client, useApi, type FeedbackAction, type RankedItem } from "@/lib/api";
+import { client, useApi, type FeedbackAction, type RankedItem, type RankedPapers } from "@/lib/api";
+
+function arrivalsLine(a: RankedPapers["arrivals"]): ReactNode {
+  if (!a) return <span className="text-muted">The radar&apos;s first scan: nothing earlier to compare with.</span>;
+  if (!a.newly_published && !a.newly_observed) return <span className="text-muted">Nothing new since the previous scan.</span>;
+  return (
+    <>
+      Since the previous scan: <strong>{a.newly_published}</strong> newly published,{" "}
+      <strong>{a.newly_observed}</strong> newly observed (older, but new to this radar).
+    </>
+  );
+}
 
 function Feed({ radarId, runId }: { radarId: string; runId?: string }) {
   const { data, error, loading, setData } = useApi(() => client.papers(radarId, runId), [radarId, runId]);
-  const delta = useApi(() => (runId ? Promise.resolve(undefined) : client.delta(radarId).catch(() => undefined)), [radarId, runId]);
   const [why, setWhy] = useState<string | undefined>();
   const [busy, setBusy] = useState<string | undefined>();
   const [actionError, setActionError] = useState<Error | undefined>();
-
-  const entered = useMemo(
-    () => (delta.data?.previous_run_id ? new Set(delta.data.entered) : new Set<string>()),
-    [delta.data],
-  );
 
   async function toggle(item: RankedItem, action: FeedbackAction) {
     const on = action === "save" ? item.saved : item.dismissed;
@@ -58,12 +64,10 @@ function Feed({ radarId, runId }: { radarId: string; runId?: string }) {
         <p>
           {runId ? "Earlier run" : "Latest run"} from <strong>{fmtDateTime(run.executed_at)}</strong>, covering papers up to{" "}
           {fmtDate(run.as_of)} · {run.n_candidates.toLocaleString()} candidates → {run.n_items} recommended · {run.mode} mode
-          {!runId && delta.data?.previous_run_id && (
-            <>
-              {" "}
-              · <strong>{delta.data.entered.length}</strong> new since the previous run
-            </>
-          )}
+          {run.trigger === "scheduled" && " · scheduled"}
+        </p>
+        <p data-testid="arrivals" className="mt-1">
+          {arrivalsLine(data.arrivals)}
         </p>
         {partial.length > 0 && (
           <ul className="mt-1 text-xs text-muted">
@@ -98,7 +102,7 @@ function Feed({ radarId, runId }: { radarId: string; runId?: string }) {
               paper={it.paper}
               features={it.features}
               flags={it.flags}
-              isNew={entered.has(it.paper_id)}
+              arrival={it.arrival}
               saved={it.saved}
               dismissed={it.dismissed}
               busy={busy === it.paper_id}
