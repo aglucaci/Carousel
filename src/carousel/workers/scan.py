@@ -33,14 +33,18 @@ QUEUE = "carousel-scans"
 
 
 def replay_connectors(directory: str) -> Dict[str, Any]:
-    """Connectors that answer from recorded HTTP fixtures in ``directory`` (``pubmed.json``, ``openalex.json``)."""
-    from carousel.connectors import HttpClient, OpenAlexConnector, PubMedConnector, ReplayTransport
+    """Connectors that answer from recorded HTTP fixtures in ``directory`` (``pubmed.json``, ``openalex.json``,
+    ``crossref.json``)."""
+    from carousel.connectors import CrossrefConnector, HttpClient, OpenAlexConnector, PubMedConnector, ReplayTransport
 
-    out = {}
+    out: Dict[str, Any] = {}
     for name, cls in (("pubmed", PubMedConnector), ("openalex", OpenAlexConnector)):
         path = Path(directory) / f"{name}.json"
         if path.exists():
             out[name] = cls(client=HttpClient(transport=ReplayTransport(path)), api_key="")
+    path = Path(directory) / "crossref.json"
+    if path.exists():
+        out["crossref"] = CrossrefConnector(client=HttpClient(transport=ReplayTransport(path)), mailto="")
     return out
 
 

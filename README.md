@@ -27,9 +27,10 @@ changed in my field, why does it matter, and what should I read next?"**
 > lexical and semantic candidates, an interpretable ranker, stored runs, and
 > feedback, running daily on GitHub Actions. The web app (Phase 1B) runs
 > locally with one `docker compose up` (Postgres, Redis, the REST API, a scan
-> worker, a scheduler, and the web app). Phase 2 has started with scheduled
-> scans (daily or weekly, with pause and resume) and labels that separate newly
-> published from newly observed papers. See [What works today](#what-works-today) and the
+> worker, a scheduler, and the web app). Phase 2 has started: scheduled scans
+> (daily or weekly, with pause and resume), labels that separate newly
+> published from newly observed papers, and Crossref checks for corrections
+> and retractions. See [What works today](#what-works-today) and the
 > [roadmap](#roadmap). CAROUSEL grew out of the ETHER prototype, so you will
 > still see that name in the manuscript drafts.
 
@@ -48,6 +49,7 @@ changed in my field, why does it matter, and what should I read next?"**
 | **Ranker** | [`src/carousel/ranking/`](src/carousel/ranking/) | `ranking_version` 0.1.0: relevance, novelty against only earlier-observed papers (guarded against temporal leakage), and method match; weighted by mode (focused / balanced / exploratory), then diversified with MMR. Every item carries its features and flags |
 | **Postgres schema (Phase 1B)** | [`src/carousel/database/models.py`](src/carousel/database/models.py), [`migrations/`](src/carousel/database/migrations/) | The spec's production tables on PostgreSQL + pgvector (papers with full-text search, identifiers, sources, authors, embeddings, runs and items, feedback, collections, topics, events), managed with Alembic. `carousel db import-store` and `import-snapshots` copy the engine's history in and verify counts. Needs `pip install "carousel-research[server]"` |
 | **Web app (Phase 1B)** | [`apps/web/`](apps/web/) | Next.js: **For You** (ranked papers per radar, new since the last run), **Radars** (describe a topic, review and approve the exact searches it proposes, scan, and see each run's history and source coverage), the **"Why this paper?"** drawer (from the stored run only), save and dismiss, and the **Library** of saved papers. A Playwright test runs the spec's acceptance flow end to end in CI |
+| **Crossref verification (Phase 2)** | [`src/carousel/connectors/crossref.py`](src/carousel/connectors/crossref.py) | With `crossref` in a radar's `sources` (the default for new radars), each scan looks up the DOIs its searches found. Corrections, retractions, and expressions of concern (including Retraction Watch data) are recorded on the paper with who reported them; a retraction flags the paper and keeps it out of recommendations. Preprint links (`has-preprint` / `is-preprint-of`) are stored. Crossref is not searched: its free-text search cannot express a radar's boolean queries |
 | **Scheduled scans (Phase 2)** | [`src/carousel/workers/schedule.py`](src/carousel/workers/schedule.py), `carousel scheduler` | Radars scan daily or weekly (UTC periods; a manual scan in the period counts). Pausing stops scheduled scans and keeps every run, saved paper, and feedback event. Each recommendation is labelled against the radar's previous scan: **newly published** (after that scan's window) or **newly observed** (older, but new to this radar, e.g. indexed late) |
 | **REST API v1 (Phase 1B)** | [`src/carousel/api/`](src/carousel/api/), [`openapi/carousel-v1.json`](openapi/carousel-v1.json) | FastAPI over Postgres: radars, scans as background jobs (RQ on Redis, `carousel worker`), ranked papers, delta, paper records, "Why this paper?" explanations from the stored run, full-text search, and feedback. Writes need `CAROUSEL_API_TOKEN` when it is set |
 | **Radar configs** | [`examples/`](examples/), [`src/carousel/core/config.py`](src/carousel/core/config.py) | YAML radars with strict validation and `file:line` error messages |
@@ -118,7 +120,9 @@ results.delta()
 
 Without the `[semantic]` extra, scans use a non-semantic fallback embedder and
 say so in the run's notes. Set `OPENALEX_API_KEY` to page past the first 100
-OpenAlex results, and `NCBI_API_KEY` for faster PubMed access.
+OpenAlex results, and `NCBI_API_KEY` for faster PubMed access. Crossref needs
+no key; `CROSSREF_MAILTO` (an email address) moves lookups to its faster
+"polite" pool, and is never stored.
 
 Build the dashboard locally from one or more scan exports:
 
@@ -137,7 +141,7 @@ docker compose up
 
 Put optional settings in a `.env` file next to `docker-compose.yml` (it is
 git-ignored): `OPENALEX_API_KEY` (OpenAlex is skipped without one),
-`NCBI_API_KEY`, `CAROUSEL_API_TOKEN`, `POSTGRES_PASSWORD`, `CAROUSEL_WEB_PORT`,
+`NCBI_API_KEY`, `CROSSREF_MAILTO`, `CAROUSEL_API_TOKEN`, `POSTGRES_PASSWORD`, `CAROUSEL_WEB_PORT`,
 and `CAROUSEL_EXTRAS=server,semantic` for real embeddings (adds PyTorch to the
 image; without it scans use the hashing embedder). Ports are bound to
 localhost. Data lives in Docker volumes; `docker compose down -v` deletes it.
@@ -285,7 +289,7 @@ Validation rules:
 - Unknown fields, unknown sources, duplicate YAML keys, and duplicate terms are rejected with the line number.
 - `radar_id` defaults to the file name, so `viral_evolution.yml` becomes `viral-evolution`.
 - Each resolved config gets a short `config_hash`, which is recorded with results.
-- Sources: `pubmed`, `europepmc`, `biorxiv`, `medrxiv`, `crossref`, `openalex`, `arxiv`. The config schema accepts all of these. PubMed and OpenAlex have connectors; Europe PMC, Crossref, arXiv, and bioRxiv/medRxiv arrive in Phase 2 (until then a scan records them as `no_connector`). Optional keys: `NCBI_API_KEY` raises PubMed's rate limit, and `OPENALEX_API_KEY` is needed to page past the first 100 OpenAlex results.
+- Sources: `pubmed`, `europepmc`, `biorxiv`, `medrxiv`, `crossref`, `openalex`, `arxiv`. The config schema accepts all of these. PubMed and OpenAlex are searched. `crossref` does not search: it checks the DOIs the searches found for corrections, retractions, and preprint links. Europe PMC, arXiv, and bioRxiv/medRxiv arrive later in Phase 2 (until then a scan records them as `no_connector`). Optional keys: `NCBI_API_KEY` raises PubMed's rate limit, and `OPENALEX_API_KEY` is needed to page past the first 100 OpenAlex results.
 
 ## How recommendations work
 
@@ -351,7 +355,7 @@ day they were recommended.
 
 ```text
 src/carousel/        Python package: radar.py (Radar API), feedback.py, core/ (radar config, identifiers, paper model),
-                     connectors/ (PubMed, OpenAlex), ingestion/ (dedup), search/ (candidates),
+                     connectors/ (PubMed, OpenAlex; Crossref verification), ingestion/ (dedup), search/ (candidates),
                      ranking/ (ranker),
                      database/ (SQLite store; Postgres models, migrations, importer),
                      api/ (REST API v1), workers/ (scan jobs), site.py (dashboard), cli.py
@@ -380,7 +384,7 @@ done-when checks for each task, is in [`CAROUSEL_PLAN.md`](CAROUSEL_PLAN.md).
 | Phase | Focus | Status |
 | --- | --- | --- |
 | **1. Functional MVP** | **Engine:** canonical paper records, OpenAlex + PubMed, careful dedup, lexical + semantic candidates, relevance/novelty/methods ranking with modes, `carousel scan` and a Python `Radar` API. **App:** FastAPI + Postgres/pgvector, Next.js (For You, Radars, Library, "Why this paper?"), save/dismiss, Docker Compose | Done for local use: the engine, Postgres, the REST API, the web app, and Docker Compose |
-| **2. Continuous intelligence** | Scheduled ingestion, Europe PMC + Crossref (retractions, corrections, preprint links), arXiv, versioned explanations, feedback learning, email/RSS digests, evidence-grounded summaries | In progress: scheduled scans with pause/resume and newly published vs newly observed labels are done; Crossref is next |
+| **2. Continuous intelligence** | Scheduled ingestion, Europe PMC + Crossref (retractions, corrections, preprint links), arXiv, versioned explanations, feedback learning, email/RSS digests, evidence-grounded summaries | In progress: scheduled scans with pause/resume, newly published vs newly observed labels, and Crossref corrections/retractions are done; Europe PMC is next |
 | **3. Research Delta** | Topic clusters and observations, statistical trend detection (negative binomial, multiple-testing control), the **What's New** change log, **Trends** with baselines and uncertainty | Planned |
 | **4. Advanced discovery** | Method Transfer, literature graphs, Zotero, public API docs, collaborative radars, benchmark dataset, software paper | Planned |
 

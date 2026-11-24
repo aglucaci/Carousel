@@ -25,7 +25,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Mapping, Optional, Sequence, Set, Tuple, Union
 
-from carousel.connectors import CONNECTORS, Connector, ConnectorError, SearchQuery
+from carousel.connectors import CONNECTORS, VERIFIERS, Connector, ConnectorError, SearchQuery
 from carousel.core.config import Mode, RadarConfig, load_radar
 from carousel.core.paper import CanonicalPaper
 from carousel.database.local import PaperStore, _iso
@@ -273,14 +273,17 @@ class Radar:
             coverage: List[Dict[str, Any]] = []
             observations: List[Tuple[str, str, str, str]] = []
             hits: Set[str] = set()
+            verify = [s.value for s in cfg.sources if s.value in VERIFIERS]
             for src in cfg.sources:
                 name = src.value
+                if name in VERIFIERS:
+                    continue  # runs after the search sources, on what they found
                 conn = conns.get(name)
                 if conn is None and connectors is None and name in CONNECTORS:
                     conn = conns[name] = CONNECTORS[name]()
                 if conn is None:
                     coverage.append({"source": name, "status": "no_connector",
-                                     "note": "no connector for this source yet (Europe PMC, Crossref, arXiv, bioRxiv/medRxiv arrive in Phase 2)"})
+                                     "note": "no connector for this source yet (Europe PMC, arXiv, bioRxiv/medRxiv arrive in Phase 2)"})
                     continue
                 native = cfg.source_queries.get(src)
                 query = SearchQuery(terms=list(cfg.queries), exclude=list(cfg.exclude), start=start, end=as_of,
@@ -297,6 +300,27 @@ class Radar:
                     observations.append((rec.source.value, rec.source_id, obs.paper.paper_id, obs.status))
                     hits.add(obs.paper.paper_id)
             hits = {st.resolve(pid) for pid in hits}  # follow any merges made later in this scan
+
+            # ---- verify: look up the found papers' DOIs (Crossref: corrections, retractions, preprint links) ----
+            for name in verify:
+                conn = conns.get(name)
+                if conn is None and connectors is None:
+                    conn = conns[name] = VERIFIERS[name]()
+                if conn is None:
+                    coverage.append({"source": name, "status": "no_connector", "note": "not configured for this scan"})
+                    continue
+                dois = sorted({p.identifiers.doi for p in (st.get(pid) for pid in hits) if p and p.identifiers.doi})
+                query = SearchQuery(terms=list(cfg.queries), start=start, end=as_of, max_results=max_results)
+                try:
+                    res = conn.lookup(query, dois)  # type: ignore[attr-defined]
+                except ConnectorError as exc:
+                    coverage.append({"source": name, "status": "error", "error": str(exc)})
+                    continue
+                coverage.append({"status": "ok", "role": "verification", **res.coverage.model_dump(mode="json")})
+                for rec in res.records:
+                    obs = st.observe(rec, started)
+                    observations.append((rec.source.value, rec.source_id, obs.paper.paper_id, obs.status))
+            hits = {st.resolve(pid) for pid in hits}  # a DOI lookup can merge papers too
             observations = [(s, i, st.resolve(pid), status) for s, i, pid, status in observations]
 
             # ---- feedback ----

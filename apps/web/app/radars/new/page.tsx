@@ -21,7 +21,9 @@ const MODES = [
 const SOURCES = [
   { value: "pubmed", label: "PubMed" },
   { value: "openalex", label: "OpenAlex" },
+  { value: "crossref", label: "Crossref (checks corrections and retractions)" },
 ];
+const SEARCHED = ["pubmed", "openalex"]; // Crossref verifies what these find, so at least one is needed
 
 const field = "mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm";
 
@@ -42,7 +44,7 @@ export default function NewRadarPage() {
   const [exclude, setExclude] = useState("");
   const [methods, setMethods] = useState("");
   const [seeds, setSeeds] = useState("");
-  const [sources, setSources] = useState<string[]>(["pubmed", "openalex"]);
+  const [sources, setSources] = useState<string[]>(["pubmed", "openalex", "crossref"]);
   const [windowDays, setWindowDays] = useState(90);
   const [mode, setMode] = useState("balanced");
   const [proposal, setProposal] = useState<Proposal | undefined>();
@@ -274,7 +276,7 @@ export default function NewRadarPage() {
                   </label>
                 ))}
               </div>
-              <p className="mt-1 text-xs text-muted">Europe PMC, Crossref, and preprint servers arrive in Phase 2.</p>
+              <p className="mt-1 text-xs text-muted">Europe PMC and preprint servers arrive later in Phase 2.</p>
             </fieldset>
             <div>
               <label htmlFor="window" className="block text-sm font-medium">
@@ -314,7 +316,7 @@ export default function NewRadarPage() {
             </fieldset>
           </div>
         </details>
-        <Button type="submit" variant="primary" disabled={working || topic.trim().length < 2 || sources.length === 0}>
+        <Button type="submit" variant="primary" disabled={working || topic.trim().length < 2 || !sources.some((s) => SEARCHED.includes(s))}>
           Propose search strategy
         </Button>
       </form>

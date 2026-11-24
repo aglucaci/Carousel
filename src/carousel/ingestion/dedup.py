@@ -55,6 +55,8 @@ _NOTICE = re.compile(
 _NOTICE_TYPES = frozenset({
     "published erratum", "erratum", "retraction of publication", "retraction notice", "retraction", "comment",
     "correction", "expression of concern",
+    # Crossref update types (on notices, via update-to), normalized with underscores
+    "expression_of_concern", "corrigendum", "partial_retraction", "withdrawal", "removal", "addendum",
 })
 _GENERIC_TITLES = frozenset({
     "editorial", "introduction", "preface", "foreword", "correction", "erratum", "reply", "response",

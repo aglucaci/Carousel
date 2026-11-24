@@ -571,6 +571,16 @@
             "title": "Publication Types",
             "type": "array"
           },
+          "relations": {
+            "default": [],
+            "description": "Links to other works, e.g. has-preprint / is-preprint-of",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Relations",
+            "type": "array"
+          },
           "requested_id": {
             "description": "The ID asked for; differs from paper_id when that paper was merged",
             "title": "Requested Id",
@@ -594,6 +604,16 @@
               }
             ],
             "title": "Title"
+          },
+          "updates": {
+            "default": [],
+            "description": "Corrections, retractions, expressions of concern, ... (type, notice_doi, date, asserted_by, via)",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Updates",
+            "type": "array"
           },
           "url": {
             "anyOf": [
@@ -695,8 +715,10 @@
           "sources": {
             "default": [
               "pubmed",
-              "openalex"
+              "openalex",
+              "crossref"
             ],
+            "description": "crossref verifies the DOIs the other sources find",
             "items": {
               "type": "string"
             },

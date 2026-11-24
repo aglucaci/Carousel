@@ -228,6 +228,9 @@ class ProposalTests(ApiTestCase):
         self.assertEqual(steps["pubmed"]["query"], '(Immune escape) NOT ("case report"[Title/Abstract])')
         self.assertEqual(steps["openalex"]["query"], '("Immune escape") NOT ("case report")')
         self.assertIn("type:article", steps["openalex"]["filters"])
+        self.assertEqual(list(steps), ["pubmed", "openalex", "crossref"])  # Crossref verification is on by default
+        self.assertEqual((steps["crossref"]["status"], steps["crossref"]["query"]), ("ready", None))
+        self.assertIn("retractions", steps["crossref"]["notes"][0])
         self.assertEqual(prop["window"]["days"], 14)
         self.assertTrue(any("method match is inactive" in n for n in prop["notes"]))
         self.assertEqual(self.get("/radars").json(), [])  # a proposal saves nothing
@@ -253,6 +256,9 @@ class ProposalTests(ApiTestCase):
         self.assertIn("not a doi", bad.text)
         self.assertEqual(self.post("/radars/proposal", {"topic": "x y", "sources": ["scopus"]}).status_code, 422)
         self.assertEqual(self.post("/radars/proposal", {"topic": " "}).status_code, 422)
+        only = self.post("/radars/proposal", {"topic": "x y", "sources": ["crossref"]})
+        self.assertEqual(only.status_code, 422)  # Crossref verifies; something has to search
+        self.assertIn("at least one source to search", only.text)
 
 
 class ReplayTests(ApiTestCase):
@@ -441,3 +447,36 @@ class ScheduleTests(ApiTestCase):
         # Viewing run 1 later still compares it with nothing before it.
         self.assertIsNone(self.get("/radars/escape/papers", run_id=run1).json()["arrivals"])
 
+
+
+class CrossrefUpdatesTests(ApiTestCase):
+    """Plan task 16: Crossref's updates and relations reach the paper API through the Postgres import."""
+
+    def test_retraction_and_relations_on_paper_detail(self) -> None:
+        import sys as _sys
+
+        from carousel.connectors import CrossrefConnector
+        from carousel.core.paper import SourceRecord
+        from carousel.database import PaperStore
+        from carousel.database.importer import import_store
+        from test_connectors import FIXTURES, replay
+
+        _sys.path.insert(0, str(FIXTURES))
+        from record_fixtures import KNOWN_DOIS
+
+        store = Path(self.tmp.name) / "engine.db"
+        t = dt.datetime(2026, 11, 24, tzinfo=dt.timezone.utc)
+        with PaperStore(store) as st:
+            pid = st.observe(SourceRecord(source="pubmed", source_id="9500106", title="Ileal-lymphoid-nodular hyperplasia",
+                                          identifiers={"doi": "10.1016/S0140-6736(97)11096-0"}), t).paper.paper_id
+            for rec in CrossrefConnector(replay("crossref_lookup.json"), mailto="").fetch(KNOWN_DOIS):
+                st.observe(rec, t)
+            article = st.find("doi", "10.1021/acsomega.5c02989").paper_id
+        import_store(store, self.app.state.engine)
+
+        paper = self.get(f"/papers/{pid}").json()
+        self.assertTrue(paper["is_retracted"])
+        self.assertEqual([(u["type"], u["asserted_by"], u["via"]) for u in paper["updates"]],
+                         [("correction", "retraction-watch", "crossref"), ("retraction", "retraction-watch", "crossref")])
+        self.assertEqual([(r["type"], r["value"]) for r in self.get(f"/papers/{article}").json()["relations"]],
+                         [("has-preprint", "10.26434/chemrxiv-2025-8hnzz")])

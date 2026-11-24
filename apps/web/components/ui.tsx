@@ -124,6 +124,16 @@ export const FLAGS: Record<string, { label: string; tone: Tone; help: string }> 
     help: "An erratum, retraction notice, or similar notice rather than a research paper.",
   },
   retracted: { label: "Retracted", tone: "bad", help: "A source marks this paper as retracted." },
+  corrected: {
+    label: "Corrected",
+    tone: "warn",
+    help: "A correction, erratum, or partial retraction has been published for this paper (Crossref; may come from Retraction Watch).",
+  },
+  expression_of_concern: {
+    label: "Expression of concern",
+    tone: "bad",
+    help: "The publisher or Retraction Watch has issued an expression of concern about this paper.",
+  },
 };
 
 export function Flag({ flag }: { flag: string }) {
@@ -167,10 +177,14 @@ export function fmtDateTime(iso?: string | null) {
 }
 
 /** One line on what a source returned, including what it did not. */
-export function coverageLine(c: { source: string; status: string; retrieved?: number; total_available?: number | null; truncation_reason?: string | null; note?: string; error?: string }) {
+export function coverageLine(c: { source: string; status: string; role?: string; retrieved?: number; total_available?: number | null; truncation_reason?: string | null; note?: string; error?: string }) {
   const name = sourceName(c.source);
   if (c.status === "no_connector") return `${name}: not searched (no connector yet)`;
   if (c.status === "error") return `${name}: failed (${c.error ?? "error"})`;
+  if (c.role === "verification")
+    return `${name}: ${c.retrieved ?? 0} of ${(c.total_available ?? 0).toLocaleString()} DOIs verified${
+      c.truncation_reason ? ` (stopped: ${c.truncation_reason})` : ""
+    }`;
   const of = c.total_available != null ? ` of ${c.total_available.toLocaleString()}` : "";
   const why =
     c.truncation_reason === "no_api_key"
