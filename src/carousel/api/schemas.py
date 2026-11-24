@@ -54,6 +54,39 @@ class RadarOut(_Out):
     latest_run: Optional[RunSummary] = None
 
 
+class ProposalIn(BaseModel):
+    """What a user tells a new radar; everything but the topic is optional (progressive disclosure)."""
+
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    topic: str = Field(min_length=2, max_length=200, description="What to watch, in plain words; also the radar name")
+    research_question: str = Field("", max_length=1000)
+    description: str = Field("", max_length=2000)
+    terms: List[str] = Field([], description="Search terms; default: the topic itself")
+    exclude: List[str] = []
+    methods: List[str] = Field([], description="Methods, assays, data types to match")
+    seed_papers: List[str] = Field([], description="DOIs of papers that define the radar")
+    publication_types: List[str] = []
+    sources: List[str] = Field(["pubmed", "openalex"])
+    mode: Literal["focused", "balanced", "exploratory"] = "balanced"
+    window_days: int = Field(90, ge=1, le=3650)
+
+
+class StrategyStep(_Out):
+    source: str
+    status: str = Field(description="ready | not_available")
+    query: Optional[str] = Field(None, description="The exact query this source will receive")
+    filters: Optional[str] = None
+    notes: List[str] = []
+
+
+class ProposalOut(_Out):
+    config: Dict[str, Any] = Field(description="The radar config to create (POST /radars) once approved")
+    window: Dict[str, Any]
+    strategy: List[StrategyStep]
+    ranking: Dict[str, Any]
+    notes: List[str]
+
+
 class ScanRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     top_n: int = Field(25, ge=1, le=200)
@@ -82,6 +115,8 @@ class RankedItem(_Out):
     flags: List[str]
     paper: Dict[str, Any] = Field(description="Title, authors, venue, date, identifiers, URL")
     dismissed: bool = Field(description="Dismissed since this run (feedback applies from the next run)")
+    saved: bool = Field(False, description="In the radar's saved list now")
+    feedback: List[str] = Field([], description="Feedback actions currently on for this paper in this radar")
 
 
 class RankedPapersOut(_Out):
@@ -165,6 +200,14 @@ class FeedbackOut(_Out):
     change: str
     at: dt.datetime
     state: Dict[str, List[str]] = Field(description="The radar's current feedback, applied on its next scan")
+
+
+class LibraryItem(_Out):
+    radar_id: str
+    radar_title: Optional[str] = None
+    paper_id: str
+    saved_at: dt.datetime
+    paper: Dict[str, Any]
 
 
 class Health(_Out):

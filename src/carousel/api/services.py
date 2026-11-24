@@ -7,6 +7,7 @@ API layer only maps them to response models.
 from __future__ import annotations
 
 import datetime as dt
+import os
 from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import func, select, text
@@ -49,6 +50,78 @@ def upsert_radar(s: Session, cfg: RadarConfig, *, owner_id: Optional[str] = None
         version.config = cfg.model_dump(mode="json")
     s.flush()
     return radar_detail(s, rid), created
+
+
+def _slug(text_: str) -> str:
+    return "-".join("".join(ch if ch.isalnum() else " " for ch in text_.lower()).split())[:60].strip("-") or "radar"
+
+
+def propose_radar(s: Session, *, topic: str, research_question: str = "", description: str = "",
+                  terms: Optional[List[str]] = None, exclude: Optional[List[str]] = None,
+                  methods: Optional[List[str]] = None, seed_papers: Optional[List[str]] = None,
+                  publication_types: Optional[List[str]] = None, sources: Optional[List[str]] = None,
+                  mode: str = "balanced", window_days: int = 90, as_of: Optional[dt.date] = None) -> Dict[str, Any]:
+    """Turn a topic (and any options) into a radar config plus the exact searches it will send.
+
+    Nothing is saved: the caller shows the strategy, and creates the radar with
+    the returned config once the user approves it. Deterministic (no model calls).
+    Raises ``ValueError`` (user-facing) if the inputs don't make a valid config.
+    """
+    from carousel.connectors import CONNECTORS, SearchQuery
+    from carousel.connectors.openalex import OpenAlexConnector, build_search
+    from carousel.connectors.pubmed import build_term
+
+    topic = topic.strip()
+    if not topic:
+        raise ValueError("topic is required")
+    base = _slug(topic)
+    rid, n = base, 2
+    while s.get(m.Radar, rid) is not None:
+        rid, n = f"{base[:56]}-{n}", n + 1
+    try:
+        cfg = RadarConfig.model_validate({
+            "radar_id": rid, "radar_name": topic, "description": description.strip(),
+            "research_question": research_question.strip(), "queries": [t for t in (terms or []) if t.strip()] or [topic],
+            "exclude": list(exclude or []), "methods_profile": list(methods or []), "seed_papers": list(seed_papers or []),
+            "publication_types": list(publication_types or []), "sources": list(sources or ["pubmed", "openalex"]),
+            "mode": mode, "filters": {"date_range": f"last_{int(window_days)}_days"},
+        })
+    except Exception as exc:  # pydantic's message is already user-facing
+        raise ValueError(str(exc)) from None
+
+    as_of = as_of or dt.datetime.now(dt.timezone.utc).date()
+    start = as_of - dt.timedelta(days=cfg.filters.days - 1)
+    q = SearchQuery(terms=list(cfg.queries), exclude=list(cfg.exclude), start=start, end=as_of)
+    strategy: List[Dict[str, Any]] = []
+    for src in cfg.sources:
+        name = src.value
+        if name == "pubmed":
+            strategy.append({"source": name, "status": "ready", "query": build_term(q),
+                             "filters": "publication date in the window", "notes": []})
+        elif name == "openalex":
+            notes = [] if os.environ.get("OPENALEX_API_KEY") else [
+                "No OPENALEX_API_KEY on this server: each scan reads only the first page (up to 100 works)."]
+            strategy.append({"source": name, "status": "ready", "query": build_search(q),
+                             "filters": OpenAlexConnector(api_key="")._filter(q), "notes": notes})
+        else:
+            strategy.append({"source": name, "status": "ready" if name in CONNECTORS else "not_available",
+                             "query": None, "filters": None,
+                             "notes": ["No connector for this source yet (Phase 2); it will be listed as skipped."]})
+
+    notes = []
+    if not cfg.method_terms():
+        notes.append("No methods given, so method match is inactive and relevance and novelty decide the ranking.")
+    if not cfg.seed_papers:
+        notes.append("No seed papers: the interest profile comes from the topic, question, and search terms.")
+    return {
+        "config": cfg.model_dump(mode="json"),
+        "window": {"start": start, "end": as_of, "days": cfg.filters.days},
+        "strategy": strategy,
+        "ranking": {"mode": cfg.mode.value, "signals": ["relevance", "novelty", "method_match"],
+                    "weights": {k: v for k, v in cfg.ranking.as_dict().items()
+                                if k in ("relevance", "novelty", "method_match")}},
+        "notes": notes,
+    }
 
 
 def radar_config(s: Session, radar_id: str) -> RadarConfig:
@@ -136,12 +209,17 @@ def ranked_papers(s: Session, radar_id: str, run_id: Optional[str] = None) -> Di
     run = _run(s, radar_id, run_id)
     items = s.scalars(select(m.RecommendationItem).where(m.RecommendationItem.run_id == run.id)
                       .order_by(m.RecommendationItem.rank)).all()
-    dismissed = set(current_feedback(s, radar_id).get("dismiss", []))
+    state = current_feedback(s, radar_id)
+    active: Dict[str, List[str]] = {}
+    for action in ACTIONS:
+        for pid in state.get(action, []):
+            active.setdefault(pid, []).append(action)
     return {
         "run": _run_summary(run),
         "items": [{
             "rank": it.rank, "paper_id": it.paper_id, "score": it.score, "features": it.features, "flags": it.flags,
-            "paper": (it.explanation or {}).get("paper") or {}, "dismissed": it.paper_id in dismissed,
+            "paper": (it.explanation or {}).get("paper") or {}, "dismissed": "dismiss" in active.get(it.paper_id, []),
+            "saved": "save" in active.get(it.paper_id, []), "feedback": active.get(it.paper_id, []),
         } for it in items],
     }
 
@@ -268,15 +346,55 @@ def record_feedback(s: Session, *, radar_id: str, paper_id: str, action: str, re
             "state": current_feedback(s, radar_id)}
 
 
+def _feedback_state(s: Session, radar_id: Optional[str] = None) -> Dict[Tuple[str, str, str], dt.datetime]:
+    """{(radar_id, paper_id, action): when it was turned on} for every action currently on.
+
+    Replays the append-only events in order, so the last change wins.
+    """
+    q = (select(m.UserFeedback.radar_id, m.UserFeedback.paper_id, m.UserFeedback.action, m.UserFeedback.change,
+                m.UserFeedback.at).where(m.UserFeedback.radar_id.isnot(None))
+         .order_by(m.UserFeedback.at, m.UserFeedback.id))
+    if radar_id is not None:
+        q = q.where(m.UserFeedback.radar_id == radar_id)
+    state: Dict[Tuple[str, str, str], Optional[dt.datetime]] = {}
+    for rid, pid, action, change, at in s.execute(q):
+        state[(rid, pid, action)] = at if change == "added" else None
+    return {k: v for k, v in state.items() if v is not None}
+
+
 def current_feedback(s: Session, radar_id: str) -> Dict[str, List[str]]:
-    """{action: [paper_id]}: replay the radar's feedback events in order (last change wins)."""
-    state: Dict[Tuple[str, str], bool] = {}
-    for pid, action, change in s.execute(select(m.UserFeedback.paper_id, m.UserFeedback.action, m.UserFeedback.change)
-                                         .where(m.UserFeedback.radar_id == radar_id)
-                                         .order_by(m.UserFeedback.at, m.UserFeedback.id)):
-        state[(pid, action)] = change == "added"
+    """{action: [paper_id]}: the radar's feedback as it stands now."""
     out: Dict[str, List[str]] = {a: [] for a in ACTIONS}
-    for (pid, action), on in sorted(state.items()):
-        if on:
-            out[action].append(pid)
+    for (_, pid, action) in sorted(_feedback_state(s, radar_id)):
+        out[action].append(pid)
     return out
+
+
+def paper_briefs(s: Session, paper_ids: List[str]) -> Dict[str, Dict[str, Any]]:
+    """Card-sized summaries (title, first authors, venue, date, identifiers, URL), keyed by paper ID."""
+    if not paper_ids:
+        return {}
+    ids = _identifiers(s, paper_ids)
+    authors: Dict[str, List[str]] = {}
+    for pid, name in s.execute(select(m.PaperAuthor.paper_id, m.Author.name).join(m.Author)
+                               .where(m.PaperAuthor.paper_id.in_(paper_ids)).order_by(m.PaperAuthor.position)):
+        authors.setdefault(pid, []).append(name)
+    out = {}
+    for p in s.scalars(select(m.Paper).where(m.Paper.id.in_(paper_ids))):
+        out[p.id] = {"title": p.title, "authors": authors.get(p.id, []), "venue": p.venue,
+                     "earliest_public_date": p.earliest_public_date.isoformat() if p.earliest_public_date else None,
+                     "url": p.url, "is_retracted": p.is_retracted, **ids.get(p.id, {})}
+    return out
+
+
+def library(s: Session, radar_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Saved papers, most recently saved first. Merged papers are shown under the paper they merged into."""
+    if radar_id is not None and s.get(m.Radar, radar_id) is None:
+        raise NotFound(f"radar {radar_id!r}")
+    saved = [(rid, pid, at) for (rid, pid, action), at in _feedback_state(s, radar_id).items() if action == "save"]
+    resolved = {pid: resolve_paper(s, pid).id for _, pid, _ in saved}
+    briefs = paper_briefs(s, sorted(set(resolved.values())))
+    titles = dict(s.execute(select(m.Radar.id, m.Radar.title)).all())
+    rows = [{"radar_id": rid, "radar_title": titles.get(rid), "paper_id": resolved[pid], "saved_at": at,
+             "paper": briefs.get(resolved[pid], {})} for rid, pid, at in saved]
+    return sorted(rows, key=lambda r: (r["saved_at"], r["radar_id"], r["paper_id"]), reverse=True)
