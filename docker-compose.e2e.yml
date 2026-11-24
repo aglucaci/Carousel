@@ -1,0 +1,25 @@
+# Overlay for the acceptance test against the compose stack (no network, no model):
+# scans replay the recorded HTTP in apps/web/e2e/fixtures/http and use the hashing embedder.
+#
+#   docker compose -p carousel-e2e -f docker-compose.yml -f docker-compose.e2e.yml up -d --build --wait
+#   (cd apps/web && CAROUSEL_E2E_BASE_URL=http://127.0.0.1:3000 npx playwright test)
+#   docker compose -p carousel-e2e -f docker-compose.yml -f docker-compose.e2e.yml down -v
+#
+# Use a separate project name (-p) so the test never touches your own data. It expects an empty database.
+services:
+  api:
+    environment:
+      OPENALEX_API_KEY: ""
+      CAROUSEL_API_TOKEN: ""
+  worker:
+    environment:
+      OPENALEX_API_KEY: ""
+      NCBI_API_KEY: ""
+      CAROUSEL_API_TOKEN: ""
+      CAROUSEL_HTTP_REPLAY: /fixtures
+      CAROUSEL_EMBEDDER: hashing
+    volumes:
+      - ./apps/web/e2e/fixtures/http:/fixtures:ro
+  web:
+    environment:
+      CAROUSEL_API_TOKEN: ""

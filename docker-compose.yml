@@ -1,0 +1,111 @@
+# CAROUSEL Phase 1B stack: Postgres (pgvector), Redis, the API, the scan worker, and the web app.
+#
+#   docker compose up        then open http://localhost:3000
+#
+# Optional settings go in a .env file next to this one (never commit it):
+#   OPENALEX_API_KEY, NCBI_API_KEY   source API keys (OpenAlex is skipped without one)
+#   CAROUSEL_API_TOKEN               require a bearer token for API writes (the web app adds it)
+#   CAROUSEL_EXTRAS                  server,semantic  for real embeddings (larger image)
+#   POSTGRES_PASSWORD                defaults to "carousel"; ports are bound to localhost only
+#   CAROUSEL_WEB_PORT                defaults to 3000
+#
+# Data persists in the pgdata and engine volumes; `docker compose down -v` deletes it.
+
+x-carousel: &carousel
+  image: carousel:local
+  build:
+    context: .
+    args:
+      CAROUSEL_EXTRAS: ${CAROUSEL_EXTRAS:-server}
+  environment: &carousel-env
+    CAROUSEL_DATABASE_URL: postgresql+psycopg://carousel:${POSTGRES_PASSWORD:-carousel}@postgres:5432/carousel
+    CAROUSEL_REDIS_URL: redis://redis:6379/0
+    CAROUSEL_STORE: /data/engine.db
+    CAROUSEL_API_TOKEN: ${CAROUSEL_API_TOKEN:-}
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: carousel
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-carousel}
+      POSTGRES_DB: carousel
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U carousel -d carousel"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  migrate:
+    <<: *carousel
+    command: ["carousel", "db", "upgrade"]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    <<: *carousel
+    environment:
+      <<: *carousel-env
+      OPENALEX_API_KEY: ${OPENALEX_API_KEY:-}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=3)"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  worker:
+    <<: *carousel
+    command: ["carousel", "worker"]
+    environment:
+      <<: *carousel-env
+      OPENALEX_API_KEY: ${OPENALEX_API_KEY:-}
+      NCBI_API_KEY: ${NCBI_API_KEY:-}
+    volumes:
+      - engine:/data
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  web:
+    image: carousel-web:local
+    build: apps/web
+    environment:
+      CAROUSEL_API_URL: http://api:8000
+      CAROUSEL_API_TOKEN: ${CAROUSEL_API_TOKEN:-}
+    ports:
+      - "127.0.0.1:${CAROUSEL_WEB_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  engine:

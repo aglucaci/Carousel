@@ -153,3 +153,41 @@ jobs:
             apps/web/playwright-report
             apps/web/test-results
           retention-days: 7
+
+  compose:
+    # Task 14: `docker compose up` brings up the whole stack from a fresh clone, and the
+    # acceptance flow passes against it (scans replay recorded HTTP; see docker-compose.e2e.yml).
+    runs-on: ubuntu-latest
+    env:
+      COMPOSE: docker compose -p carousel-e2e -f docker-compose.yml -f docker-compose.e2e.yml
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and start the stack
+        run: $COMPOSE up -d --build --wait --wait-timeout 300
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install Playwright
+        working-directory: apps/web
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Acceptance flow against the stack
+        working-directory: apps/web
+        env:
+          CAROUSEL_E2E_BASE_URL: http://127.0.0.1:3000
+        run: npm run e2e
+
+      - name: Stack logs
+        if: failure()
+        run: $COMPOSE logs --no-color
+
+      - name: Stop the stack
+        if: always()
+        run: $COMPOSE down -v

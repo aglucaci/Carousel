@@ -25,9 +25,9 @@ changed in my field, why does it matter, and what should I read next?"**
 > **Status: early development (Phase 1 in progress).** The engine (Phase 1A)
 > works end to end: PubMed and OpenAlex retrieval, careful deduplication,
 > lexical and semantic candidates, an interpretable ranker, stored runs, and
-> feedback, running daily on GitHub Actions. The web app (Phase 1B) works
-> locally on Postgres, Redis, the REST API, and a scan worker; Docker Compose
-> and Research Delta are next. See [What works today](#what-works-today) and the
+> feedback, running daily on GitHub Actions. The web app (Phase 1B) runs
+> locally with one `docker compose up` (Postgres, Redis, the REST API, a scan
+> worker, and the web app); Research Delta is next. See [What works today](#what-works-today) and the
 > [roadmap](#roadmap). CAROUSEL grew out of the ETHER prototype, so you will
 > still see that name in the manuscript drafts.
 
@@ -123,6 +123,24 @@ Build the dashboard locally from one or more scan exports:
 carousel scan radars/lab_default.yml --json out/lab-default.json && carousel site out/*.json --out site
 ```
 
+### The web app with Docker Compose
+
+From a fresh clone, one command builds and starts Postgres (pgvector), Redis,
+the API, the scan worker, and the web app, then open http://localhost:3000:
+
+```bash
+docker compose up
+```
+
+Put optional settings in a `.env` file next to `docker-compose.yml` (it is
+git-ignored): `OPENALEX_API_KEY` (OpenAlex is skipped without one),
+`NCBI_API_KEY`, `CAROUSEL_API_TOKEN`, `POSTGRES_PASSWORD`, `CAROUSEL_WEB_PORT`,
+and `CAROUSEL_EXTRAS=server,semantic` for real embeddings (adds PyTorch to the
+image; without it scans use the hashing embedder). Ports are bound to
+localhost. Data lives in Docker volumes; `docker compose down -v` deletes it.
+
+### Running the pieces yourself
+
 Load everything into Postgres (Phase 1B; needs the `[server]` extra and a
 database with pgvector):
 
@@ -179,6 +197,22 @@ cd apps/web && npx playwright install chromium && npm run build
 
 ```bash
 CAROUSEL_E2E_DATABASE_URL=postgresql://user:pass@localhost/carousel_e2e CAROUSEL_E2E_REDIS_URL=redis://localhost:6379/15 npm run e2e
+```
+
+The same test runs against the Compose stack, under its own project name and
+volumes, with scans replaying the recorded responses
+([`docker-compose.e2e.yml`](docker-compose.e2e.yml)):
+
+```bash
+docker compose -p carousel-e2e -f docker-compose.yml -f docker-compose.e2e.yml up -d --build --wait
+```
+
+```bash
+cd apps/web && CAROUSEL_E2E_BASE_URL=http://127.0.0.1:3000 npm run e2e
+```
+
+```bash
+docker compose -p carousel-e2e -f docker-compose.yml -f docker-compose.e2e.yml down -v
 ```
 
 ## Defining a radar
@@ -312,6 +346,7 @@ src/carousel/        Python package: radar.py (Radar API), feedback.py, core/ (r
                      database/ (SQLite store; Postgres models, migrations, importer),
                      api/ (REST API v1), workers/ (scan jobs), site.py (dashboard), cli.py
 apps/web/            Next.js web app (For You, Radars, Library); e2e/ holds the Playwright acceptance test
+docker-compose.yml   The Phase 1B stack (Dockerfile = API + worker image; apps/web/Dockerfile = web app)
 radars/              Radars scanned daily by Actions (lab_default.yml = the lab's ten themes)
 examples/            Starter radar configs (validated in CI)
 openapi/             The committed API contract (checked against the app in CI)
@@ -334,7 +369,7 @@ done-when checks for each task, is in [`CAROUSEL_PLAN.md`](CAROUSEL_PLAN.md).
 
 | Phase | Focus | Status |
 | --- | --- | --- |
-| **1. Functional MVP** | **Engine:** canonical paper records, OpenAlex + PubMed, careful dedup, lexical + semantic candidates, relevance/novelty/methods ranking with modes, `carousel scan` and a Python `Radar` API. **App:** FastAPI + Postgres/pgvector, Next.js (For You, Radars, Library, "Why this paper?"), save/dismiss, Docker Compose | In progress: the engine, Postgres, the REST API, and the web app are done; Docker Compose is next |
+| **1. Functional MVP** | **Engine:** canonical paper records, OpenAlex + PubMed, careful dedup, lexical + semantic candidates, relevance/novelty/methods ranking with modes, `carousel scan` and a Python `Radar` API. **App:** FastAPI + Postgres/pgvector, Next.js (For You, Radars, Library, "Why this paper?"), save/dismiss, Docker Compose | Done for local use: the engine, Postgres, the REST API, the web app, and Docker Compose |
 | **2. Continuous intelligence** | Scheduled ingestion, Europe PMC + Crossref (retractions, corrections, preprint links), arXiv, versioned explanations, feedback learning, email/RSS digests, evidence-grounded summaries | Planned |
 | **3. Research Delta** | Topic clusters and observations, statistical trend detection (negative binomial, multiple-testing control), the **What's New** change log, **Trends** with baselines and uncertainty | Planned |
 | **4. Advanced discovery** | Method Transfer, literature graphs, Zotero, public API docs, collaborative radars, benchmark dataset, software paper | Planned |
