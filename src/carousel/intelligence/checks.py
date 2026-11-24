@@ -43,7 +43,8 @@ from carousel.intelligence.observations import FIELD, counts_as_of, lag_profile,
 CHECKS_VERSION = "checks-1"
 SETTLED_SHARE = 0.95
 MIN_LAG_WEEKS = 3
-DEFAULT_SETTLING_DAYS = {"pubmed": 21, "europepmc": 21, "openalex": 28, "arxiv": 3}
+# PubMed is counted by entry date (when a record was added), which hardly backfills; the others by publication date.
+DEFAULT_SETTLING_DAYS = {"pubmed": 7, "europepmc": 21, "openalex": 28, "arxiv": 3}
 FALLBACK_SETTLING_DAYS = 28
 DENOMINATOR_BAND = (2 / 3, 1.5)
 DISTINCT_SHARE = 0.7

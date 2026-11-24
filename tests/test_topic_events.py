@@ -93,7 +93,7 @@ class TopicEventTests(unittest.TestCase):
         if np is not None:
             [acc] = [e for e in out["events"] if e["type"] == "topic_acceleration"]
             ev = acc["evidence"]
-            self.assertEqual((ev["source"], ev["evaluated_through"], ev["papers_in_window"]), ("pubmed", "2026-11-22", 5))
+            self.assertEqual((ev["source"], ev["evaluated_through"], ev["papers_in_window"]), ("pubmed", "2026-12-06", 5))
             self.assertEqual(ev["recent_window"], ["2026-10-26", "2026-11-22"])  # the four weeks the model tested
             self.assertEqual([w["week"] for w in ev["weekly"]][-4:], ["2026-10-26", "2026-11-02", "2026-11-09", "2026-11-16"])
             dup = next(c for c in ev["checks"] if c["check"] == "duplicate_surge")
@@ -134,7 +134,7 @@ class TopicEventTests(unittest.TestCase):
         lines = [topic_line(e) for e in derive_topic_events(self.st, RADAR, AS_OF, "run_1")["events"]]
         self.assertTrue(any(line.startswith("New method in a topic: cryo-em") for line in lines))
         if np is not None:
-            self.assertTrue(any(line.startswith("Growing: ") and "in pubmed, through 2026-11-22; 5 papers)" in line
+            self.assertTrue(any(line.startswith("Growing: ") and "in pubmed, through 2026-12-06; 5 papers)" in line
                                 for line in lines))
 
     def test_reproducible_from_stored_data(self) -> None:

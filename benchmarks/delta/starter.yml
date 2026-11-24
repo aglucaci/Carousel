@@ -1,0 +1,78 @@
+# Study C starter benchmark for Research Delta (plan task 31).
+#
+# STATUS: DRAFT. The expert dates below are the dates of documented public events, chosen by the engineer who
+# built the harness, not annotations by domain experts. Open decision 7 in CAROUSEL_PLAN.md: the lab should have
+# two annotators review each episode (the date an expert would place the change in the literature, the topic's key
+# terms, and the controls), record their agreement, and set `annotation: reviewed (...)`.
+#
+# Counts: weekly PubMed counts by entry date (when records were added; publication dates spike monthly).
+#
+# Run: carousel eval delta benchmarks/delta/starter.yml --out delta-report
+benchmark: carousel-delta-starter
+version: 1
+status: draft (annotations pending review; see open decision 7)
+note: >
+  Weekly PubMed counts by entry date. Expected episodes should be detected between 8 weeks before and
+  26 weeks after the expert date; controls should not be flagged at all.
+episodes:
+  - id: h5n1-dairy-cattle-2024
+    description: Highly pathogenic avian influenza H5N1 in US dairy cattle.
+    field_queries: ["H5N1", "avian influenza"]
+    topic_label: H5N1 in dairy cattle
+    key_terms: ["dairy cattle", "dairy cows", "bovine", "milk"]
+    expected: true
+    expert_date: 2024-03-25
+    replay_start: 2023-09-04
+    replay_end: 2024-09-29
+    reference: USDA APHIS confirmed HPAI H5N1 in dairy cattle (Texas and Kansas) on 25 March 2024.
+    annotation: draft
+    # FIRST RUN (delta-eval-1): missed. The topic rose from ~0.3 to 3-6 papers a week for months, but a 4-week
+    # window holds only ~10-15 papers, so the interval stays wide. Small topics may need a longer recent window.
+  - id: mpox-clade-i-2024
+    description: Mpox clade I (Ib) spread from the Democratic Republic of the Congo.
+    field_queries: ["mpox", "monkeypox"]
+    topic_label: Mpox clade I
+    key_terms: ["clade I", "clade Ib", "Democratic Republic of the Congo", "Kamituga"]
+    expected: true
+    expert_date: 2024-08-14
+    replay_start: 2024-01-01
+    replay_end: 2025-02-28
+    reference: WHO declared the mpox upsurge a Public Health Emergency of International Concern on 14 August 2024.
+    annotation: draft
+    # REVIEW: clade I drove most of the mpox literature in 2024, so the topic's *share* of the mpox field may barely
+    # change even as both grow. A share-based model can miss a topic that is the field's own growth; a broader field
+    # (e.g. "orthopoxvirus" or "emerging infections") may be the fairer episode.
+  - id: sars-cov-2-jn1-2023
+    description: The SARS-CoV-2 BA.2.86 / JN.1 lineage.
+    field_queries: ["SARS-CoV-2"]
+    topic_label: JN.1 and BA.2.86
+    key_terms: ["JN.1", "BA.2.86", "pirola"]
+    expected: true
+    expert_date: 2023-12-19
+    replay_start: 2023-06-05
+    replay_end: 2024-06-30
+    reference: WHO classified JN.1 as a variant of interest on 19 December 2023.
+    annotation: draft
+    # REVIEW: the key terms include BA.2.86, which emerged in August 2023, months before JN.1's designation, so an
+    # annotator may place this topic's change earlier (or split BA.2.86 and JN.1 into two episodes). Left unchanged
+    # after the first run so the benchmark isn't tuned to the model's answer.
+  - id: control-influenza-neuraminidase-2023
+    description: "Control: neuraminidase work within influenza research, with no known surge in 2023."
+    field_queries: ["influenza"]
+    topic_label: Influenza neuraminidase
+    key_terms: ["neuraminidase", "oseltamivir"]
+    expected: false
+    replay_start: 2023-01-02
+    replay_end: 2023-12-31
+    reference: "Control chosen as a long-established topic; no documented event in the period."
+    annotation: draft
+  - id: control-tuberculosis-isoniazid-2023
+    description: "Control: first-line drugs within tuberculosis research, with no known surge in 2023."
+    field_queries: ["tuberculosis"]
+    topic_label: Tuberculosis first-line drugs
+    key_terms: ["isoniazid", "rifampicin"]
+    expected: false
+    replay_start: 2023-01-02
+    replay_end: 2023-12-31
+    reference: "Control chosen as a long-established topic; no documented event in the period."
+    annotation: draft

@@ -15,6 +15,7 @@ carousel command-line interface.
     carousel topics observe RADAR_ID --config RADAR.yml [--weeks N] [--budget N]   # weekly counts per topic
     carousel topics trends RADAR_ID [--source S] [--as-of ISO]   # needs the [trends] extra
     carousel topics events RADAR_ID --config RADAR.yml [--as-of ISO]   # derive and store topic events
+    carousel eval delta BENCHMARK.yml [--out PREFIX] [--replay FIXTURE.json]   # Study C (needs [trends])
     carousel review link STORE.db PREPRINT_ID PUBLISHED_ID [--note TEXT]   # versions of one work, kept apart
     carousel review unlink STORE.db ID_A ID_B [--note TEXT]          # not versions of one work
 
@@ -452,7 +453,7 @@ def cmd_topics(args: argparse.Namespace) -> int:
         if args.action == "observe":
             from carousel.connectors import CONNECTORS
             from carousel.core.config import load_radar
-            from carousel.intelligence.observations import COUNTING_SOURCES, observe
+            from carousel.intelligence.observations import counting_connectors, observe
 
             if not args.config:
                 print("FAIL observe needs the radar's config: --config RADAR.yml", file=sys.stderr)
@@ -461,7 +462,7 @@ def cmd_topics(args: argparse.Namespace) -> int:
             if cfg.radar_id != args.radar:
                 print(f"FAIL {args.config} is radar {cfg.radar_id!r}, not {args.radar!r}", file=sys.stderr)
                 return 1
-            conns = {s.value: CONNECTORS[s.value]() for s in cfg.sources if s.value in COUNTING_SOURCES}
+            conns = counting_connectors([s.value for s in cfg.sources])
             stats = observe(store, cfg, model, conns, at=dt.datetime.now(dt.timezone.utc), weeks=args.weeks,
                             budget=args.budget)
             print(f"observed {stats['weeks']} week(s) from {', '.join(stats['sources']) or 'no counting source'}: "
@@ -486,6 +487,47 @@ def cmd_topics(args: argparse.Namespace) -> int:
             for conf, pid in rows:
                 p = store.get(pid)
                 print(f"  {conf:.3f}  {pid}  {(p.title if p else '')[:100]}")
+    return 0
+
+
+def cmd_eval(args: argparse.Namespace) -> int:
+    from carousel.connectors import CONNECTORS, HttpClient, ReplayTransport
+    from carousel.evaluation.delta import evaluate_benchmark, load_benchmark, report_markdown, write_report
+    from carousel.intelligence.trends import TrendsUnavailable
+
+    try:
+        bench = load_benchmark(args.benchmark)
+    except (OSError, ValueError) as exc:
+        print(f"FAIL {args.benchmark}: {exc}", file=sys.stderr)
+        return 1
+    if args.replay:
+        transport = ReplayTransport(args.replay)
+        counters = {}
+
+        def counter_for(ep):
+            if ep.source not in counters:
+                cls = CONNECTORS[ep.source]
+                kw = {"api_key": "", **({"date_field": "edat"} if ep.source == "pubmed" else {})} \
+                    if ep.source in ("pubmed", "openalex") else {}
+                counters[ep.source] = cls(HttpClient(transport, sleep=lambda s: None), **kw)
+            return counters[ep.source]
+    else:
+        cache = {}
+
+        def counter_for(ep):
+            from carousel.intelligence.observations import counting_connectors
+
+            return cache.setdefault(ep.source, counting_connectors([ep.source])[ep.source])
+    try:
+        report = evaluate_benchmark(bench, counter_for)
+    except TrendsUnavailable as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    if args.out:
+        for path in write_report(report, args.out):
+            print(f"wrote {path}")
+    else:
+        print(report_markdown(report))
     return 0
 
 
@@ -789,6 +831,14 @@ def build_parser() -> argparse.ArgumentParser:
     tp.add_argument("--source", help="trends: one source only (default: every observed source)")
     tp.add_argument("--as-of", help="trends: use only observations made by this time (ISO; default now)")
     tp.set_defaults(func=cmd_topics)
+
+    ev = sub.add_parser("eval", help="Evaluation harnesses (Study C: carousel eval delta)")
+    evs = ev.add_subparsers(dest="study", required=True, metavar="STUDY")
+    ed = evs.add_parser("delta", help="Research Delta accuracy: replay a benchmark of annotated episodes")
+    ed.add_argument("benchmark", metavar="BENCHMARK.yml")
+    ed.add_argument("--out", metavar="PREFIX", help="Write PREFIX.md and PREFIX.json (default: Markdown to stdout)")
+    ed.add_argument("--replay", metavar="FIXTURE.json", help="Answer count requests from recorded HTTP (no network)")
+    ed.set_defaults(func=cmd_eval)
 
     ru = sub.add_parser("runs", help="List stored runs")
     ru.add_argument("--store", default="carousel.db")

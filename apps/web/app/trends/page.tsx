@@ -35,7 +35,8 @@ function TopicCard({ t }: { t: TrendTopic }) {
         {t.status === "ok" ? (
           <>
             {Number(t.rate_ratio).toFixed(2)}&times; its baseline share in the tested weeks (95% interval{" "}
-            {Number(t.ci_low).toFixed(2)}–{Number(t.ci_high).toFixed(2)}, q = {Number(t.q_value).toFixed(3)}); {t.recent_count} papers, about{" "}
+            {Number(t.ci_low).toFixed(2)}–{t.ci_high == null ? "no upper bound" : Number(t.ci_high).toFixed(2)}, q ={" "}
+            {Number(t.q_value).toFixed(3)}); {t.recent_count} papers, about{" "}
             {Math.round(t.expected_recent ?? 0)} expected.
           </>
         ) : (

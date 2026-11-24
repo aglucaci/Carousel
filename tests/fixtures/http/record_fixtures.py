@@ -1,6 +1,6 @@
 """Re-record the connector fixtures from the live APIs.
 
-    python tests/fixtures/http/record_fixtures.py [pubmed] [openalex] [crossref] [europepmc] [europepmc-scan] [versions] [arxiv] [observations]   # default: all
+    python tests/fixtures/http/record_fixtures.py [pubmed] [openalex] [crossref] [europepmc] [europepmc-scan] [versions] [arxiv] [observations] [benchmark]   # default: all
 
 crossref records two files: a lookup of known DOIs (a retracted paper and its
 notice, a plain paper, a paper with a preprint and that preprint, and an
@@ -15,6 +15,9 @@ arxiv records ``arxiv_search.json`` (a paged search) and ``arxiv_extras.json``
 
 observations records ``observations.json``: weekly count requests (field and two
 topics) from PubMed, Europe PMC, OpenAlex, and arXiv over four weeks.
+
+benchmark records ``benchmark_delta.json``: the weekly PubMed counts the Study C
+starter benchmark (benchmarks/delta/starter.yml) replays, and its report.
 
 versions records ``versions.json``: preprint/article pairs that Europe PMC and
 Crossref link, fetched together and one side at a time.
@@ -206,8 +209,17 @@ def main(sources) -> None:
             for r in st.topic_observations("escape"):
                 print("  ", r["source"], r["period_start"], r["topic_id"], r["count"], r["status"], r["error"] or "")
 
+    if "benchmark" in sources:
+        from carousel.evaluation.delta import evaluate_benchmark, load_benchmark, report_markdown
+
+        rec = RecordingTransport(UrllibTransport(timeout=60), HERE / "benchmark_delta.json")
+        pm = PubMedConnector(HttpClient(rec, min_interval=0.4), api_key="", date_field="edat")
+        report = evaluate_benchmark(load_benchmark(HERE.parents[2] / "benchmarks" / "delta" / "starter.yml"), lambda ep: pm)
+        print(report_markdown(report))
+        print("benchmark", len(rec.interactions), "requests", rec.save())
+
 
 if __name__ == "__main__":
     import sys
 
-    main(sys.argv[1:] or ["pubmed", "openalex", "crossref", "europepmc", "versions", "arxiv", "observations"])
+    main(sys.argv[1:] or ["pubmed", "openalex", "crossref", "europepmc", "versions", "arxiv", "observations", "benchmark"])
