@@ -29,6 +29,7 @@ from carousel.connectors import CONNECTORS, VERIFIERS, Connector, ConnectorError
 from carousel.core.config import Mode, RadarConfig, load_radar
 from carousel.core.paper import CanonicalPaper
 from carousel.database.local import PaperStore, _iso
+from carousel.ingestion.versions import fetch_linked, link_versions
 from carousel import feedback as fb
 from carousel.ranking import rank
 from carousel.search import Embedder, HashingEmbedder, candidates_for_radar
@@ -74,6 +75,24 @@ def _paper_summary(p: CanonicalPaper) -> Dict[str, Any]:
         "venue": p.venue, "earliest_public_date": p.earliest_public_date, "url": p.url,
         "doi": ids.doi, "pmid": ids.pmid, "pmcid": ids.pmcid, "openalex": ids.openalex, "arxiv": ids.arxiv,
     }
+
+
+VERSION_FLAGS = {"published": "published_version", "preprint": "has_preprint"}
+"""Flag on a recommended paper by the role of its linked version: a preprint since published, an article with
+a preprint."""
+
+
+def version_summaries(st: PaperStore, paper_id: str) -> List[Dict[str, Any]]:
+    """The paper's linked versions, for a run's stored details: each stays its own paper."""
+    out = []
+    for link in st.version_links(paper_id):
+        other = st.get(link["paper_id"])
+        if other is None:
+            continue
+        out.append({"paper_id": other.paper_id, "role": link["role"], "title": other.title, "venue": other.venue,
+                    "earliest_public_date": other.earliest_public_date, "doi": other.identifiers.doi,
+                    "url": other.url, "linked_by": sorted({e.get("method", "source") for e in link["evidence"]})})
+    return out
 
 
 # -------------------------
@@ -374,6 +393,9 @@ class Radar:
             hits = {st.resolve(pid) for pid in hits}  # a DOI lookup can merge papers too
             observations = [(s, i, st.resolve(pid), status) for s, i, pid, status in observations]
 
+            # ---- link preprints and their publications that are both in the store (never merged) ----
+            linked_before = link_versions(st, hits, started)
+
             # ---- feedback ----
             fb_data = fb.load(self.feedback_path) if self.feedback_path else {a: [] for a in fb.ACTIONS}
             feedback, state = fb.resolve(st, fb_data, source=str(self.feedback_path or "feedback"))
@@ -402,12 +424,24 @@ class Radar:
                     if c["source"] == "europepmc" and c["status"] == "ok":
                         c["enrichment"] = stats
 
+            # ---- the other version of what was recommended, looked up where the store lacks it ----
+            lookups = {k: v for k, v in conns.items() if k in {s.value for s in cfg.sources}}
+            linked_after = fetch_linked(st, lookups, [it.paper_id for it in ranking.items], started)
+
             items = []
             for it in ranking.items:
                 d = it.to_dict()
                 d["details"]["paper"] = _paper_summary(st.get(it.paper_id))  # type: ignore[arg-type]
+                d["details"]["versions"] = versions = version_summaries(st, it.paper_id)
+                d["flags"] += [f for f in dict.fromkeys(VERSION_FLAGS[v["role"]] for v in versions) if f not in d["flags"]]
                 items.append(d)
             ranking_meta = {k: v for k, v in ranking.to_dict().items() if k != "items"}
+            ranking_meta["versions"] = {
+                "linked": linked_before["linked"] + linked_after["linked"],
+                "refused": linked_before["refused"] + linked_after["refused"],
+                "looked_up": linked_after["looked_up"], "found": linked_after["found"],
+                "unresolved": linked_after["unresolved"], "errors": linked_after["errors"],
+            }
             ranking_meta["window"] = {"start": start.isoformat(), "end": as_of.isoformat(), "days": days}
 
             started_iso = _iso(started)

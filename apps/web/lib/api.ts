@@ -167,6 +167,19 @@ export type PaperTextInfo = {
 };
 export type PaperAnnotation = { type: string; name: string; uri?: string | null; mentions: number; sections?: string[] };
 
+export type PaperVersion = {
+  paper_id: string;
+  role: "preprint" | "published";
+  title?: string | null;
+  venue?: string | null;
+  earliest_public_date?: string | null;
+  doi?: string | null;
+  url?: string | null;
+  is_retracted?: boolean;
+  linked_by: string[];
+  evidence?: { method: string; relation?: string; asserted_by?: string; note?: string }[];
+};
+
 export type Paper = {
   paper_id: string;
   title?: string | null;
@@ -178,6 +191,7 @@ export type Paper = {
   updates?: PaperUpdate[];
   texts?: PaperTextInfo[];
   annotations?: PaperAnnotation[];
+  versions?: PaperVersion[];
 };
 
 export type StrategyStep = { source: string; status: string; query?: string | null; filters?: string | null; notes: string[] };

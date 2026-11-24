@@ -182,6 +182,10 @@ class PaperOut(_Out):
     relations: List[Dict[str, Any]] = Field([], description="Links to other works, e.g. has-preprint / is-preprint-of")
     license: Optional[str] = Field(None, description="The article's licence as its sources state it (normalized)")
     open_access: Optional[bool] = None
+    versions: List[Dict[str, Any]] = Field([], description="Other versions of this work, each its own paper: role "
+                                                         "(preprint | published), paper_id, title, venue, "
+                                                         "earliest_public_date, doi, linked_by (crossref, europepmc, "
+                                                         "manual), evidence")
     texts: List[Dict[str, Any]] = Field([], description="Full texts kept, each with its own licence (license, "
                                         "license_source: text | metadata, reuse), section titles, and length. "
                                         "The text itself is not served")

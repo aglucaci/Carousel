@@ -200,6 +200,25 @@ class RecordingTransport(Transport):
         return self.path
 
 
+class ExtendingTransport(Transport):
+    """For re-recording: replays what ``path`` already holds and sends only new requests to ``live``.
+
+    Wrapped in a :class:`RecordingTransport` writing to the same file, it adds a scan's new requests (e.g. a
+    new lookup step) without changing the responses the existing tests rely on.
+    """
+
+    def __init__(self, live: Transport, path: Union[str, Path]) -> None:
+        self.live = live
+        self.replay = ReplayTransport(path) if Path(path).exists() else None
+        self.new: List[str] = []
+
+    def send(self, request: Request) -> Response:
+        if self.replay is not None and self.replay._queue.get(request.key()):
+            return self.replay.send(request)
+        self.new.append(request.key())
+        return self.live.send(request)
+
+
 # -------------------------
 # Cache and budget
 # -------------------------

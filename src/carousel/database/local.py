@@ -8,7 +8,9 @@ The Phase 1A store behind ``carousel scan`` and the Actions demo. It keeps:
   paper;
 - the canonical paper derived from each paper's source records;
 - a **review queue** of possible duplicates, and a **merge log** of every
-  merge and split, so deduplication is reviewable and reversible.
+  merge and split, so deduplication is reviewable and reversible;
+- **version links** between a preprint and its journal article: two papers
+  that stay separate and point at each other (plan task 18).
 
 How a newly observed record finds its paper (plan task 6):
 
@@ -33,6 +35,8 @@ Usage::
         store.merge_papers(keep, other)      # reviewer says: same work
         store.mark_distinct(a, b)            # reviewer says: different works
         store.split("openalex", "W123")      # undo a wrong merge
+        store.link_versions(preprint, article)    # reviewer says: preprint and its publication
+        store.version_links(paper_id)        # the paper's other versions
 """
 
 from __future__ import annotations
@@ -53,7 +57,7 @@ from carousel.ingestion.dedup import MatchDecision, best_match, title_tokens
 if TYPE_CHECKING:
     from carousel.core.fulltext import Annotation, PaperText
 
-STORE_SCHEMA_VERSION = 5
+STORE_SCHEMA_VERSION = 6
 
 _DDL = """
 CREATE TABLE IF NOT EXISTS meta (
@@ -110,7 +114,7 @@ CREATE TABLE IF NOT EXISTS review_queue (
     score       REAL,
     reasons     TEXT NOT NULL,             -- JSON list
     features    TEXT NOT NULL,             -- JSON object
-    status      TEXT NOT NULL,             -- pending | merged | distinct | superseded
+    status      TEXT NOT NULL,             -- pending | merged | distinct | linked | superseded
     created_at  TEXT NOT NULL,
     decided_at  TEXT,
     note        TEXT,
@@ -213,6 +217,21 @@ CREATE TABLE IF NOT EXISTS paper_annotations (      -- text-mined entities per a
     annotations  TEXT NOT NULL,                  -- JSON [Annotation]
     retrieved_at TEXT NOT NULL,
     PRIMARY KEY (source, article_id)
+);
+CREATE TABLE IF NOT EXISTS paper_links (           -- a preprint and its journal article: linked, never merged
+    preprint_id  TEXT NOT NULL,                  -- paper IDs as linked; resolved through merges on read
+    published_id TEXT NOT NULL,
+    evidence     TEXT NOT NULL,                  -- JSON [{method, relation, scheme, value, asserted_by, paper_id}]
+    created_at   TEXT NOT NULL,
+    updated_at   TEXT NOT NULL,
+    PRIMARY KEY (preprint_id, published_id)
+);
+CREATE TABLE IF NOT EXISTS link_checks (            -- linked works looked up at their source, found or not
+    scheme     TEXT NOT NULL,                    -- doi | europepmc
+    value      TEXT NOT NULL,
+    outcome    TEXT NOT NULL,                    -- found | not_found
+    checked_at TEXT NOT NULL,
+    PRIMARY KEY (scheme, value)
 );
 CREATE TABLE IF NOT EXISTS merge_log (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -569,6 +588,116 @@ class PaperStore:
         with self.db:
             self._decide(a, b, "distinct", note, _iso(at or dt.datetime.now(dt.timezone.utc)))
 
+    # ---- version links (preprint <-> journal article) ----
+
+    def _aliases(self, paper_id: str) -> List[str]:
+        """The paper and every paper merged into it (merge redirects are kept flat)."""
+        rows = self.db.execute("SELECT paper_id FROM papers WHERE merged_into = ?", (paper_id,)).fetchall()
+        return [paper_id] + [r["paper_id"] for r in rows]
+
+    def _link_rows(self, paper_id: str) -> List[sqlite3.Row]:
+        ids = self._aliases(paper_id)
+        marks = ",".join("?" * len(ids))
+        return self.db.execute(
+            f"SELECT * FROM paper_links WHERE preprint_id IN ({marks}) OR published_id IN ({marks})", (*ids, *ids)
+        ).fetchall()
+
+    def _link(self, preprint: str, published: str, evidence: Dict[str, Any], now: str, manual: bool,
+              note: Optional[str] = None) -> str:
+        """Record a version link. Returns linked | confirmed | same_paper | distinct (a reviewer said no)."""
+        pre, pub = self.resolve(preprint), self.resolve(published)
+        if pre == pub:
+            if manual:
+                raise StoreError(f"{preprint} and {published} are the same paper; split it first")
+            return "same_paper"
+        pa, pb = _pair(pre, pub)
+        decided = self.db.execute("SELECT status FROM review_queue WHERE paper_a = ? AND paper_b = ?", (pa, pb)).fetchone()
+        if not manual and decided is not None and decided["status"] == "distinct":
+            return "distinct"
+        existing = [r for r in self._link_rows(pre)
+                    if {self.resolve(r["preprint_id"]), self.resolve(r["published_id"])} == {pre, pub}]
+        if existing and not any(self.resolve(r["preprint_id"]) == pre for r in existing):
+            if not manual:
+                return "distinct"  # the stored link says the roles are the other way round; leave it to a reviewer
+            self.db.executemany("DELETE FROM paper_links WHERE preprint_id = ? AND published_id = ?",
+                                [(r["preprint_id"], r["published_id"]) for r in existing])
+            existing = []
+        if existing:
+            row = existing[0]
+            old = json.loads(row["evidence"])
+            if evidence in old:
+                return "confirmed"
+            self.db.execute("UPDATE paper_links SET evidence = ?, updated_at = ? WHERE preprint_id = ? AND published_id = ?",
+                            (json.dumps(old + [evidence], sort_keys=True), now, row["preprint_id"], row["published_id"]))
+            status = "confirmed"
+        else:
+            self.db.execute("INSERT INTO paper_links VALUES (?, ?, ?, ?, ?)",
+                            (pre, pub, json.dumps([evidence], sort_keys=True), now, now))
+            status = "linked"
+        self._decide(pre, pub, "linked", note, now, kind="manual" if manual else "version_link")
+        return status
+
+    def link_asserted(self, preprint: str, published: str, evidence: Dict[str, Any], at: dt.datetime) -> str:
+        """A source says ``preprint`` was published as ``published``. Never overrides a reviewer's "distinct".
+
+        Returns ``linked`` (new), ``confirmed`` (already linked; the evidence is added), ``same_paper``, or
+        ``distinct`` (a reviewer separated the pair, or the stored link has the roles the other way round).
+        """
+        with self.db:
+            return self._link(preprint, published, evidence, _iso(at), manual=False)
+
+    def link_versions(self, preprint: str, published: str, note: Optional[str] = None,
+                      at: Optional[dt.datetime] = None) -> str:
+        """Reviewer decision: ``preprint`` is a preprint of ``published``. The papers stay separate."""
+        evidence = {"method": "manual", **({"note": note} if note else {})}
+        with self.db:
+            return self._link(preprint, published, evidence, _iso(at or dt.datetime.now(dt.timezone.utc)),
+                              manual=True, note=note)
+
+    def unlink_versions(self, a: str, b: str, note: Optional[str] = None, at: Optional[dt.datetime] = None) -> int:
+        """Reviewer decision: not versions of one work. Removes the link; sources can't relink the pair."""
+        a, b = self.resolve(a), self.resolve(b)
+        if a == b:
+            raise StoreError(f"{a} and {b} are the same paper")
+        with self.db:
+            rows = [r for r in self._link_rows(a) if {self.resolve(r["preprint_id"]), self.resolve(r["published_id"])} == {a, b}]
+            self.db.executemany("DELETE FROM paper_links WHERE preprint_id = ? AND published_id = ?",
+                                [(r["preprint_id"], r["published_id"]) for r in rows])
+            self._decide(a, b, "distinct", note, _iso(at or dt.datetime.now(dt.timezone.utc)))
+            return len(rows)
+
+    def version_links(self, paper_id: str) -> List[Dict[str, Any]]:
+        """The paper's other versions: ``{paper_id, role, evidence, linked_at}``, role being the *other* paper's
+        (``preprint`` or ``published``). Each linked paper keeps its own record; nothing is merged."""
+        me = self.resolve(paper_id)
+        out: Dict[str, Dict[str, Any]] = {}
+        for r in self._link_rows(me):
+            pre, pub = self.resolve(r["preprint_id"]), self.resolve(r["published_id"])
+            if pre == pub:  # merged since (a reviewer decided they are one work)
+                continue
+            other, role = (pub, "published") if pre == me else (pre, "preprint")
+            entry = out.setdefault(other, {"paper_id": other, "role": role, "evidence": [], "linked_at": r["created_at"]})
+            entry["evidence"].extend(e for e in json.loads(r["evidence"]) if e not in entry["evidence"])
+            entry["linked_at"] = min(entry["linked_at"], r["created_at"])
+        return sorted(out.values(), key=lambda x: (x["role"], x["linked_at"], x["paper_id"]))
+
+    def all_version_links(self) -> List[Tuple[str, str, List[Dict[str, Any]], str, str]]:
+        """Every link as (preprint, published, evidence, created_at, updated_at), resolved through merges."""
+        out = []
+        for r in self.db.execute("SELECT * FROM paper_links ORDER BY created_at, preprint_id, published_id"):
+            pre, pub = self.resolve(r["preprint_id"]), self.resolve(r["published_id"])
+            if pre != pub:
+                out.append((pre, pub, json.loads(r["evidence"]), r["created_at"], r["updated_at"]))
+        return out
+
+    def mark_link_checked(self, scheme: str, value: str, outcome: str, at: dt.datetime) -> None:
+        with self.db:
+            self.db.execute("INSERT OR REPLACE INTO link_checks VALUES (?, ?, ?, ?)", (scheme, value, outcome, _iso(at)))
+
+    def link_checked_at(self, scheme: str, value: str) -> Optional[dt.datetime]:
+        row = self.db.execute("SELECT checked_at FROM link_checks WHERE scheme = ? AND value = ?", (scheme, value)).fetchone()
+        return _parse(row["checked_at"]) if row else None
+
     # ---- merge / split ----
 
     def merge_papers(self, keep: str, other: str, note: Optional[str] = None,
@@ -908,6 +1037,7 @@ class PaperStore:
             "identifiers": q("SELECT COUNT(*) FROM identifiers"),
             "conflicts": q("SELECT COUNT(*) FROM identifier_conflicts"),
             "review_pending": q("SELECT COUNT(*) FROM review_queue WHERE status = 'pending'"),
+            "version_links": q("SELECT COUNT(*) FROM paper_links"),
             "runs": q("SELECT COUNT(*) FROM recommendation_runs"),
             "embeddings": dict(self.db.execute(
                 "SELECT model_version, COUNT(*) FROM embeddings GROUP BY model_version ORDER BY model_version").fetchall()),

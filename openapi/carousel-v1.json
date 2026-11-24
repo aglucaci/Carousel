@@ -679,6 +679,16 @@
               }
             ],
             "title": "Venue"
+          },
+          "versions": {
+            "default": [],
+            "description": "Other versions of this work, each its own paper: role (preprint | published), paper_id, title, venue, earliest_public_date, doi, linked_by (crossref, europepmc, manual), evidence",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Versions",
+            "type": "array"
           }
         },
         "required": [

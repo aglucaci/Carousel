@@ -522,3 +522,40 @@ class EuropePMCTextsTests(ApiTestCase):
         self.assertNotIn("text", text)  # the text itself is not served
         self.assertEqual(len(paper["annotations"]), 32)
         self.assertEqual(paper["annotations"][0]["name"], "severe acute respiratory syndrome coronavirus 2")
+
+
+class VersionLinksTests(ApiTestCase):
+    """Plan task 18: a preprint and its publication stay two papers, and each shows the other."""
+
+    def test_linked_versions_show_each_other(self) -> None:
+        import sys as _sys
+
+        from carousel.connectors import EuropePMCConnector
+        from carousel.database import PaperStore
+        from carousel.database.importer import import_store
+        from carousel.ingestion.versions import link_versions
+        from test_connectors import FIXTURES, replay
+
+        _sys.path.insert(0, str(FIXTURES))
+        from record_fixtures import EPMC_ARTICLES, EPMC_PREPRINTS
+
+        store = Path(self.tmp.name) / "engine.db"
+        t = dt.datetime(2026, 11, 24, tzinfo=dt.timezone.utc)
+        with PaperStore(store) as st:
+            ids = {r.source_id: st.observe(r, t).paper.paper_id
+                   for r in EuropePMCConnector(replay("versions.json")).fetch(EPMC_ARTICLES + EPMC_PREPRINTS)}
+            link_versions(st, ids.values(), t)
+        counts = import_store(store, self.app.state.engine)
+        self.assertEqual(counts["paper_versions"], 4)  # two links, one row per direction
+        counts = import_store(store, self.app.state.engine)  # re-import replaces, never duplicates
+        self.assertEqual(counts["paper_versions"], 4)
+
+        art, pre = ids["MED:42949957"], ids["PPR:PPR1222416"]
+        a, p = self.get(f"/papers/{art}").json(), self.get(f"/papers/{pre}").json()
+        self.assertNotEqual(a["paper_id"], p["paper_id"])
+        [down], [up] = a["versions"], p["versions"]
+        self.assertEqual((down["paper_id"], down["role"], down["linked_by"], down["earliest_public_date"]),
+                         (pre, "preprint", ["europepmc"], "2026-02-27"))
+        self.assertEqual((up["paper_id"], up["role"], up["doi"]), (art, "published", "10.1073/pnas.2608185123"))
+        self.assertEqual(len(down["evidence"]), 2)  # asserted on both records
+        self.assertIn("Antigenic landscape", up["title"])

@@ -6,7 +6,9 @@ only (``TITLE_ABS``, so a passing mention deep in a full text is not a hit),
 bounded by first-publication date. Each record carries the article's licence
 and open-access status as Europe PMC states them, and corrections and
 retractions from its ``commentCorrectionList`` ("Retraction in", "Erratum in",
-...) as update notices.
+...) as update notices, and its preprint links ("Preprint in" on an article,
+"Preprint of" on a preprint) as relations to the other Europe PMC record,
+which :mod:`carousel.ingestion.versions` turns into version links.
 
 **Full text** (:meth:`EuropePMCConnector.full_text`) is fetched as JATS XML
 for open-access PMC articles, and kept only when the document's own
@@ -42,11 +44,12 @@ from carousel.connectors.base import (
 )
 from carousel.core.fulltext import Annotation, PaperText, Section, is_reusable, normalize_license, reuse_of
 from carousel.core.identifiers import try_normalize
-from carousel.core.paper import Author, SourceRecord, UpdateNotice
+from carousel.core.paper import Author, Relation, SourceRecord, UpdateNotice
 
 REST = "https://www.ebi.ac.uk/europepmc/webservices/rest"
 ANNOTATIONS = "https://www.ebi.ac.uk/europepmc/annotations_api/annotationsByArticleIds"
 PAGE_MAX = 100
+FETCH_BATCH = 20
 ANNOTATION_BATCH = 8  # the annotations API takes 1-8 article IDs per request
 DEFAULT_BUDGET_REQUESTS = 120
 SOURCES = ("MED", "PMC", "PPR")
@@ -62,6 +65,9 @@ UPDATE_TYPES = {
     "update in": "update",
 }
 RETRACTING = {"retraction"}
+# commentCorrectionList entries that link a preprint and its journal article (Europe PMC finds most of these
+# by matching title and first author, and says so in the entry's note).
+RELATION_TYPES = {"preprint in": "has-preprint", "preprint of": "is-preprint-of"}
 
 _TAG = re.compile(r"<[^>]+>")
 _DOI_IN_REF = re.compile(r"doi:\s*(10\.\S+)", re.I)
@@ -121,6 +127,19 @@ def _updates(result: Dict[str, Any]) -> List[UpdateNotice]:
     return out
 
 
+def _relations(result: Dict[str, Any]) -> List[Relation]:
+    out = []
+    for c in (result.get("commentCorrectionList") or {}).get("commentCorrection") or []:
+        kind = RELATION_TYPES.get((c.get("type") or "").strip().lower())
+        src, rid = (c.get("source") or "").strip().upper(), (c.get("id") or "").strip()
+        if not kind or src not in SOURCES or not rid:
+            continue
+        note = (c.get("note") or "").lower()
+        out.append(Relation(type=kind, scheme="europepmc", value=f"{src}:{rid}",
+                            asserted_by="title_author_match" if "title" in note and "author" in note else "europepmc"))
+    return out
+
+
 def parse_result(r: Dict[str, Any]) -> Optional[SourceRecord]:
     """One Europe PMC ``resultType=core`` result -> SourceRecord (None without an ID)."""
     src, rid = r.get("source"), r.get("id")
@@ -158,6 +177,7 @@ def parse_result(r: Dict[str, Any]) -> Optional[SourceRecord]:
         url=f"https://europepmc.org/article/{src}/{rid}",
         dates={k: v for k, v in dates.items() if v},
         updates=updates,
+        relations=_relations(r),
         license=normalize_license(r.get("license")),
         open_access=None if oa is None else oa == "Y",
     )
@@ -284,13 +304,18 @@ class EuropePMCConnector(Connector):
         return SearchResult(records=records, coverage=coverage)
 
     def fetch(self, ids: Sequence[str]) -> List[SourceRecord]:
-        """Records by Europe PMC ID (``MED:123``, ``PPR:PPR456``, ``PMC:PMC789``)."""
-        out: List[SourceRecord] = []
-        for ref in ids:
+        """Records by Europe PMC ID (``MED:123``, ``PPR:PPR456``, ``PMC:PMC789``), up to 20 per request."""
+        refs = []
+        for ref in dict.fromkeys(ids):
             src, _, rid = ref.partition(":")
-            if not src or not rid:
-                continue
-            params = {"query": f"EXT_ID:{rid} AND SRC:{src}", "resultType": "core", "format": "json", "pageSize": 1}
+            if src in SOURCES and re.fullmatch(r"[A-Za-z0-9]+", rid or ""):
+                refs.append((src, rid))
+        out: List[SourceRecord] = []
+        for i in range(0, len(refs), FETCH_BATCH):
+            batch = refs[i : i + FETCH_BATCH]
+            terms = [f"EXT_ID:{rid} AND SRC:{src}" for src, rid in batch]
+            q = terms[0] if len(terms) == 1 else " OR ".join(f"({t})" for t in terms)
+            params = {"query": q, "resultType": "core", "format": "json", "pageSize": len(batch)}
             data = self.client.get(Request.build(f"{REST}/search", params)).json()
             out.extend(r for r in (parse_result(x) for x in (data.get("resultList") or {}).get("result") or []) if r)
         return out
