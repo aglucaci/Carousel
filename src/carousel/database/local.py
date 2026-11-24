@@ -44,13 +44,16 @@ import json
 import math
 import sqlite3
 from pathlib import Path
-from typing import Any, Dict, Iterator, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Sequence, Tuple, Union
 
 from carousel.core.identifiers import normalize
 from carousel.core.paper import CanonicalPaper, SourceRecord, paper_id_for
 from carousel.ingestion.dedup import MatchDecision, best_match, title_tokens
 
-STORE_SCHEMA_VERSION = 4
+if TYPE_CHECKING:
+    from carousel.core.fulltext import Annotation, PaperText
+
+STORE_SCHEMA_VERSION = 5
 
 _DDL = """
 CREATE TABLE IF NOT EXISTS meta (
@@ -179,6 +182,37 @@ CREATE TABLE IF NOT EXISTS feedback_events (       -- append-only history of fee
     change   TEXT NOT NULL,                    -- added | removed
     ref      TEXT NOT NULL,
     at       TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS paper_texts (            -- full texts kept under a reusable licence (Europe PMC)
+    source         TEXT NOT NULL,
+    source_id      TEXT NOT NULL,                -- e.g. PMC13778503
+    kind           TEXT NOT NULL,                -- full_text
+    paper_id       TEXT NOT NULL,                -- resolved through merges on read
+    format         TEXT NOT NULL,
+    license        TEXT,                         -- normalized, e.g. cc-by-4.0
+    license_url    TEXT,
+    license_source TEXT NOT NULL,                -- text | metadata
+    reuse          TEXT NOT NULL,                -- open | noncommercial | no_derivatives | restricted | unknown
+    url            TEXT,
+    sha256         TEXT NOT NULL,
+    sections       TEXT NOT NULL,                -- JSON [{title, text}]
+    retrieved_at   TEXT NOT NULL,
+    PRIMARY KEY (source, source_id, kind)
+);
+CREATE TABLE IF NOT EXISTS text_checks (            -- full texts looked for, kept or not (so they aren't re-fetched)
+    source     TEXT NOT NULL,
+    source_id  TEXT NOT NULL,
+    outcome    TEXT NOT NULL,                    -- kept | not_reusable
+    checked_at TEXT NOT NULL,
+    PRIMARY KEY (source, source_id)
+);
+CREATE TABLE IF NOT EXISTS paper_annotations (      -- text-mined entities per article (Europe PMC)
+    source       TEXT NOT NULL,
+    article_id   TEXT NOT NULL,                  -- MED:123 | PMC:PMC456 | PPR:PPR789
+    paper_id     TEXT NOT NULL,
+    annotations  TEXT NOT NULL,                  -- JSON [Annotation]
+    retrieved_at TEXT NOT NULL,
+    PRIMARY KEY (source, article_id)
 );
 CREATE TABLE IF NOT EXISTS merge_log (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -792,6 +826,73 @@ class PaperStore:
             paper = self.get(pid)
             if paper is not None:
                 yield paper
+
+    # ---- texts and annotations (Europe PMC) ----
+
+    def save_text(self, paper_id: str, text: "PaperText") -> None:
+        """Keep a full text with its licence (replaces an earlier copy of the same text)."""
+        sections = json.dumps([s.model_dump() for s in text.sections], ensure_ascii=False)
+        with self.db:
+            self.db.execute(
+                "INSERT OR REPLACE INTO paper_texts VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (text.source, text.source_id, text.kind, self.resolve(paper_id), text.format, text.license,
+                 text.license_url, text.license_source, text.reuse, text.url, text.sha256(), sections,
+                 _iso(text.retrieved_at)),
+            )
+
+    def _owned_rows(self, table: str, paper_id: str) -> List[sqlite3.Row]:
+        target = self.resolve(paper_id)
+        rows = self.db.execute(f"SELECT * FROM {table} ORDER BY source, {'source_id' if table == 'paper_texts' else 'article_id'}")
+        return [r for r in rows if self.resolve(r["paper_id"]) == target]
+
+    def texts(self, paper_id: str) -> List["PaperText"]:
+        from carousel.core.fulltext import PaperText
+
+        return [PaperText(source=r["source"], source_id=r["source_id"], kind=r["kind"], format=r["format"],
+                          license=r["license"], license_url=r["license_url"], license_source=r["license_source"],
+                          reuse=r["reuse"], url=r["url"], sections=json.loads(r["sections"]),
+                          retrieved_at=_parse(r["retrieved_at"]))
+                for r in self._owned_rows("paper_texts", paper_id)]
+
+    def mark_text_checked(self, source: str, source_id: str, outcome: str, at: dt.datetime) -> None:
+        with self.db:
+            self.db.execute("INSERT OR REPLACE INTO text_checks VALUES (?, ?, ?, ?)", (source, source_id, outcome, _iso(at)))
+
+    def text_checked_at(self, source: str, source_id: str) -> Optional[dt.datetime]:
+        row = self.db.execute("SELECT checked_at FROM text_checks WHERE source = ? AND source_id = ?",
+                              (source, source_id)).fetchone()
+        return _parse(row["checked_at"]) if row else None
+
+    def has_text(self, source: str, source_id: str, kind: str = "full_text") -> bool:
+        return self.db.execute("SELECT 1 FROM paper_texts WHERE source = ? AND source_id = ? AND kind = ?",
+                               (source, source_id, kind)).fetchone() is not None
+
+    def save_annotations(self, paper_id: str, source: str, article_id: str, annotations: Sequence["Annotation"],
+                         retrieved_at: dt.datetime) -> None:
+        data = json.dumps([a.model_dump(exclude_none=True) for a in annotations], ensure_ascii=False)
+        with self.db:
+            self.db.execute("INSERT OR REPLACE INTO paper_annotations VALUES (?, ?, ?, ?, ?)",
+                            (source, article_id, self.resolve(paper_id), data, _iso(retrieved_at)))
+
+    def annotations(self, paper_id: str) -> List["Annotation"]:
+        """Every source's annotations for the paper, one row per entity, most-mentioned first."""
+        from carousel.core.fulltext import Annotation, annotation_key
+
+        merged: Dict[Tuple[str, str, str], Annotation] = {}
+        for r in self._owned_rows("paper_annotations", paper_id):
+            for a in (Annotation(**x) for x in json.loads(r["annotations"])):
+                k = annotation_key(a)
+                if k in merged:  # the same paper through two articles (e.g. MED and PMC)
+                    old = merged[k]
+                    a = old.model_copy(update={"mentions": max(old.mentions, a.mentions),
+                                               "sections": list(dict.fromkeys(old.sections + a.sections))})
+                merged[k] = a
+        return sorted(merged.values(), key=lambda x: (-x.mentions, x.type, x.name.lower()))
+
+    def annotations_retrieved_at(self, source: str, article_id: str) -> Optional[dt.datetime]:
+        row = self.db.execute("SELECT retrieved_at FROM paper_annotations WHERE source = ? AND article_id = ?",
+                              (source, article_id)).fetchone()
+        return _parse(row["retrieved_at"]) if row else None
 
     def conflicts(self) -> List[Conflict]:
         rows = self.db.execute("SELECT * FROM identifier_conflicts ORDER BY observed_at, scheme, value")

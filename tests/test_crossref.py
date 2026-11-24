@@ -92,7 +92,7 @@ class ParseTests(unittest.TestCase):
         import hashlib
         import json
 
-        content = r.model_dump(mode="json", exclude={"first_seen", "last_verified", "raw", "updates", "relations"})
+        content = r.model_dump(mode="json", exclude={"first_seen", "last_verified", "raw", "updates", "relations", "license", "open_access"})
         blob = json.dumps(content, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
         self.assertEqual(r.content_sha256(), hashlib.sha256(blob.encode()).hexdigest())
 

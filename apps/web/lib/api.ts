@@ -152,12 +152,32 @@ export type Explanation = {
   executed_at: string;
 };
 
+export type PaperUpdate = { type: string; notice_doi?: string | null; date?: string | null; asserted_by?: string | null; label?: string | null; via?: string | null };
+export type PaperTextInfo = {
+  source: string;
+  source_id: string;
+  kind: string;
+  license?: string | null;
+  license_url?: string | null;
+  license_source: "text" | "metadata";
+  reuse: "open" | "noncommercial" | "no_derivatives" | "restricted" | "unknown";
+  url?: string | null;
+  sections: string[];
+  characters: number;
+};
+export type PaperAnnotation = { type: string; name: string; uri?: string | null; mentions: number; sections?: string[] };
+
 export type Paper = {
   paper_id: string;
   title?: string | null;
   venue?: string | null;
   url?: string | null;
   identifiers: Record<string, string>;
+  license?: string | null;
+  open_access?: boolean | null;
+  updates?: PaperUpdate[];
+  texts?: PaperTextInfo[];
+  annotations?: PaperAnnotation[];
 };
 
 export type StrategyStep = { source: string; status: string; query?: string | null; filters?: string | null; notes: string[] };

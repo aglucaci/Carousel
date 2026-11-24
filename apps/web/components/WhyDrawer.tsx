@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { client, useApi, type Explanation } from "@/lib/api";
 import { PaperMeta, PaperTitle } from "./PaperCard";
 import { Badge, Button, FLAGS, Flag, Loading, coverageLine, fmtDate, fmtDateTime, sourceName } from "./ui";
@@ -215,6 +215,83 @@ function Body({ e }: { e: Explanation }) {
   );
 }
 
+const REUSE: Record<string, string> = {
+  open: "reuse allowed",
+  noncommercial: "non-commercial reuse",
+  no_derivatives: "no derivatives",
+  restricted: "restricted",
+  unknown: "licence not stated",
+};
+
+function licenceName(l?: string | null) {
+  if (!l) return "no licence stated";
+  return l.startsWith("cc") ? l.toUpperCase().replace(/^CC-/, "CC ").replace(/-(\d)/, " $1") : l;
+}
+
+/** The paper record's access, licences, corrections, and annotations (current, not from the stored run). */
+function Access({ paperId }: { paperId: string }) {
+  const { data } = useApi(() => client.paper(paperId), [paperId]);
+  if (!data) return null;
+  const texts = data.texts ?? [];
+  const updates = data.updates ?? [];
+  const notes = data.annotations ?? [];
+  if (!data.license && data.open_access == null && !texts.length && !updates.length && !notes.length) return null;
+  return (
+    <Section title="Access and annotations (current record)">
+      <dl data-testid="paper-access" className="grid grid-cols-[8rem_1fr] gap-x-3 gap-y-2">
+        <dt className="text-muted">Licence</dt>
+        <dd>
+          {licenceName(data.license)}
+          {data.open_access != null && <span className="text-muted"> · {data.open_access ? "open access" : "not open access"}</span>}
+        </dd>
+        {texts.map((t) => (
+          <Fragment key={`${t.source}:${t.source_id}`}>
+            <dt className="text-muted">Full text kept</dt>
+            <dd>
+              {t.url ? (
+                <a href={t.url} target="_blank" rel="noreferrer" className="text-accent hover:underline">
+                  {t.source_id}
+                </a>
+              ) : (
+                t.source_id
+              )}{" "}
+              under {licenceName(t.license)} ({REUSE[t.reuse] ?? t.reuse}; licence read from the{" "}
+              {t.license_source === "text" ? "article itself" : "source's metadata"}) · {t.sections.length} sections
+            </dd>
+          </Fragment>
+        ))}
+        {updates.length > 0 && (
+          <>
+            <dt className="text-muted">Updates</dt>
+            <dd className="space-y-0.5">
+              {updates.map((u, i) => (
+                <p key={i}>
+                  {u.type.replaceAll("_", " ")}
+                  {u.date && ` (${fmtDate(u.date)})`}
+                  {u.asserted_by && <span className="text-muted"> · reported by {u.asserted_by}</span>}
+                  {u.via && <span className="text-muted"> via {sourceName(u.via)}</span>}
+                </p>
+              ))}
+            </dd>
+          </>
+        )}
+        {notes.length > 0 && (
+          <>
+            <dt className="text-muted">Mentions</dt>
+            <dd className="flex flex-wrap gap-1">
+              {notes.slice(0, 10).map((a) => (
+                <Badge key={`${a.type}:${a.name}`} title={`${a.type}, ${a.mentions} mention${a.mentions === 1 ? "" : "s"}`}>
+                  {a.name}
+                </Badge>
+              ))}
+            </dd>
+          </>
+        )}
+      </dl>
+    </Section>
+  );
+}
+
 export function WhyDrawer({
   paperId,
   radarId,
@@ -252,6 +329,11 @@ export function WhyDrawer({
           </Button>
         </div>
         {error ? <p className="text-sm text-bad">{error.message}</p> : data ? <Body e={data} /> : <Loading />}
+        {data && (
+          <div className="mt-4 text-sm">
+            <Access paperId={paperId} />
+          </div>
+        )}
       </aside>
     </div>
   );

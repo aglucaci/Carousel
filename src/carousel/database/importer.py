@@ -178,6 +178,25 @@ def _import_store(st: PaperStore, engine: Engine) -> Dict[str, int]:
         _upsert(conn, T["paper_embeddings"], emb, ["paper_id", "model_version"], ["text_sha256", "dim", "embedding"], chunk=200)
         counts["paper_embeddings"] = len(emb)
 
+        # ---- texts and annotations (licence per text) ----
+        def owner(pid: str) -> str:
+            return st.resolve(pid)
+
+        texts = [{"source": r["source"], "source_id": r["source_id"], "kind": r["kind"], "paper_id": owner(r["paper_id"]),
+                  "format": r["format"], "license": r["license"], "license_url": r["license_url"],
+                  "license_source": r["license_source"], "reuse": r["reuse"], "url": r["url"], "sha256": r["sha256"],
+                  "sections": json.loads(r["sections"]), "retrieved_at": _ts(r["retrieved_at"])}
+                 for r in db.execute("SELECT * FROM paper_texts")]
+        cols = ["paper_id", "format", "license", "license_url", "license_source", "reuse", "url", "sha256", "sections",
+                "retrieved_at"]
+        _upsert(conn, T["paper_texts"], texts, ["source", "source_id", "kind"], cols, chunk=50)
+        counts["paper_texts"] = len(texts)
+        notes = [{"source": r["source"], "article_id": r["article_id"], "paper_id": owner(r["paper_id"]),
+                  "annotations": json.loads(r["annotations"]), "retrieved_at": _ts(r["retrieved_at"])}
+                 for r in db.execute("SELECT * FROM paper_annotations")]
+        _upsert(conn, T["paper_annotations"], notes, ["source", "article_id"], ["paper_id", "annotations", "retrieved_at"])
+        counts["paper_annotations"] = len(notes)
+
         # ---- dedup audit ----
         reviews = [{"paper_a": r["paper_a"], "paper_b": r["paper_b"], "kind": r["kind"], "score": r["score"],
                     "reasons": json.loads(r["reasons"]), "features": json.loads(r["features"]), "status": r["status"],
