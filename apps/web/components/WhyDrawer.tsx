@@ -86,6 +86,26 @@ function Body({ e }: { e: Explanation }) {
         quality.
       </p>
 
+      <Section title="In short">
+        {e.explanation ? (
+          <>
+            <ul data-testid="explanation" className="list-disc space-y-1 pl-5">
+              {e.explanation.reasons.map((r, i) => (
+                <li key={i}>{r.text}</li>
+              ))}
+            </ul>
+            <p className="mt-2 text-xs text-muted">
+              Explanation version {e.explanation.version}, written when this run ranked the paper and stored with it; it is
+              never regenerated.
+            </p>
+          </>
+        ) : (
+          <p className="text-muted">
+            This run was recorded before explanations were versioned. The details below come from its stored features.
+          </p>
+        )}
+      </Section>
+
       <Section title="Score">
         <table className="w-full text-left tabular-nums">
           <thead className="text-xs text-muted">
@@ -336,15 +356,44 @@ function Access({ paperId }: { paperId: string }) {
   );
 }
 
+function Judge({ feedback, busy, onJudge }: { feedback: string[]; busy?: boolean; onJudge: (a: "relevant" | "irrelevant") => void }) {
+  const relevant = feedback.includes("relevant");
+  const irrelevant = feedback.includes("irrelevant");
+  return (
+    <div data-testid="judge" className="mb-4 rounded-lg border border-border px-4 py-3 text-sm">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="mr-1">Right for this radar?</span>
+        <Button variant={relevant ? "primary" : "secondary"} aria-pressed={relevant} disabled={busy} onClick={() => onJudge("relevant")}>
+          Relevant
+        </Button>
+        <Button variant={irrelevant ? "primary" : "secondary"} aria-pressed={irrelevant} disabled={busy} onClick={() => onJudge("irrelevant")}>
+          Not relevant
+        </Button>
+      </div>
+      <p className="mt-1 text-xs text-muted">
+        {relevant || irrelevant
+          ? "Applied from the next scan: the radar's profile moves " + (relevant ? "toward" : "away from") + " papers like this one, and this paper leaves the list."
+          : "Either answer applies from the next scan: it moves the radar's interest profile, and this paper leaves the list."}
+      </p>
+    </div>
+  );
+}
+
 export function WhyDrawer({
   paperId,
   radarId,
   runId,
+  feedback,
+  busy,
+  onJudge,
   onClose,
 }: {
   paperId: string;
   radarId: string;
   runId?: string;
+  feedback?: string[];
+  busy?: boolean;
+  onJudge?: (action: "relevant" | "irrelevant") => void;
   onClose: () => void;
 }) {
   const { data, error } = useApi(() => client.explanation(paperId, radarId, runId), [paperId, radarId, runId]);
@@ -372,6 +421,7 @@ export function WhyDrawer({
             Close
           </Button>
         </div>
+        {onJudge && <Judge feedback={feedback ?? []} busy={busy} onJudge={onJudge} />}
         {error ? <p className="text-sm text-bad">{error.message}</p> : data ? <Body e={data} /> : <Loading />}
         {data && (
           <div className="mt-4 text-sm">

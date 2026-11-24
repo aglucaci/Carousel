@@ -160,6 +160,9 @@ def _run_summary(r: m.RecommendationRun) -> Dict[str, Any]:
         "as_of": r.as_of, "status": r.status, "ranking_version": r.ranking_version, "model_version": r.model_version,
         "mode": r.mode, "config_hash": r.config_hash, "n_observed": r.n_observed, "n_candidates": r.n_candidates,
         "n_items": r.n_items, "coverage": r.coverage, "notes": r.notes, "trigger": r.trigger,
+        "explanation_version": r.explanation_version,
+        "feedback_effect": ((r.ranking or {}).get("stats") or {}).get("feedback_effect"),
+        "profile": ((r.ranking or {}).get("stats") or {}).get("profile"),
     }
 
 
@@ -306,6 +309,7 @@ def ranked_papers(s: Session, radar_id: str, run_id: Optional[str] = None) -> Di
             "paper": (it.explanation or {}).get("paper") or {}, "dismissed": "dismiss" in active.get(it.paper_id, []),
             "saved": "save" in active.get(it.paper_id, []), "feedback": active.get(it.paper_id, []),
             "arrival": arrival.get(it.paper_id),
+            "why": ((it.explanation or {}).get("explanation") or {}).get("summary"),
         } for it in items],
         "previous_run_id": previous_run_id,
         "arrivals": {a: sum(1 for v in arrival.values() if v == a) for a in ARRIVALS} if previous_run_id else None,
@@ -440,6 +444,7 @@ def explanation(s: Session, paper_id: str, radar_id: Optional[str] = None, run_i
         "paper_id": p.id, "run_id": run.id, "radar_id": run.radar_id, "rank": item.rank, "score": item.score,
         "features": item.features, "details": item.explanation, "flags": item.flags,
         "ranking_version": run.ranking_version, "model_version": run.model_version, "mode": run.mode,
+        "explanation_version": run.explanation_version, "explanation": (item.explanation or {}).get("explanation"),
         "weights": rk.get("weights", {}), "inactive_signals": rk.get("inactive_signals", {}),
         "source_coverage": run.coverage, "executed_at": run.executed_at,
     }

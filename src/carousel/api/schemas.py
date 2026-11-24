@@ -45,6 +45,14 @@ class RunSummary(_Out):
     notes: List[str] = []
     trigger: Optional[Literal["manual", "scheduled"]] = Field(
         None, description="What started the run; null for runs from the CLI or imported history")
+    explanation_version: Optional[str] = Field(
+        None, description="Version of the explanations stored with this run's items; null: recorded before versioning")
+    feedback_effect: Optional[Dict[str, Any]] = Field(
+        None, description="What the radar's feedback changed in this run, against the same run ranked without it: "
+                          "entered / left (paper IDs), moved_up / moved_down (counts), profile_shift. Null without "
+                          "feedback")
+    profile: Optional[Dict[str, Any]] = Field(None, description="The interest profile used: seeds and feedback counts, "
+                                                                "and how far feedback moved it (shift)")
 
 
 class RunDetail(RunSummary):
@@ -134,6 +142,7 @@ class RankedItem(_Out):
     arrival: Optional[Literal["newly_published", "newly_observed", "seen_before"]] = Field(
         None, description="Relative to the radar's earlier runs: published since the previous scan, older but "
                           "seen by this radar for the first time, or seen before. Null on a radar's first run")
+    why: Optional[str] = Field(None, description="One-line summary of the stored explanation (null before versioning)")
 
 
 class RankedPapersOut(_Out):
@@ -213,6 +222,10 @@ class ExplanationOut(_Out):
     ranking_version: str
     model_version: Optional[str] = None
     mode: str
+    explanation_version: Optional[str] = Field(None, description="Null: recorded before explanations were versioned")
+    explanation: Optional[Dict[str, Any]] = Field(
+        None, description="The explanation stored with the recommendation: version, summary, and reasons (kind, "
+                          "text, share of the score). Never regenerated")
     weights: Dict[str, float]
     inactive_signals: Dict[str, str]
     source_coverage: List[Dict[str, Any]]

@@ -235,6 +235,7 @@ def _import_store(st: PaperStore, engine: Engine) -> Dict[str, int]:
             "id": r["run_id"], "radar_id": r["radar_id"], "radar_version_id": version_ids.get((r["radar_id"], r["config_hash"])),
             "executed_at": _ts(r["started_at"]), "finished_at": _ts(r["finished_at"]), "as_of": dt.date.fromisoformat(r["as_of"]),
             "status": r["status"], "config_hash": r["config_hash"], "ranking_version": r["ranking_version"],
+            "explanation_version": r["explanation_version"],
             "candidates_version": r["candidates_version"], "model_version": r["model_version"], "mode": r["mode"],
             "n_observed": r["n_observed"], "n_candidates": r["n_candidates"], "n_items": r["n_items"],
             "coverage": json.loads(r["coverage"]), "ranking": json.loads(r["ranking"]), "notes": json.loads(r["notes"]),

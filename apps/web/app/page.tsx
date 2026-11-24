@@ -20,6 +20,25 @@ function arrivalsLine(a: RankedPapers["arrivals"]): ReactNode {
   );
 }
 
+function feedbackLine(run: RankedPapers["run"]): ReactNode {
+  const e = run.feedback_effect;
+  if (!e) return null;
+  const p = run.profile ?? {};
+  const given = `${p.feedback_positive ?? 0} saved or relevant, ${p.feedback_negative ?? 0} not relevant`;
+  const changes = [
+    e.moved_up && `${e.moved_up} moved up`,
+    e.moved_down && `${e.moved_down} moved down`,
+    e.entered.length && `${e.entered.length} brought in`,
+  ].filter(Boolean);
+  return changes.length ? (
+    <>
+      Your feedback ({given}) changed this list: {changes.join(", ")}, compared with the same run ranked without it.
+    </>
+  ) : (
+    <span className="text-muted">Your feedback ({given}) was applied but didn&apos;t change this list&apos;s order.</span>
+  );
+}
+
 function Feed({ radarId, runId }: { radarId: string; runId?: string }) {
   const { data, error, loading, setData } = useApi(() => client.papers(radarId, runId), [radarId, runId]);
   const [why, setWhy] = useState<string | undefined>();
@@ -27,7 +46,7 @@ function Feed({ radarId, runId }: { radarId: string; runId?: string }) {
   const [actionError, setActionError] = useState<Error | undefined>();
 
   async function toggle(item: RankedItem, action: FeedbackAction) {
-    const on = action === "save" ? item.saved : item.dismissed;
+    const on = action === "save" ? item.saved : action === "dismiss" ? item.dismissed : item.feedback.includes(action);
     setBusy(item.paper_id);
     setActionError(undefined);
     try {
@@ -41,6 +60,7 @@ function Feed({ radarId, runId }: { radarId: string; runId?: string }) {
                   ...it,
                   saved: state.save.includes(it.paper_id),
                   dismissed: state.dismiss.includes(it.paper_id),
+                  feedback: Object.keys(state).filter((a) => state[a].includes(it.paper_id)),
                 }
               : it,
           ),
@@ -69,6 +89,11 @@ function Feed({ radarId, runId }: { radarId: string; runId?: string }) {
         <p data-testid="arrivals" className="mt-1">
           {arrivalsLine(data.arrivals)}
         </p>
+        {run.feedback_effect && (
+          <p data-testid="feedback-effect" className="mt-1">
+            {feedbackLine(run)}
+          </p>
+        )}
         {partial.length > 0 && (
           <ul className="mt-1 text-xs text-muted">
             {partial.map((c) => (
@@ -103,6 +128,7 @@ function Feed({ radarId, runId }: { radarId: string; runId?: string }) {
               features={it.features}
               flags={it.flags}
               arrival={it.arrival}
+              why={it.why}
               saved={it.saved}
               dismissed={it.dismissed}
               busy={busy === it.paper_id}
@@ -114,10 +140,24 @@ function Feed({ radarId, runId }: { radarId: string; runId?: string }) {
         </ol>
       )}
       <p className="mt-6 text-xs text-muted">
-        Saving and dismissing apply from the radar&apos;s next scan: dismissed papers aren&apos;t recommended again, and saved
-        papers move to your Library.
+        Feedback applies from the radar&apos;s next scan: dismissed papers aren&apos;t recommended again, saved papers move to
+        your Library, and saved or relevant papers pull the radar&apos;s interest profile toward papers like them (not
+        relevant ones push it away).
       </p>
-      {why && <WhyDrawer paperId={why} radarId={radarId} runId={run.run_id} onClose={() => setWhy(undefined)} />}
+      {why && (
+        <WhyDrawer
+          paperId={why}
+          radarId={radarId}
+          runId={run.run_id}
+          feedback={data.items.find((it) => it.paper_id === why)?.feedback ?? []}
+          busy={busy === why}
+          onJudge={(action) => {
+            const item = data.items.find((it) => it.paper_id === why);
+            if (item) toggle(item, action);
+          }}
+          onClose={() => setWhy(undefined)}
+        />
+      )}
     </>
   );
 }

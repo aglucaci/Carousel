@@ -307,6 +307,7 @@ class RecommendationRun(Base):
     status: Mapped[str] = mapped_column(String(16))
     config_hash: Mapped[str] = mapped_column(String(32))
     ranking_version: Mapped[str] = mapped_column(String(32))
+    explanation_version: Mapped[Optional[str]] = mapped_column(String(16))  # NULL: recorded before versioning
     candidates_version: Mapped[str] = mapped_column(String(32))
     model_version: Mapped[Optional[str]] = mapped_column(Text)
     mode: Mapped[str] = mapped_column(String(16))

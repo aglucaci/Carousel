@@ -57,7 +57,7 @@ from carousel.ingestion.dedup import MatchDecision, best_match, title_tokens
 if TYPE_CHECKING:
     from carousel.core.fulltext import Annotation, PaperText
 
-STORE_SCHEMA_VERSION = 6
+STORE_SCHEMA_VERSION = 7
 
 _DDL = """
 CREATE TABLE IF NOT EXISTS meta (
@@ -147,7 +147,8 @@ CREATE TABLE IF NOT EXISTS recommendation_runs (   -- one row per scan (spec §8
     n_items            INTEGER NOT NULL,
     coverage           TEXT NOT NULL,          -- JSON list, one entry per source
     ranking            TEXT NOT NULL,          -- JSON: weights, signals, stats
-    notes              TEXT NOT NULL           -- JSON list of warnings
+    notes              TEXT NOT NULL,          -- JSON list of warnings
+    explanation_version TEXT                   -- version of the stored explanations (NULL: before versioning)
 );
 CREATE INDEX IF NOT EXISTS runs_radar ON recommendation_runs(radar_id, started_at);
 CREATE TABLE IF NOT EXISTS recommendation_items (  -- spec §8 recommendation_items
@@ -334,6 +335,9 @@ class PaperStore:
             if version == 1:
                 self._migrate_v1()
             self.db.executescript(_DDL)
+            run_cols = {r["name"] for r in self.db.execute("PRAGMA table_info(recommendation_runs)")}
+            if "explanation_version" not in run_cols:  # v6 -> v7
+                self.db.execute("ALTER TABLE recommendation_runs ADD COLUMN explanation_version TEXT")
             self.db.execute("CREATE INDEX IF NOT EXISTS papers_merged_into ON papers(merged_into)")
             self.db.execute("INSERT OR REPLACE INTO meta VALUES ('schema_version', ?)", (str(STORE_SCHEMA_VERSION),))
 
@@ -822,11 +826,15 @@ class PaperStore:
         j = lambda x: json.dumps(x, sort_keys=True, ensure_ascii=False)  # noqa: E731
         with self.db:
             self.db.execute(
-                "INSERT INTO recommendation_runs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                """INSERT INTO recommendation_runs (run_id, radar_id, radar_name, config_hash, as_of, started_at,
+                   finished_at, status, ranking_version, candidates_version, model_version, mode, n_observed,
+                   n_candidates, n_items, coverage, ranking, notes, explanation_version)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (run["run_id"], run["radar_id"], run["radar_name"], run["config_hash"], run["as_of"],
                  run["started_at"], run["finished_at"], run["status"], run["ranking_version"],
                  run["candidates_version"], run.get("model_version"), run["mode"], run["n_observed"],
-                 run["n_candidates"], len(items), j(run["coverage"]), j(run["ranking"]), j(run.get("notes", []))),
+                 run["n_candidates"], len(items), j(run["coverage"]), j(run["ranking"]), j(run.get("notes", [])),
+                 run.get("explanation_version")),
             )
             self.db.executemany(
                 "INSERT INTO recommendation_items VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
