@@ -53,7 +53,8 @@ function Acceleration({ ev }: { ev: Record<string, any> }) {
       <Card>
         <dl className="grid grid-cols-[11rem_1fr] gap-x-3 gap-y-1 text-sm">
           <Row label="Rate ratio">
-            {Number(ev.rate_ratio).toFixed(2)}&times; (95% interval {Number(ev.ci?.[0]).toFixed(2)}&ndash;{Number(ev.ci?.[1]).toFixed(2)})
+            {Number(ev.rate_ratio).toFixed(2)}&times; (95% interval {Number(ev.ci?.[0]).toFixed(2)}&ndash;
+            {ev.ci?.[1] == null ? "no upper bound" : Number(ev.ci[1]).toFixed(2)})
           </Row>
           <Row label="Significance">
             q = {Number(ev.q_value).toFixed(4)} after Benjamini–Hochberg across the radar&apos;s topics (p = {Number(ev.p_value).toFixed(4)})

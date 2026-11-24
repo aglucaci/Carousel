@@ -61,7 +61,7 @@ class SimulationTests(unittest.TestCase):
         report = evaluate({"spike": sim(rng, 6.0, spike_only_last=True), "flat": sim(rng, 1.0)})
         spike = next(t for t in report["topics"] if t["topic_id"] == "spike")
         self.assertFalse(spike["flagged"])
-        self.assertIn("persistence", spike["failed"])
+        self.assertTrue({"persistence", "interval"} & set(spike["failed"]))  # one week can't make a trend
 
     def test_a_large_effect_on_few_papers_is_not_flagged(self) -> None:
         rng = np.random.default_rng(4)
@@ -94,6 +94,20 @@ class FitTests(unittest.TestCase):
         self.assertIn(f.status, ("ok", "failed"))  # whatever happens, it says what it did
         if f.status == "ok":
             self.assertIn(f.method, ("negbin", "poisson"))
+
+    def test_a_topic_that_did_not_exist_gets_an_exact_test(self) -> None:
+        """No papers in any baseline week (a new lineage, a new host): the GLM can't estimate the excess."""
+        weeks = [{"week": f"w{i:02d}", "count": 0 if i < 12 else c, "denominator": 1000}
+                 for i, c in zip(range(16), [0] * 12 + [3, 8, 15, 30])]
+        f = fit_series(weeks)
+        self.assertEqual((f.status, f.method, f.ci_high, f.recent_count), ("ok", "exact (emerging topic)", None, 56))
+        self.assertLess(f.p_value, 1e-20)  # (4000/16000)**56
+        self.assertGreater(f.ci_low, 1.5)
+        report = evaluate({"new": weeks, **{f"flat{i}": sim(np.random.default_rng(i), 1.0) for i in range(3)}})
+        new = next(t for t in report["topics"] if t["topic_id"] == "new")
+        self.assertTrue(new["flagged"])
+        one = [dict(w, count=0) for w in weeks[:-1]] + [dict(weeks[-1], count=2)]
+        self.assertFalse(evaluate({"blip": one})["topics"][0]["flagged"])  # two papers: below the minimum count
 
     def test_benjamini_hochberg(self) -> None:
         q = benjamini_hochberg({"a": 0.01, "b": 0.04, "c": 0.03, "d": 0.5})

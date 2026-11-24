@@ -22,7 +22,9 @@ A topic is **flagged** only when all of these hold:
 
 - the effect is large: rate ratio at least ``MIN_RATE_RATIO``;
 - it is statistically supported after **Benjamini-Hochberg** correction across
-  the radar's topics (q at most ``FDR``);
+  the radar's topics (q at most ``FDR``), and its 95% interval excludes 1 (a
+  one-sided test can pass while the two-sided interval still includes "no
+  change"; the Study C benchmark's faithfulness check caught such a flag);
 - there is enough data: at least ``MIN_RECENT_COUNT`` papers in the recent
   weeks, and ``MIN_BASELINE_WEEKS`` weeks before them;
 - it **persists**: the same criteria also hold when the evaluation ends one
@@ -74,7 +76,7 @@ class Fit:
     method: Optional[str] = None     # negbin | poisson
     rate_ratio: Optional[float] = None
     ci_low: Optional[float] = None
-    ci_high: Optional[float] = None
+    ci_high: Optional[float] = None  # None: no upper bound (an emerging topic)
     p_value: Optional[float] = None  # one-sided: the recent weeks exceed the baseline
     recent_count: int = 0
     expected_recent: Optional[float] = None
@@ -100,6 +102,8 @@ def fit_series(series: Sequence[Mapping[str, Any]], recent: int = RECENT_WEEKS) 
     recent_n = int(n[-recent:].sum())
     if n.sum() == 0:
         return Fit(status="no_counts", weeks=weeks, recent_count=0, note="the topic has no papers in these weeks")
+    if n[:-recent].sum() == 0:  # a topic that didn't exist in the baseline: the GLM can't estimate the excess
+        return _emerging(n, N, recent, weeks, student_t)
     w = (np.arange(weeks) - (weeks - 1) / 2) / weeks  # centred, scaled week index
     is_recent = (np.arange(weeks) >= weeks - recent).astype(float)
     linear = weeks - recent >= LINEAR_MIN_BASELINE
@@ -138,10 +142,34 @@ def fit_series(series: Sequence[Mapping[str, Any]], recent: int = RECENT_WEEKS) 
     base = [{"week": r["week"], "share": math.exp(b0 + b1 * float(wi)),
              "low": math.exp(b0 - crit * se_b0 + b1 * float(wi)), "high": math.exp(b0 + crit * se_b0 + b1 * float(wi))}
             for r, wi in zip(rows, w)]
-    return Fit(status="ok", baseline_share=base, method=method, rate_ratio=math.exp(delta), ci_low=math.exp(delta - crit * se),
-               ci_high=math.exp(delta + crit * se), p_value=float(student_t.sf(delta / se, df)), recent_count=recent_n,
+    return Fit(status="ok", baseline_share=base, method=method, rate_ratio=_exp(delta), ci_low=_exp(delta - crit * se),
+               ci_high=_exp(delta + crit * se), p_value=float(student_t.sf(delta / se, df)), recent_count=recent_n,
                expected_recent=expected, dispersion=alpha, weeks=weeks, note=note,
                baseline="linear" if linear else "level")
+
+
+def _exp(x: float) -> float:
+    return math.exp(min(x, 700.0))
+
+
+def _emerging(n: Any, N: Any, recent: int, weeks: int, student_t: Any) -> Fit:
+    """No papers in any baseline week, some recently: an exact test instead of the GLM.
+
+    If nothing changed, each of the topic's ``x`` papers falls in the recent weeks with probability
+    ``q = N_recent / N_total`` (the field's share of those weeks), so all ``x`` do with probability ``q**x``:
+    the one-sided p-value. The rate ratio uses half a paper in the baseline (a standard continuity correction);
+    its lower bound comes from the exact (Clopper-Pearson) lower bound of the recent share ``x/x``.
+    """
+    x = int(n[-recent:].sum())
+    n_rec, n_base = float(N[-recent:].sum()), float(N[:-recent].sum())
+    q = n_rec / (n_rec + n_base)
+    p_value = q ** x
+    rr = (x / n_rec) / (0.5 / n_base)
+    lower_share = 0.025 ** (1.0 / x)  # Clopper-Pearson lower bound for x successes in x trials
+    ci_low = (lower_share / (1 - lower_share)) * (n_base / n_rec) if lower_share < 1 else rr
+    return Fit(status="ok", method="exact (emerging topic)", rate_ratio=rr, ci_low=ci_low, ci_high=None,
+               p_value=p_value, recent_count=x, expected_recent=0.0, dispersion=None, weeks=weeks, baseline="none",
+               note="no papers in the baseline weeks: exact test; the rate ratio uses half a paper in the baseline")
 
 
 def benjamini_hochberg(p: Mapping[str, float]) -> Dict[str, float]:
@@ -170,6 +198,8 @@ def _evaluate(series_by_topic: Mapping[str, Sequence[Mapping[str, Any]]], recent
                 failed.append("effect_size")
             if q.get(tid, 1.0) > FDR:
                 failed.append("significance")
+            if f.ci_low is not None and f.ci_low <= 1.0:
+                failed.append("interval")  # the 95% interval still includes "no change"
             if f.recent_count < MIN_RECENT_COUNT:
                 failed.append("min_count")
         out[tid] = {**dataclasses.asdict(f), "q_value": q.get(tid), "passes": not failed, "failed": failed}

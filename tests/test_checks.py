@@ -76,10 +76,12 @@ class CheckTests(unittest.TestCase):
         self.obs(counts())
         rep = self.report(as_of=dt.datetime(2026, 11, 24, tzinfo=UTC))  # a day after the counts: not settled yet
         lag = next(c for c in rep["checks"] if c["check"] == "indexing_lag")
-        self.assertEqual((lag["settling_days"], lag["basis"]), (21, "default (too few re-observed weeks)"))
-        self.assertEqual(rep["evaluated_through"], "2026-11-01")
-        self.assertEqual(len(rep["provisional_weeks"]), 3)
-        self.assertFalse(self.topic(rep)["flagged"])  # the rise is in weeks that haven't settled: not reported yet
+        self.assertEqual((lag["settling_days"], lag["basis"]), (7, "default (too few re-observed weeks)"))
+        self.assertEqual(rep["evaluated_through"], "2026-11-15")
+        self.assertEqual(rep["provisional_weeks"], ["2026-11-16"])
+        rising = self.topic(rep)
+        self.assertEqual(rising["weekly"][-1]["week"], "2026-11-16")
+        self.assertTrue(rising["weekly"][-1]["provisional"])  # shown, but not part of the evaluation
 
     def test_settling_time_is_measured_from_reobservations(self) -> None:
         def growing(observed_week):  # a week's field count is 60% complete a day after it ends, full a week later

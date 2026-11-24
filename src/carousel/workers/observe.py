@@ -39,10 +39,9 @@ def run_observe(radar_id: str, *, database_url: Optional[str] = None, store_path
     from sqlalchemy.orm import Session
 
     from carousel.api import services
-    from carousel.connectors import CONNECTORS
     from carousel.database import PaperStore, postgres
     from carousel.database.importer import import_store
-    from carousel.intelligence.observations import COUNTING_SOURCES, observe
+    from carousel.intelligence.observations import counting_connectors, observe
     from carousel.workers.scan import replay_connectors
 
     engine = postgres.engine(database_url)
@@ -57,8 +56,7 @@ def run_observe(radar_id: str, *, database_url: Optional[str] = None, store_path
             model = st.active_topic_model(radar_id)
             if model is None:
                 return {"status": "skipped", "reason": "no topic model yet"}
-            conns = replay_connectors(replay) if replay else {
-                s.value: CONNECTORS[s.value]() for s in cfg.sources if s.value in COUNTING_SOURCES}
+            conns = replay_connectors(replay) if replay else counting_connectors([s.value for s in cfg.sources])
             stats = observe(st, cfg, model, conns, at=now, today=today,
                             weeks=weeks_to_observe(st, radar_id, model.classifier_version, today))
         import_store(store, engine)

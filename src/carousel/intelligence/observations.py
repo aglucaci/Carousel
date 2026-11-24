@@ -40,6 +40,16 @@ DEFAULT_WEEKS = 16  # 8 baseline + 4 recent + a week for the persistence check, 
 DEFAULT_BUDGET = 400
 COUNTING_SOURCES = ("pubmed", "europepmc", "openalex", "arxiv")
 
+
+def counting_connectors(names: Sequence[str]) -> Dict[str, Any]:
+    """Connectors for counting. PubMed counts by **entry date** (``edat``, when a record was added), not publication
+    date: many journals publish only a month ("2024 Apr"), which PubMed files on the 1st, so weekly counts by
+    publication date spike every four to five weeks."""
+    from carousel.connectors import CONNECTORS, PubMedConnector
+
+    return {n: (PubMedConnector(date_field="edat") if n == "pubmed" else CONNECTORS[n]())
+            for n in names if n in COUNTING_SOURCES and n in CONNECTORS}
+
 Week = Tuple[dt.date, dt.date]
 
 
@@ -160,5 +170,5 @@ def lag_profile(rows: Iterable[Mapping[str, Any]], source: str, topic_id: str = 
     return out
 
 
-__all__ = ["COUNTING_SOURCES", "DEFAULT_BUDGET", "DEFAULT_WEEKS", "FIELD", "OBSERVATIONS_VERSION", "TOPIC_TERMS",
+__all__ = ["counting_connectors", "COUNTING_SOURCES", "DEFAULT_BUDGET", "DEFAULT_WEEKS", "FIELD", "OBSERVATIONS_VERSION", "TOPIC_TERMS",
            "complete_weeks", "counts_as_of", "lag_profile", "observe", "queries_for", "series", "topic_terms"]

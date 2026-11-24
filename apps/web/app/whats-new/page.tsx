@@ -27,7 +27,7 @@ function Summary({ e }: { e: ResearchEvent }) {
       return (
         <>
           {Number(ev.rate_ratio).toFixed(1)}&times; its usual share of the field in {sourceName(ev.source)} (95% interval{" "}
-          {Number(ev.ci?.[0]).toFixed(1)}&ndash;{Number(ev.ci?.[1]).toFixed(1)}), weeks through {fmtDate(ev.evaluated_through)};{" "}
+          {Number(ev.ci?.[0]).toFixed(1)}&ndash;{ev.ci?.[1] == null ? "no upper bound" : Number(ev.ci[1]).toFixed(1)}), weeks through {fmtDate(ev.evaluated_through)};{" "}
           {ev.recent_count} papers where about {Math.round(ev.expected_recent)} were expected.
         </>
       );
