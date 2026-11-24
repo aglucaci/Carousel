@@ -74,6 +74,7 @@ def propose_radar(s: Session, *, topic: str, research_question: str = "", descri
     """
     from carousel.connectors import CONNECTORS, VERIFIERS, SearchQuery
     from carousel.connectors.openalex import OpenAlexConnector, build_search
+    from carousel.connectors.europepmc import build_query as epmc_query
     from carousel.connectors.pubmed import build_term
 
     topic = topic.strip()
@@ -89,7 +90,7 @@ def propose_radar(s: Session, *, topic: str, research_question: str = "", descri
             "research_question": research_question.strip(), "queries": [t for t in (terms or []) if t.strip()] or [topic],
             "exclude": list(exclude or []), "methods_profile": list(methods or []), "seed_papers": list(seed_papers or []),
             "publication_types": list(publication_types or []),
-            "sources": list(sources or ["pubmed", "openalex", "crossref"]),
+            "sources": list(sources or ["pubmed", "openalex", "europepmc", "crossref"]),
             "mode": mode, "filters": {"date_range": f"last_{int(window_days)}_days"},
         })
     except Exception as exc:  # pydantic's message is already user-facing
@@ -111,6 +112,11 @@ def propose_radar(s: Session, *, topic: str, research_question: str = "", descri
                 "No OPENALEX_API_KEY on this server: each scan reads only the first page (up to 100 works)."]
             strategy.append({"source": name, "status": "ready", "query": build_search(q),
                              "filters": OpenAlexConnector(api_key="")._filter(q), "notes": notes})
+        elif name == "europepmc":
+            strategy.append({"source": name, "status": "ready", "query": epmc_query(q),
+                             "filters": "titles and abstracts; MEDLINE, PubMed Central, and preprints; first publication date in the window",
+                             "notes": ["For recommended papers, keeps open-access full texts under a Creative Commons licence "
+                                       "(with that licence) and Europe PMC's text-mined annotations."]})
         elif name in VERIFIERS:
             strategy.append({"source": name, "status": "ready", "query": None,
                              "filters": "looks up the DOIs of the papers the searches find",
@@ -366,7 +372,36 @@ def paper_detail(s: Session, paper_id: str) -> Dict[str, Any]:
         "provenance": (p.canonical or {}).get("provenance", {}),
         "updates": (p.canonical or {}).get("updates", []),
         "relations": (p.canonical or {}).get("relations", []),
+        "license": (p.canonical or {}).get("license"),
+        "open_access": (p.canonical or {}).get("open_access"),
+        "texts": _texts(s, p.id),
+        "annotations": _annotations(s, p.id),
     }
+
+
+def _texts(s: Session, paper_id: str) -> List[Dict[str, Any]]:
+    """What texts are kept and under which licence; the text itself is not served."""
+    rows = s.scalars(select(m.PaperText).where(m.PaperText.paper_id == paper_id).order_by(m.PaperText.source,
+                                                                                          m.PaperText.source_id))
+    return [{"source": t.source, "source_id": t.source_id, "kind": t.kind, "license": t.license,
+             "license_url": t.license_url, "license_source": t.license_source, "reuse": t.reuse, "url": t.url,
+             "retrieved_at": t.retrieved_at, "sections": [x.get("title", "") for x in t.sections],
+             "characters": sum(len(x.get("text", "")) for x in t.sections)} for t in rows]
+
+
+ANNOTATIONS_SHOWN = 50
+
+
+def _annotations(s: Session, paper_id: str) -> List[Dict[str, Any]]:
+    """Annotations from every article of the paper, one row per entity, most-mentioned first (top 50)."""
+    merged: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
+    for row in s.scalars(select(m.PaperAnnotation).where(m.PaperAnnotation.paper_id == paper_id)):
+        for a in row.annotations:
+            key = (a["type"], (a.get("uri") or "").lower(), a["name"].lower())
+            old = merged.get(key)
+            if old is None or a["mentions"] > old["mentions"]:
+                merged[key] = {**a, "via": row.source}
+    return sorted(merged.values(), key=lambda a: (-a["mentions"], a["type"], a["name"].lower()))[:ANNOTATIONS_SHOWN]
 
 
 def explanation(s: Session, paper_id: str, radar_id: Optional[str] = None, run_id: Optional[str] = None) -> Dict[str, Any]:

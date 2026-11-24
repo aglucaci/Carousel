@@ -220,6 +220,8 @@ class SourceRecord(_Strict):
     dates: PaperDates = Field(default_factory=PaperDates)
     updates: List[UpdateNotice] = Field(default_factory=list, description="Corrections, retractions, ... of this paper")
     relations: List[Relation] = Field(default_factory=list, description="Links to other works (preprint of, ...)")
+    license: Optional[str] = Field(default=None, description="The article's licence as this source states it (normalized)")
+    open_access: Optional[bool] = Field(default=None, description="Whether this source says the full text is open access")
     first_seen: Optional[UTCDateTime] = None
     last_verified: Optional[UTCDateTime] = None
     raw: Optional[Dict[str, Any]] = Field(default=None, description="Untouched source payload, for audit")
@@ -237,8 +239,8 @@ class SourceRecord(_Strict):
     def content_sha256(self) -> str:
         """Hash of what the source says, excluding observation times and the raw payload."""
         content = self.model_dump(mode="json", exclude={"first_seen", "last_verified", "raw"})
-        for key in ("updates", "relations"):  # added later; leaving them out when empty keeps older hashes stable
-            if not content[key]:
+        for key in ("updates", "relations", "license", "open_access"):  # added later; leaving them out when
+            if content[key] in (None, []):                               # empty keeps older hashes stable
                 del content[key]
         blob = json.dumps(content, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()
@@ -269,6 +271,9 @@ FIELD_PRECEDENCE: Dict[str, List[str]] = {
     "dates.preprint_posted": _order("biorxiv", "medrxiv", "arxiv", "europepmc", "openalex", "crossref"),
     "dates.version": _order("biorxiv", "medrxiv", "arxiv"),
     "version": _order("biorxiv", "medrxiv", "arxiv"),
+    # Europe PMC states licences and open-access status for MEDLINE, PMC, and preprint records.
+    "license": _order("europepmc", "crossref", "openalex"),
+    "open_access": _order("europepmc", "openalex", "crossref"),
 }
 """Per-field source precedence; fields not listed use :data:`DEFAULT_PRECEDENCE`."""
 
@@ -282,6 +287,8 @@ RESOLVED_FIELDS: Tuple[str, ...] = (
     "language",
     "url",
     "version",
+    "license",
+    "open_access",
     *(f"dates.{d}" for d in DATE_FIELDS),
 )
 
@@ -323,6 +330,8 @@ class CanonicalPaper(_Strict):
     version: Optional[str] = None
     dates: PaperDates
     is_retracted: bool = False
+    license: Optional[str] = None
+    open_access: Optional[bool] = None
     updates: List[UpdateNotice] = Field(default_factory=list, description="From every source, each with its `via`")
     relations: List[Relation] = Field(default_factory=list, description="From every source, each with its `via`")
     first_seen: UTCDateTime

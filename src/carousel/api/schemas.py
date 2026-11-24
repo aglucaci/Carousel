@@ -79,7 +79,8 @@ class ProposalIn(BaseModel):
     methods: List[str] = Field([], description="Methods, assays, data types to match")
     seed_papers: List[str] = Field([], description="DOIs of papers that define the radar")
     publication_types: List[str] = []
-    sources: List[str] = Field(["pubmed", "openalex", "crossref"], description="crossref verifies the DOIs the other sources find")
+    sources: List[str] = Field(["pubmed", "openalex", "europepmc", "crossref"],
+                               description="crossref verifies the DOIs the other sources find")
     mode: Literal["focused", "balanced", "exploratory"] = "balanced"
     window_days: int = Field(90, ge=1, le=3650)
 
@@ -179,6 +180,13 @@ class PaperOut(_Out):
     updates: List[Dict[str, Any]] = Field([], description="Corrections, retractions, expressions of concern, ... "
                                           "(type, notice_doi, date, asserted_by, via)")
     relations: List[Dict[str, Any]] = Field([], description="Links to other works, e.g. has-preprint / is-preprint-of")
+    license: Optional[str] = Field(None, description="The article's licence as its sources state it (normalized)")
+    open_access: Optional[bool] = None
+    texts: List[Dict[str, Any]] = Field([], description="Full texts kept, each with its own licence (license, "
+                                        "license_source: text | metadata, reuse), section titles, and length. "
+                                        "The text itself is not served")
+    annotations: List[Dict[str, Any]] = Field([], description="Text-mined entities (type, name, uri, mentions, "
+                                              "sections), most-mentioned first, top 50")
 
 
 class SearchHit(_Out):

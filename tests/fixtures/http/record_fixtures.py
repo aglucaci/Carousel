@@ -1,6 +1,6 @@
 """Re-record the connector fixtures from the live APIs.
 
-    python tests/fixtures/http/record_fixtures.py [pubmed] [openalex] [crossref]   # default: all
+    python tests/fixtures/http/record_fixtures.py [pubmed] [openalex] [crossref] [europepmc]   # default: all
 
 crossref records two files: a lookup of known DOIs (a retracted paper and its
 notice, a plain paper, a paper with a preprint and that preprint, and an
@@ -16,11 +16,16 @@ from pathlib import Path
 
 import tempfile
 
-from carousel.connectors import (CrossrefConnector, HttpClient, OpenAlexConnector, PubMedConnector, RecordingTransport,
+from carousel.connectors import (CrossrefConnector, EuropePMCConnector, HttpClient, OpenAlexConnector, PubMedConnector, RecordingTransport,
                                  ReplayTransport, SearchQuery)
 from carousel.connectors.base import UrllibTransport
 
 HERE = Path(__file__).parent
+
+EPMC_RECORDS = ["MED:9500320"]                     # retracted (commentCorrectionList: "Retraction in", ...)
+EPMC_FULL_TEXTS = ["PMC13778503",                   # open access, CC BY 4.0 in the JATS <license>
+                   "PMC7092803"]                    # in PMC but not in the open-access subset (404)
+EPMC_ANNOTATED = ["MED:43054306", "PMC:PMC13778503"]
 
 KNOWN_DOIS = [
     "10.1016/S0140-6736(97)11096-0",   # retracted (Retraction Watch: retraction 2010, correction 2004)
@@ -81,7 +86,40 @@ def main(sources) -> None:
         print("crossref scan", cov["total_available"], cov["retrieved"], rec.save())
 
 
+    if "europepmc" in sources:
+        rec = RecordingTransport(UrllibTransport(timeout=120), HERE / "europepmc_search.json")
+        ep = EuropePMCConnector(HttpClient(rec, min_interval=0.3), page_size=3)
+        res = ep.search(QUERY)
+        print("europepmc search", res.coverage.total_available, len(res.records), rec.save())
+
+        rec = RecordingTransport(UrllibTransport(timeout=120), HERE / "europepmc_extras.json")
+        ep = EuropePMCConnector(HttpClient(rec, min_interval=0.3))
+        print("  wakefield", [r.source_id for r in ep.fetch(EPMC_RECORDS)])
+        print("  full texts", [(p, bool(ep.full_text(p))) for p in EPMC_FULL_TEXTS])
+        print("  annotations", {k: len(v) for k, v in ep.annotations(EPMC_ANNOTATED).items()}, rec.save())
+
+        # A scan's Europe PMC traffic: search, then full texts and annotations for its top 5.
+        from carousel import Radar
+        from carousel.core.config import RadarConfig
+
+        rec = RecordingTransport(UrllibTransport(timeout=120), HERE / "europepmc_scan.json")
+        conns = {
+            "pubmed": PubMedConnector(HttpClient(ReplayTransport(HERE / "pubmed_search.json")), api_key="",
+                                      page_size=3, batch_size=5),
+            "openalex": OpenAlexConnector(HttpClient(ReplayTransport(HERE / "openalex_search.json")), api_key=""),
+            "europepmc": EuropePMCConnector(HttpClient(rec, min_interval=0.3), page_size=3),
+        }
+        radar = Radar(RadarConfig.model_validate({
+            "radar_id": "escape", "radar_name": "Escape radar", "sources": ["pubmed", "openalex", "europepmc"],
+            "queries": QUERY.terms, "exclude": QUERY.exclude, "filters": {"date_range": "last_14_days"}}))
+        with tempfile.TemporaryDirectory() as d:
+            res = radar.scan(as_of=QUERY.end, store=Path(d) / "s.db", connectors=conns, embedder="hashing",
+                             max_results=QUERY.max_results, top_n=5)
+        cov = [c for c in res.run["coverage"] if c["source"] == "europepmc"][0]
+        print("europepmc scan", cov["retrieved"], cov.get("enrichment"), rec.save())
+
+
 if __name__ == "__main__":
     import sys
 
-    main(sys.argv[1:] or ["pubmed", "openalex", "crossref"])
+    main(sys.argv[1:] or ["pubmed", "openalex", "crossref", "europepmc"])

@@ -211,6 +211,40 @@ class PaperEmbedding(Base):
     created_at: Mapped[dt.datetime] = _now()
 
 
+class PaperText(Base):
+    """A full text kept under a reusable licence (Europe PMC), with that licence. See carousel.core.fulltext."""
+
+    __tablename__ = "paper_texts"
+    source: Mapped[str] = mapped_column(String(16), primary_key=True)
+    source_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    kind: Mapped[str] = mapped_column(String(16), primary_key=True)
+    paper_id: Mapped[str] = mapped_column(ForeignKey("papers.id", ondelete="CASCADE"), index=True)
+    format: Mapped[str] = mapped_column(String(16))
+    license: Mapped[Optional[str]] = mapped_column(Text)
+    license_url: Mapped[Optional[str]] = mapped_column(Text)
+    license_source: Mapped[str] = mapped_column(String(16))
+    reuse: Mapped[str] = mapped_column(String(16))
+    url: Mapped[Optional[str]] = mapped_column(Text)
+    sha256: Mapped[str] = mapped_column(String(64))
+    sections: Mapped[List[Any]] = mapped_column()
+    retrieved_at: Mapped[dt.datetime] = mapped_column(TS)
+    __table_args__ = (
+        CheckConstraint("reuse IN ('open', 'noncommercial', 'no_derivatives', 'restricted', 'unknown')", name="reuse"),
+        CheckConstraint("license_source IN ('text', 'metadata')", name="license_source"),
+    )
+
+
+class PaperAnnotation(Base):
+    """Text-mined entities a source attached to one article of a paper (one JSON list per article)."""
+
+    __tablename__ = "paper_annotations"
+    source: Mapped[str] = mapped_column(String(16), primary_key=True)
+    article_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    paper_id: Mapped[str] = mapped_column(ForeignKey("papers.id", ondelete="CASCADE"), index=True)
+    annotations: Mapped[List[Any]] = mapped_column()
+    retrieved_at: Mapped[dt.datetime] = mapped_column(TS)
+
+
 # -------------------------
 # Topics and research events (Phase 3)
 # -------------------------

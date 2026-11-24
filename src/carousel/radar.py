@@ -80,6 +80,57 @@ def _paper_summary(p: CanonicalPaper) -> Dict[str, Any]:
 # Results
 # -------------------------
 
+ANNOTATIONS_MAX_AGE = dt.timedelta(days=30)
+TEXT_RECHECK_AFTER = dt.timedelta(days=30)  # a text not kept (licence) may be relicensed or join the OA subset
+
+
+def enrich_from_europepmc(conn: Any, st: PaperStore, paper_ids: Sequence[str], at: dt.datetime) -> Dict[str, Any]:
+    """Fetch full texts (open access, under a reusable licence) and annotations for ``paper_ids``.
+
+    Bounded by the papers given (a scan passes its recommendations). Texts already kept or checked in the
+    last :data:`TEXT_RECHECK_AFTER`, and annotations fetched in the last :data:`ANNOTATIONS_MAX_AGE`, are not
+    fetched again. Errors are counted, not raised (and the text is tried again next scan).
+    """
+    stats: Dict[str, Any] = {"full_texts": 0, "full_texts_skipped_license": 0, "annotated": 0, "errors": []}
+    articles: Dict[str, str] = {}
+    for pid in paper_ids:
+        paper = st.get(pid)
+        if paper is None:
+            continue
+        pmc = paper.identifiers.pmcid
+        checked = st.text_checked_at("europepmc", pmc) if pmc else None
+        recent = checked is not None and at - checked <= TEXT_RECHECK_AFTER
+        if pmc and paper.open_access and not st.has_text("europepmc", pmc) and not recent:
+            try:
+                text = conn.full_text(pmc, metadata_license=paper.license)
+            except ConnectorError as exc:
+                stats["errors"].append(str(exc))
+            else:
+                if text is None:  # not in the open-access subset, or not under a reusable licence
+                    stats["full_texts_skipped_license"] += 1
+                else:
+                    st.save_text(paper.paper_id, text)
+                    stats["full_texts"] += 1
+                st.mark_text_checked("europepmc", pmc, "not_reusable" if text is None else "kept", at)
+        refs = [r.source_id for r in paper.source("europepmc")]
+        if not refs and paper.identifiers.pmid:
+            refs = [f"MED:{paper.identifiers.pmid}"]
+        for ref in refs[:1]:
+            fetched = st.annotations_retrieved_at("europepmc", ref)
+            if fetched is None or at - fetched > ANNOTATIONS_MAX_AGE:
+                articles[ref] = paper.paper_id
+    if articles:
+        try:
+            found = conn.annotations(articles)
+        except ConnectorError as exc:
+            stats["errors"].append(str(exc))
+            found = {}
+        for ref, pid in articles.items():
+            st.save_annotations(pid, "europepmc", ref, found.get(ref, []), at)
+            stats["annotated"] += 1 if found.get(ref) else 0
+    return stats
+
+
 @dataclasses.dataclass
 class ScanResults:
     """A stored run, as returned by :meth:`Radar.scan` or :meth:`Radar.results`."""
@@ -342,6 +393,14 @@ class Radar:
             cands = candidates_for_radar(cfg, [pool[k] for k in sorted(pool)], as_of=as_of, store=st,
                                          embedder=emb, source_hits=hits)
             ranking = rank(cands, cfg, store=st, embedder=emb, top_n=top_n, feedback=feedback)
+
+            # ---- enrich what was recommended: licensed full texts and annotations (Europe PMC) ----
+            epmc = conns.get("europepmc")
+            if epmc is not None and hasattr(epmc, "full_text"):
+                stats = enrich_from_europepmc(epmc, st, [it.paper_id for it in ranking.items], started)
+                for c in coverage:
+                    if c["source"] == "europepmc" and c["status"] == "ok":
+                        c["enrichment"] = stats
 
             items = []
             for it in ranking.items:

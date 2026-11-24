@@ -228,8 +228,10 @@ class ProposalTests(ApiTestCase):
         self.assertEqual(steps["pubmed"]["query"], '(Immune escape) NOT ("case report"[Title/Abstract])')
         self.assertEqual(steps["openalex"]["query"], '("Immune escape") NOT ("case report")')
         self.assertIn("type:article", steps["openalex"]["filters"])
-        self.assertEqual(list(steps), ["pubmed", "openalex", "crossref"])  # Crossref verification is on by default
+        self.assertEqual(list(steps), ["pubmed", "openalex", "europepmc", "crossref"])  # the defaults
         self.assertEqual((steps["crossref"]["status"], steps["crossref"]["query"]), ("ready", None))
+        self.assertEqual(steps["europepmc"]["query"], '((TITLE_ABS:"Immune escape") NOT (TITLE_ABS:"case report")) AND '
+                         f'(FIRST_PDATE:[{prop["window"]["start"]} TO {prop["window"]["end"]}]) AND (SRC:MED OR SRC:PMC OR SRC:PPR)')
         self.assertIn("retractions", steps["crossref"]["notes"][0])
         self.assertEqual(prop["window"]["days"], 14)
         self.assertTrue(any("method match is inactive" in n for n in prop["notes"]))
@@ -480,3 +482,43 @@ class CrossrefUpdatesTests(ApiTestCase):
                          [("correction", "retraction-watch", "crossref"), ("retraction", "retraction-watch", "crossref")])
         self.assertEqual([(r["type"], r["value"]) for r in self.get(f"/papers/{article}").json()["relations"]],
                          [("has-preprint", "10.26434/chemrxiv-2025-8hnzz")])
+
+
+class EuropePMCTextsTests(ApiTestCase):
+    """Plan task 17: texts (with their licence) and annotations reach the paper API through the Postgres import."""
+
+    def test_licence_per_text_and_annotations(self) -> None:
+        import sys as _sys
+
+        from carousel.connectors import EuropePMCConnector
+        from carousel.core.paper import SourceRecord
+        from carousel.database import PaperStore
+        from carousel.database.importer import import_store
+        from test_connectors import FIXTURES, replay
+
+        _sys.path.insert(0, str(FIXTURES))
+        from record_fixtures import EPMC_ANNOTATED, EPMC_FULL_TEXTS
+
+        ep = EuropePMCConnector(replay("europepmc_extras.json"))
+        store = Path(self.tmp.name) / "engine.db"
+        t = dt.datetime(2026, 11, 24, tzinfo=dt.timezone.utc)
+        with PaperStore(store) as st:
+            pid = st.observe(SourceRecord(source="europepmc", source_id="MED:43054306", title="Within-host dynamics",
+                                          identifiers={"pmid": "43054306", "pmcid": "PMC13778503"}, license="cc-by",
+                                          open_access=True), t).paper.paper_id
+            st.save_text(pid, ep.full_text(EPMC_FULL_TEXTS[0]))
+            found = ep.annotations(EPMC_ANNOTATED)
+            st.save_annotations(pid, "europepmc", "MED:43054306", found["MED:43054306"], t)
+        counts = import_store(store, self.app.state.engine)
+        self.assertEqual((counts["paper_texts"], counts["paper_annotations"]), (1, 1))
+
+        paper = self.get(f"/papers/{pid}").json()
+        self.assertEqual((paper["license"], paper["open_access"]), ("cc-by", True))
+        [text] = paper["texts"]
+        self.assertEqual((text["source_id"], text["license"], text["license_source"], text["reuse"]),
+                         ("PMC13778503", "cc-by-4.0", "text", "open"))
+        self.assertEqual(text["sections"][0], "Introduction")
+        self.assertGreater(text["characters"], 10_000)
+        self.assertNotIn("text", text)  # the text itself is not served
+        self.assertEqual(len(paper["annotations"]), 32)
+        self.assertEqual(paper["annotations"][0]["name"], "severe acute respiratory syndrome coronavirus 2")
