@@ -177,13 +177,19 @@ class UpdateNotice(_Strict):
         return normalize("doi", str(v)) if v else None
 
 
+PREPRINT_RELATIONS = frozenset({"has-preprint", "is-preprint-of"})
+"""Relation types linking a journal article (``has-preprint``) and its preprint (``is-preprint-of``)."""
+
+
 class Relation(_Strict):
     """A link to another work that a source asserts, e.g. this article ``has-preprint`` 10.1101/... ."""
 
     type: str = Field(min_length=1, description="has-preprint | is-preprint-of | ... (Crossref relation types)")
-    scheme: str = Field(min_length=1, description="Identifier scheme of the related work: doi, arxiv, ...")
+    scheme: str = Field(min_length=1, description="Identifier scheme of the related work: doi, arxiv, ... or "
+                                                  "europepmc (a Europe PMC record, e.g. PPR:PPR123)")
     value: str = Field(min_length=1)
-    asserted_by: Optional[str] = Field(default=None, description="subject | object (Crossref: which side deposited it)")
+    asserted_by: Optional[str] = Field(default=None, description="Crossref: subject | object (which side deposited "
+                                                                 "it); Europe PMC: title_author_match | europepmc")
     via: Optional[str] = Field(default=None, description="The source that carried it (set on canonical papers)")
 
     @model_validator(mode="after")

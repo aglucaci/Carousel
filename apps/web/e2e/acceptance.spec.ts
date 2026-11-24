@@ -60,6 +60,16 @@ test("define a topic, get a ranked list, save and dismiss, rescan without losing
   await drawer.getByRole("button", { name: "Close" }).click();
   await expect(drawer).toBeHidden();
 
+  // Phase 2: a journal article whose preprint was found is linked to it; both stay separate papers.
+  const withPreprint = cards.filter({ has: page.getByText("Has preprint", { exact: true }) }).first();
+  await withPreprint.getByRole("button", { name: "Why this paper?" }).click();
+  const versions = drawer.getByTestId("paper-versions");
+  await expect(versions).toContainText("Preprint");
+  await expect(versions).toContainText("Linked by Europe PMC");
+  await expect(versions).toContainText("kept as its own paper");
+  await drawer.getByRole("button", { name: "Close" }).click();
+  await expect(drawer).toBeHidden();
+
   // ---- save one, dismiss another ----
   await cards.nth(1).getByRole("button", { name: "Save" }).click();
   await expect(cards.nth(1).getByRole("button", { name: "Saved" })).toBeVisible();

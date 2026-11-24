@@ -8,6 +8,8 @@ carousel command-line interface.
     carousel review merge STORE.db KEEP_ID OTHER_ID [--note TEXT]    # same work
     carousel review distinct STORE.db ID_A ID_B [--note TEXT]        # different works
     carousel review split STORE.db SOURCE SOURCE_ID [--note TEXT]    # undo a wrong merge
+    carousel review link STORE.db PREPRINT_ID PUBLISHED_ID [--note TEXT]   # versions of one work, kept apart
+    carousel review unlink STORE.db ID_A ID_B [--note TEXT]          # not versions of one work
 
     carousel scan RADAR.yml [--store carousel.db] [--as-of DATE] [--top N] [--mode M]
                   [--embedder auto|semantic|hashing|none] [--csv OUT.csv] [--json OUT.json]
@@ -123,6 +125,12 @@ def cmd_review(args: argparse.Namespace) -> int:
             elif args.action == "split":
                 left, new = store.split(args.source, args.source_id, note=args.note)
                 print(f"split {args.source}:{args.source_id} out of {left.paper_id} into {new.paper_id}")
+            elif args.action == "link":
+                store.link_versions(args.preprint, args.published, note=args.note)
+                print(f"linked preprint {args.preprint} to its publication {args.published} (both kept)")
+            elif args.action == "unlink":
+                n = store.unlink_versions(args.a, args.b, note=args.note)
+                print(f"unlinked {args.a} and {args.b} ({n} link(s) removed); sources won't relink them")
     except StoreError as exc:
         print(f"FAIL {exc}", file=sys.stderr)
         return 1
@@ -385,7 +393,7 @@ def build_parser() -> argparse.ArgumentParser:
     rs = r.add_subparsers(dest="action", required=True, metavar="ACTION")
     rl = rs.add_parser("list", help="List the review queue")
     rl.add_argument("store", metavar="STORE.db")
-    rl.add_argument("--status", choices=("pending", "merged", "distinct", "superseded", "all"), default="pending")
+    rl.add_argument("--status", choices=("pending", "merged", "distinct", "linked", "superseded", "all"), default="pending")
     rl.add_argument("--format", choices=("text", "json"), default="text")
     rm = rs.add_parser("merge", help="Same work: move OTHER's records into KEEP")
     rm.add_argument("store", metavar="STORE.db")
@@ -399,7 +407,15 @@ def build_parser() -> argparse.ArgumentParser:
     rp.add_argument("store", metavar="STORE.db")
     rp.add_argument("source")
     rp.add_argument("source_id")
-    for x in (rm, rd, rp):
+    rk = rs.add_parser("link", help="A preprint and its publication: link them, keeping both papers")
+    rk.add_argument("store", metavar="STORE.db")
+    rk.add_argument("preprint", metavar="PREPRINT_ID")
+    rk.add_argument("published", metavar="PUBLISHED_ID")
+    ru = rs.add_parser("unlink", help="Not versions of one work: remove the link; sources won't relink the pair")
+    ru.add_argument("store", metavar="STORE.db")
+    ru.add_argument("a", metavar="ID_A")
+    ru.add_argument("b", metavar="ID_B")
+    for x in (rm, rd, rp, rk, ru):
         x.add_argument("--note", help="Why (kept in the queue and merge log)")
     r.set_defaults(func=cmd_review)
 

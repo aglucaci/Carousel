@@ -1,10 +1,17 @@
 """Re-record the connector fixtures from the live APIs.
 
-    python tests/fixtures/http/record_fixtures.py [pubmed] [openalex] [crossref] [europepmc]   # default: all
+    python tests/fixtures/http/record_fixtures.py [pubmed] [openalex] [crossref] [europepmc] [europepmc-scan] [versions]   # default: all
 
 crossref records two files: a lookup of known DOIs (a retracted paper and its
 notice, a plain paper, a paper with a preprint and that preprint, and an
 unregistered DOI), and the lookup a scan of the pubmed/openalex fixtures makes.
+
+europepmc-scan re-records only ``europepmc_scan.json``, replaying the
+requests it already holds and sending only new ones (a scan step added
+later) to the API, so the existing responses stay put.
+
+versions records ``versions.json``: preprint/article pairs that Europe PMC and
+Crossref link, fetched together and one side at a time.
 
 Fixtures hold requests and responses only; API keys are never recorded. The
 queries are deliberately tiny (a few results, small pages) so paging is
@@ -16,7 +23,7 @@ from pathlib import Path
 
 import tempfile
 
-from carousel.connectors import (CrossrefConnector, EuropePMCConnector, HttpClient, OpenAlexConnector, PubMedConnector, RecordingTransport,
+from carousel.connectors import (CrossrefConnector, EuropePMCConnector, ExtendingTransport, HttpClient, OpenAlexConnector, PubMedConnector, RecordingTransport,
                                  ReplayTransport, SearchQuery)
 from carousel.connectors.base import UrllibTransport
 
@@ -26,6 +33,11 @@ EPMC_RECORDS = ["MED:9500320"]                     # retracted (commentCorrectio
 EPMC_FULL_TEXTS = ["PMC13778503",                   # open access, CC BY 4.0 in the JATS <license>
                    "PMC7092803"]                    # in PMC but not in the open-access subset (404)
 EPMC_ANNOTATED = ["MED:43054306", "PMC:PMC13778503"]
+
+# Preprint/article pairs Europe PMC links ("Preprint in" on the article, "Preprint of" on the preprint).
+EPMC_ARTICLES = ["MED:42949957", "MED:43049340"]
+EPMC_PREPRINTS = ["PPR:PPR1222416", "PPR:PPR1235797"]
+CROSSREF_ARTICLE, CROSSREF_PREPRINT = "10.1021/acsomega.5c02989", "10.26434/chemrxiv-2025-8hnzz"  # has-preprint
 
 KNOWN_DOIS = [
     "10.1016/S0140-6736(97)11096-0",   # retracted (Retraction Watch: retraction 2010, correction 2004)
@@ -98,11 +110,14 @@ def main(sources) -> None:
         print("  full texts", [(p, bool(ep.full_text(p))) for p in EPMC_FULL_TEXTS])
         print("  annotations", {k: len(v) for k, v in ep.annotations(EPMC_ANNOTATED).items()}, rec.save())
 
-        # A scan's Europe PMC traffic: search, then full texts and annotations for its top 5.
+    if "europepmc" in sources or "europepmc-scan" in sources:
+        # A scan's Europe PMC traffic: search, then full texts, annotations, and linked versions for its top 5.
         from carousel import Radar
         from carousel.core.config import RadarConfig
 
-        rec = RecordingTransport(UrllibTransport(timeout=120), HERE / "europepmc_scan.json")
+        path = HERE / "europepmc_scan.json"
+        live = UrllibTransport(timeout=120)
+        rec = RecordingTransport(ExtendingTransport(live, path) if "europepmc" not in sources else live, path)
         conns = {
             "pubmed": PubMedConnector(HttpClient(ReplayTransport(HERE / "pubmed_search.json")), api_key="",
                                       page_size=3, batch_size=5),
@@ -116,10 +131,21 @@ def main(sources) -> None:
             res = radar.scan(as_of=QUERY.end, store=Path(d) / "s.db", connectors=conns, embedder="hashing",
                              max_results=QUERY.max_results, top_n=5)
         cov = [c for c in res.run["coverage"] if c["source"] == "europepmc"][0]
-        print("europepmc scan", cov["retrieved"], cov.get("enrichment"), rec.save())
+        print("europepmc scan", cov["retrieved"], cov.get("enrichment"), res.run["ranking"].get("versions"), rec.save())
+
+    if "versions" in sources:
+        rec = RecordingTransport(UrllibTransport(timeout=120), HERE / "versions.json")
+        client = HttpClient(rec, min_interval=0.5)
+        ep, cr = EuropePMCConnector(client), CrossrefConnector(client, mailto="")
+        print("versions: both sides", [r.source_id for r in ep.fetch(EPMC_ARTICLES + EPMC_PREPRINTS)])
+        print("  articles", [(r.source_id, [x.value for x in r.relations]) for r in ep.fetch(EPMC_ARTICLES)])
+        print("  preprints", [(r.source_id, [x.value for x in r.relations]) for r in ep.fetch(EPMC_PREPRINTS)])
+        for doi in (CROSSREF_ARTICLE, CROSSREF_PREPRINT):
+            print("  crossref", [(r.source_id, [x.value for x in r.relations]) for r in cr.fetch([doi])])
+        print("  ", rec.save())
 
 
 if __name__ == "__main__":
     import sys
 
-    main(sys.argv[1:] or ["pubmed", "openalex", "crossref", "europepmc"])
+    main(sys.argv[1:] or ["pubmed", "openalex", "crossref", "europepmc", "versions"])

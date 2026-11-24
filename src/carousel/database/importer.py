@@ -21,7 +21,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Sequence, Set, Tuple, Union
 
-from sqlalchemy import Engine, func, insert, select, text, update
+from sqlalchemy import Engine, delete, func, insert, select, text, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from carousel.core.paper import CanonicalPaper, partial_date_bounds
@@ -196,6 +196,20 @@ def _import_store(st: PaperStore, engine: Engine) -> Dict[str, int]:
                  for r in db.execute("SELECT * FROM paper_annotations")]
         _upsert(conn, T["paper_annotations"], notes, ["source", "article_id"], ["paper_id", "annotations", "retrieved_at"])
         counts["paper_annotations"] = len(notes)
+
+        # ---- version links (preprint <-> publication; the store is authoritative, so they are replaced) ----
+        conn.execute(delete(m.PaperVersion).where(m.PaperVersion.version_type.in_(("preprint", "published"))))
+        version_rows = []
+        for pre, pub, evidence, created, updated in st.all_version_links():
+            method = evidence[0].get("method", "source") if evidence else "source"
+            details = {"evidence": evidence, "linked_at": created, "updated_at": updated}
+            for pid, vtype, other in ((pub, "preprint", pre), (pre, "published", pub)):
+                related = st.get(other)
+                version_rows.append({"paper_id": pid, "version_type": vtype, "related_paper_id": other, "source": method[:16],
+                                     "date": related.earliest_public_date if related else None, "details": details})
+        if version_rows:
+            conn.execute(insert(m.PaperVersion), version_rows)
+        counts["paper_versions"] = len(version_rows)
 
         # ---- dedup audit ----
         reviews = [{"paper_a": r["paper_a"], "paper_b": r["paper_b"], "kind": r["kind"], "score": r["score"],

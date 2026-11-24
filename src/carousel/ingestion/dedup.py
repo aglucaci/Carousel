@@ -15,8 +15,8 @@ but whose title, authors, and year suggest they may be the same work.
 ``review``
     Plausibly the same work, but at least one gate fails, so it goes to the
     review queue. A preprint and its published version always land here:
-    versions are **linked, not collapsed** (verified version links arrive in
-    Phase 2).
+    versions are **linked, not collapsed** (:mod:`carousel.ingestion.versions`
+    links them when a source asserts it, which settles the review).
 ``distinct``
     Different works. Hard blockers include a correction/retraction notice vs.
     the article it is about, different part or volume numbers ("Part I" vs.

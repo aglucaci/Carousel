@@ -41,7 +41,7 @@ from carousel.connectors.base import (
     SearchResult,
 )
 from carousel.core.identifiers import try_normalize
-from carousel.core.paper import RETRACTING_UPDATES, Author, Relation, SourceRecord, UpdateNotice, update_type
+from carousel.core.paper import PREPRINT_RELATIONS, RETRACTING_UPDATES, Author, Relation, SourceRecord, UpdateNotice, update_type
 
 API = "https://api.crossref.org/works"
 BATCH = 20  # DOIs per request; keeps URLs well under common limits
@@ -50,7 +50,6 @@ SELECT = ",".join((
     "DOI", "URL", "type", "title", "abstract", "author", "container-title", "published",
     "published-online", "published-print", "posted", "issued", "deposited", "updated-by", "update-to", "relation",
 ))
-PREPRINT_RELATIONS = frozenset({"has-preprint", "is-preprint-of"})
 
 _TAG = re.compile(r"<[^>]+>")
 _TITLE = re.compile(r"^\s*(abstract|summary)\s*", re.I)

@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useRef, useState } from "react";
-import { client, useApi, type Explanation } from "@/lib/api";
+import { client, useApi, type Explanation, type PaperVersion } from "@/lib/api";
 import { PaperMeta, PaperTitle } from "./PaperCard";
 import { Badge, Button, FLAGS, Flag, Loading, coverageLine, fmtDate, fmtDateTime, sourceName } from "./ui";
 
@@ -228,6 +228,50 @@ function licenceName(l?: string | null) {
   return l.startsWith("cc") ? l.toUpperCase().replace(/^CC-/, "CC ").replace(/-(\d)/, " $1") : l;
 }
 
+const ROLE: Record<string, string> = { preprint: "Preprint", published: "Published version" };
+
+function linkedBy(v: PaperVersion) {
+  const how = v.linked_by.map((m) => (m === "manual" ? "a reviewer" : sourceName(m)));
+  const matched = (v.evidence ?? []).some((e) => e.asserted_by === "title_author_match");
+  return `Linked by ${how.join(" and ")}${matched ? " (title and first-author match)" : ""}`;
+}
+
+/** A preprint and its publication: separate papers that point at each other (current, not from the stored run). */
+function Versions({ paperId }: { paperId: string }) {
+  const { data } = useApi(() => client.paper(paperId), [paperId]);
+  const versions = data?.versions ?? [];
+  if (!versions.length) return null;
+  return (
+    <Section title="Other versions (current record)">
+      <ul data-testid="paper-versions" className="space-y-2">
+        {versions.map((v) => {
+          const href = v.doi ? `https://doi.org/${v.doi}` : v.url;
+          return (
+            <li key={v.paper_id}>
+              <p>
+                <Badge tone={v.role === "published" ? "accent" : "neutral"}>{ROLE[v.role] ?? v.role}</Badge>{" "}
+                {href ? (
+                  <a href={href} target="_blank" rel="noreferrer" className="text-accent hover:underline">
+                    {v.title ?? v.paper_id}
+                  </a>
+                ) : (
+                  (v.title ?? v.paper_id)
+                )}{" "}
+                {v.is_retracted && <Flag flag="retracted" />}
+              </p>
+              <p className="text-xs text-muted">
+                {[v.venue, fmtDate(v.earliest_public_date), `${linkedBy(v)}; kept as its own paper`]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            </li>
+          );
+        })}
+      </ul>
+    </Section>
+  );
+}
+
 /** The paper record's access, licences, corrections, and annotations (current, not from the stored run). */
 function Access({ paperId }: { paperId: string }) {
   const { data } = useApi(() => client.paper(paperId), [paperId]);
@@ -331,6 +375,7 @@ export function WhyDrawer({
         {error ? <p className="text-sm text-bad">{error.message}</p> : data ? <Body e={data} /> : <Loading />}
         {data && (
           <div className="mt-4 text-sm">
+            <Versions paperId={paperId} />
             <Access paperId={paperId} />
           </div>
         )}

@@ -134,6 +134,16 @@ export const FLAGS: Record<string, { label: string; tone: Tone; help: string }> 
     tone: "bad",
     help: "The publisher or Retraction Watch has issued an expression of concern about this paper.",
   },
+  published_version: {
+    label: "Since published",
+    tone: "accent",
+    help: "This preprint has a journal publication. Both are kept as separate papers; see Other versions.",
+  },
+  has_preprint: {
+    label: "Has preprint",
+    tone: "neutral",
+    help: "An earlier preprint of this article exists. Both are kept as separate papers; see Other versions.",
+  },
 };
 
 export function Flag({ flag }: { flag: string }) {

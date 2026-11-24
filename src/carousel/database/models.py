@@ -164,7 +164,12 @@ class PaperSource(Base):
 
 
 class PaperVersion(Base):
-    """Preprint / published / correction / retraction links (populated from Phase 2)."""
+    """Links from a paper to its other versions; ``version_type`` is the *related* paper's role.
+
+    A preprint and its journal article are two papers, linked both ways (plan task 18): the article has a
+    ``preprint`` row pointing at the preprint, the preprint a ``published`` row pointing at the article.
+    ``source`` is how the link was made (crossref, europepmc, manual); ``details`` holds every piece of evidence.
+    """
 
     __tablename__ = "paper_versions"
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
@@ -177,6 +182,7 @@ class PaperVersion(Base):
     __table_args__ = (
         CheckConstraint("version_type IN ('preprint', 'published', 'revision', 'correction', 'retraction')",
                         name="version_type"),
+        UniqueConstraint("paper_id", "version_type", "related_paper_id"),
     )
 
 
@@ -412,7 +418,7 @@ class DedupReview(Base):
     note: Mapped[Optional[str]] = mapped_column(Text)
     __table_args__ = (
         CheckConstraint("paper_a < paper_b", name="ordered_pair"),
-        CheckConstraint("status IN ('pending', 'merged', 'distinct', 'superseded')", name="status"),
+        CheckConstraint("status IN ('pending', 'merged', 'distinct', 'linked', 'superseded')", name="status"),
         Index("ix_dedup_reviews_status", "status"),
     )
 

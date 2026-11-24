@@ -375,8 +375,24 @@ def paper_detail(s: Session, paper_id: str) -> Dict[str, Any]:
         "license": (p.canonical or {}).get("license"),
         "open_access": (p.canonical or {}).get("open_access"),
         "texts": _texts(s, p.id),
+        "versions": _versions(s, p.id),
         "annotations": _annotations(s, p.id),
     }
+
+
+def _versions(s: Session, paper_id: str) -> List[Dict[str, Any]]:
+    """The paper's other versions (a preprint and its publication), each its own paper."""
+    rows = s.execute(select(m.PaperVersion, m.Paper).join(m.Paper, m.Paper.id == m.PaperVersion.related_paper_id)
+                     .where(m.PaperVersion.paper_id == paper_id,
+                            m.PaperVersion.version_type.in_(("preprint", "published")))
+                     .order_by(m.PaperVersion.version_type, m.PaperVersion.date, m.Paper.id)).all()
+    ids = _identifiers(s, [r.id for _, r in rows])
+    return [{"paper_id": r.id, "role": v.version_type, "title": r.title, "venue": r.venue,
+             "earliest_public_date": r.earliest_public_date, "doi": ids.get(r.id, {}).get("doi"), "url": r.url,
+             "is_retracted": r.is_retracted,
+             "linked_by": sorted({e.get("method", "source") for e in (v.details or {}).get("evidence", [])}),
+             "evidence": (v.details or {}).get("evidence", []), "linked_at": (v.details or {}).get("linked_at")}
+            for v, r in rows]
 
 
 def _texts(s: Session, paper_id: str) -> List[Dict[str, Any]]:
