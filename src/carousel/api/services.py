@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import datetime as dt
 import os
+import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import func, select, text
@@ -184,6 +185,7 @@ def radar_detail(s: Session, radar_id: str) -> Dict[str, Any]:
         "latest_run": _run_summary(latest) if latest else None,
         "next_scan_at": sched.next_scan_at(radar.schedule, radar.state, latest.executed_at if latest else None,
                                            dt.datetime.now(dt.timezone.utc)),
+        "digest_emails": list(radar.digest_emails or []),
     }
 
 
@@ -201,6 +203,8 @@ def update_radar(s: Session, radar_id: str, changes: Dict[str, Any]) -> Dict[str
         if changes["state"] not in ("active", "paused"):
             raise ValueError("state must be 'active' or 'paused'")
         radar.state = changes["state"]
+    if "digest_emails" in changes:
+        radar.digest_emails = clean_emails(changes["digest_emails"] or [])
     radar.updated_at = func.now()
     s.flush()
     s.refresh(radar)
@@ -542,3 +546,136 @@ def library(s: Session, radar_id: Optional[str] = None) -> List[Dict[str, Any]]:
     rows = [{"radar_id": rid, "radar_title": titles.get(rid), "paper_id": resolved[pid], "saved_at": at,
              "paper": briefs.get(resolved[pid], {})} for rid, pid, at in saved]
     return sorted(rows, key=lambda r: (r["saved_at"], r["radar_id"], r["paper_id"]), reverse=True)
+
+
+# -------------------------
+# Digests (plan task 20)
+# -------------------------
+
+EMAIL = re.compile(r"^[^@\s,;<>]+@[^@\s,;<>]+\.[^@\s,;<>]+$")
+MAX_DIGEST_EMAILS = 20
+FEED_RUNS = 20
+
+
+def clean_emails(addresses: List[str]) -> List[str]:
+    """Trimmed, de-duplicated recipient addresses; raises ValueError naming any that don't look like one."""
+    out: List[str] = []
+    bad = []
+    for a in addresses:
+        a = (a or "").strip()
+        if not a:
+            continue
+        if not EMAIL.match(a):
+            bad.append(a)
+        elif a.lower() not in {x.lower() for x in out}:
+            out.append(a)
+    if bad:
+        raise ValueError("not an email address: " + ", ".join(bad))
+    if len(out) > MAX_DIGEST_EMAILS:
+        raise ValueError(f"at most {MAX_DIGEST_EMAILS} digest recipients per radar")
+    return out
+
+
+def _digest(s: Session, radar: m.Radar, run: m.RecommendationRun):
+    from carousel.notifications import digest_from_run
+
+    items = s.scalars(select(m.RecommendationItem).where(m.RecommendationItem.run_id == run.id)
+                      .order_by(m.RecommendationItem.rank)).all()
+    previous, arrival = arrivals(s, run)
+    return digest_from_run(
+        {"run_id": run.id, "radar_id": run.radar_id, "as_of": run.as_of.isoformat(), "n_candidates": run.n_candidates,
+         "coverage": run.coverage, "ranking": run.ranking, "explanation_version": run.explanation_version},
+        [{"rank": it.rank, "paper_id": it.paper_id, "flags": it.flags, "details": it.explanation} for it in items],
+        radar_name=radar.title, arrivals=arrival if previous else None, executed_at=run.executed_at,
+        app_url=os.environ.get("CAROUSEL_PUBLIC_URL"))
+
+
+def _radar(s: Session, radar_id: str) -> m.Radar:
+    radar = s.get(m.Radar, radar_id)
+    if radar is None:
+        raise NotFound(f"radar {radar_id!r}")
+    return radar
+
+
+def digest_markdown(s: Session, radar_id: str, run_id: Optional[str] = None) -> str:
+    from carousel.notifications import to_markdown
+
+    return to_markdown(_digest(s, _radar(s, radar_id), _run(s, radar_id, run_id)))
+
+
+def digest_feed(s: Session, radar_id: str) -> str:
+    """RSS over the radar's last :data:`FEED_RUNS` runs, each paper once (from the run that first recommended it)."""
+    from carousel.notifications import to_rss
+
+    radar = _radar(s, radar_id)
+    runs = s.scalars(select(m.RecommendationRun).where(m.RecommendationRun.radar_id == radar_id)
+                     .order_by(m.RecommendationRun.executed_at.desc()).limit(FEED_RUNS)).all()
+    base = os.environ.get("CAROUSEL_PUBLIC_URL")
+    return to_rss([_digest(s, radar, r) for r in runs], radar_id=radar_id, radar_name=radar.title,
+                  link=f"{base.rstrip('/')}/?radar={radar_id}" if base else None)
+
+
+def _record(s: Session, radar_id: str, run_id: str, channel: str, status: str, details: Dict[str, Any],
+            at: Optional[dt.datetime]) -> m.DigestRun:
+    row = m.DigestRun(radar_id=radar_id, run_id=run_id, channel=channel, delivery_status=status, details=details,
+                      **({"generated_at": at} if at else {}))
+    s.add(row)
+    s.flush()
+    return row
+
+
+def send_digest_emails(s: Session, radar_id: str, run_id: Optional[str] = None, *, settings: Any = None,
+                       transport: Any = None, at: Optional[dt.datetime] = None) -> List[Dict[str, Any]]:
+    """Email the run's digest (latest by default) to each of the radar's recipients, recording every attempt."""
+    from carousel.notifications import DeliveryError, SmtpSettings, send_email, to_email
+
+    radar = _radar(s, radar_id)
+    run = _run(s, radar_id, run_id)
+    digest = _digest(s, radar, run)
+    try:
+        settings = settings or SmtpSettings.from_env()
+        config_error = None
+    except DeliveryError as exc:
+        config_error = str(exc)
+    rows = []
+    for addr in radar.digest_emails or []:
+        try:
+            if config_error:
+                raise DeliveryError(config_error)
+            send_email(to_email(digest, sender=settings.sender, recipient=addr), settings, transport)
+            rows.append(_record(s, radar_id, run.id, "email", "delivered", {"recipient": addr}, at))
+        except DeliveryError as exc:
+            rows.append(_record(s, radar_id, run.id, "email", "failed", {"recipient": addr, "error": str(exc)}, at))
+    return [_delivery(r) for r in rows]
+
+
+def deliver_digests(s: Session, radar_id: str, run_id: str, *, settings: Any = None, transport: Any = None,
+                    at: Optional[dt.datetime] = None) -> List[Dict[str, Any]]:
+    """What a scan produces: the run's Markdown digest, the updated RSS feed, and an email per recipient.
+
+    Every delivery is recorded in ``digest_runs``, failures included (with the reason); a failure never
+    stops the others.
+    """
+    rows = []
+    for channel, render in (("markdown", lambda: digest_markdown(s, radar_id, run_id)),
+                            ("rss", lambda: digest_feed(s, radar_id))):
+        try:
+            rows.append(_delivery(_record(s, radar_id, run_id, channel, "delivered", {"content": render()}, at)))
+        except Exception as exc:  # a rendering bug must not hide the other digests
+            rows.append(_delivery(_record(s, radar_id, run_id, channel, "failed",
+                                          {"error": f"{type(exc).__name__}: {exc}"}, at)))
+    return rows + send_digest_emails(s, radar_id, run_id, settings=settings, transport=transport, at=at)
+
+
+def _delivery(r: m.DigestRun) -> Dict[str, Any]:
+    d = r.details or {}
+    return {"id": r.id, "radar_id": r.radar_id, "run_id": r.run_id, "channel": r.channel, "status": r.delivery_status,
+            "generated_at": r.generated_at, "recipient": d.get("recipient"), "error": d.get("error"),
+            "characters": len(d["content"]) if "content" in d else None}
+
+
+def digest_deliveries(s: Session, radar_id: str, limit: int = 30) -> List[Dict[str, Any]]:
+    _radar(s, radar_id)
+    rows = s.scalars(select(m.DigestRun).where(m.DigestRun.radar_id == radar_id)
+                     .order_by(m.DigestRun.generated_at.desc(), m.DigestRun.id.desc()).limit(limit)).all()
+    return [_delivery(r) for r in rows]

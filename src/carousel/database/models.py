@@ -83,6 +83,7 @@ class Radar(Base):
     description: Mapped[str] = mapped_column(Text, server_default="")
     state: Mapped[str] = mapped_column(String(16), server_default="active")
     schedule: Mapped[Optional[str]] = mapped_column(Text)  # 'daily' | 'weekly' (UTC periods); NULL = manual only
+    digest_emails: Mapped[List[Any]] = mapped_column(server_default="[]")  # addresses that get each run's digest
     created_at: Mapped[dt.datetime] = _now()
     updated_at: Mapped[dt.datetime] = _now()
     __table_args__ = (
@@ -391,13 +392,24 @@ class CollectionPaper(Base):
 
 
 class DigestRun(Base):
+    """One digest delivery: a run's Markdown, the radar's RSS feed after a run, or one email to one recipient.
+
+    ``details`` holds the recipient and the error for email, and the rendered content for Markdown and RSS.
+    A failed delivery is kept (``delivery_status = 'failed'``) with the reason.
+    """
+
     __tablename__ = "digest_runs"
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     radar_id: Mapped[str] = mapped_column(ForeignKey("radars.id", ondelete="CASCADE"), index=True)
+    run_id: Mapped[Optional[str]] = mapped_column(ForeignKey("recommendation_runs.id", ondelete="SET NULL"), index=True)
     channel: Mapped[str] = mapped_column(String(16))  # email | rss | markdown
     generated_at: Mapped[dt.datetime] = _now()
-    delivery_status: Mapped[str] = mapped_column(String(16))
+    delivery_status: Mapped[str] = mapped_column(String(16))  # delivered | failed
     details: Mapped[Dict[str, Any]] = mapped_column(server_default="{}")
+    __table_args__ = (
+        CheckConstraint("channel IN ('email', 'rss', 'markdown')", name="channel"),
+        CheckConstraint("delivery_status IN ('delivered', 'failed')", name="delivery_status"),
+    )
 
 
 # -------------------------

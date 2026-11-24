@@ -67,6 +67,96 @@
         "title": "DeltaOut",
         "type": "object"
       },
+      "DigestDelivery": {
+        "properties": {
+          "channel": {
+            "enum": [
+              "email",
+              "rss",
+              "markdown"
+            ],
+            "title": "Channel",
+            "type": "string"
+          },
+          "characters": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Markdown and RSS: size of what was produced",
+            "title": "Characters"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Why a delivery failed",
+            "title": "Error"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "radar_id": {
+            "title": "Radar Id",
+            "type": "string"
+          },
+          "recipient": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Email deliveries: the address",
+            "title": "Recipient"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "status": {
+            "enum": [
+              "delivered",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "radar_id",
+          "channel",
+          "status",
+          "generated_at"
+        ],
+        "title": "DigestDelivery",
+        "type": "object"
+      },
       "ExplanationOut": {
         "properties": {
           "details": {
@@ -932,6 +1022,15 @@
             "title": "Description",
             "type": "string"
           },
+          "digest_emails": {
+            "default": [],
+            "description": "Addresses that get each run's digest by email",
+            "items": {
+              "type": "string"
+            },
+            "title": "Digest Emails",
+            "type": "array"
+          },
           "latest_run": {
             "anyOf": [
               {
@@ -1014,6 +1113,21 @@
       "RadarPatch": {
         "additionalProperties": false,
         "properties": {
+          "digest_emails": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Addresses that get each run's digest by email (replaces the list; [] to stop)",
+            "title": "Digest Emails"
+          },
           "schedule": {
             "anyOf": [
               {
@@ -2255,7 +2369,7 @@
         ]
       },
       "patch": {
-        "description": "Set the scan schedule, or pause and resume scheduled scans. History is never deleted.",
+        "description": "Set the scan schedule, pause and resume scheduled scans, or set digest recipients. History is never deleted.",
         "operationId": "update_radar_api_v1_radars__radar_id__patch",
         "parameters": [
           {
@@ -2363,6 +2477,250 @@
         "summary": "Delta",
         "tags": [
           "recommendations"
+        ]
+      }
+    },
+    "/api/v1/radars/{radar_id}/digest.md": {
+      "get": {
+        "description": "A run's digest as Markdown (the latest run by default).",
+        "operationId": "digest_markdown_api_v1_radars__radar_id__digest_md_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "radar_id",
+            "required": true,
+            "schema": {
+              "title": "Radar Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "run_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/markdown": {},
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Digest Markdown",
+        "tags": [
+          "digests"
+        ]
+      }
+    },
+    "/api/v1/radars/{radar_id}/digests": {
+      "get": {
+        "description": "Digest deliveries, newest first, failures included with the reason.",
+        "operationId": "digest_deliveries_api_v1_radars__radar_id__digests_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "radar_id",
+            "required": true,
+            "schema": {
+              "title": "Radar Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DigestDelivery"
+                  },
+                  "title": "Response Digest Deliveries Api V1 Radars  Radar Id  Digests Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Digest Deliveries",
+        "tags": [
+          "digests"
+        ]
+      }
+    },
+    "/api/v1/radars/{radar_id}/digests/email": {
+      "post": {
+        "description": "Email a run's digest (latest by default) to the radar's recipients now; every attempt is recorded.",
+        "operationId": "send_digest_api_v1_radars__radar_id__digests_email_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "radar_id",
+            "required": true,
+            "schema": {
+              "title": "Radar Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "run_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Id"
+            }
+          },
+          {
+            "description": "Bearer token, when the server sets one",
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Bearer token, when the server sets one",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DigestDelivery"
+                  },
+                  "title": "Response Send Digest Api V1 Radars  Radar Id  Digests Email Post",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Send Digest",
+        "tags": [
+          "digests"
+        ]
+      }
+    },
+    "/api/v1/radars/{radar_id}/feed.xml": {
+      "get": {
+        "description": "RSS 2.0 over the radar's recent runs; each paper appears once.",
+        "operationId": "digest_feed_api_v1_radars__radar_id__feed_xml_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "radar_id",
+            "required": true,
+            "schema": {
+              "title": "Radar Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/rss+xml": {},
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Digest Feed",
+        "tags": [
+          "digests"
         ]
       }
     },

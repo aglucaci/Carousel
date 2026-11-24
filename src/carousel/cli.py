@@ -8,6 +8,7 @@ carousel command-line interface.
     carousel review merge STORE.db KEEP_ID OTHER_ID [--note TEXT]    # same work
     carousel review distinct STORE.db ID_A ID_B [--note TEXT]        # different works
     carousel review split STORE.db SOURCE SOURCE_ID [--note TEXT]    # undo a wrong merge
+    carousel digest RADAR_ID [--store S] [--run RUN] [--format markdown|rss|email] [--to ADDRESS]
     carousel review link STORE.db PREPRINT_ID PUBLISHED_ID [--note TEXT]   # versions of one work, kept apart
     carousel review unlink STORE.db ID_A ID_B [--note TEXT]          # not versions of one work
 
@@ -174,6 +175,92 @@ def cmd_scan(args: argparse.Namespace) -> int:
     if args.json:
         res.to_json(args.json)
         print(f"wrote {args.json}")
+    if args.digest_dir:
+        from carousel.database import PaperStore
+
+        with PaperStore(args.store) as store:
+            for path in write_digests(store, radar.radar_id, radar.config.radar_name, res.run_id, args.digest_dir):
+                print(f"wrote {path}")
+    return 0
+
+
+def _store_digest(store, run: dict, radar_name: str):
+    import datetime as dt
+    import os
+
+    from carousel.notifications import arrivals_from_store, digest_from_run
+
+    executed = dt.datetime.strptime(run["started_at"], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=dt.timezone.utc)
+    return digest_from_run(run, run["items"], radar_name=radar_name, arrivals=arrivals_from_store(store, run),
+                           executed_at=executed, app_url=os.environ.get("CAROUSEL_PUBLIC_URL"))
+
+
+def write_digests(store, radar_id: str, radar_name: str, run_id: str, out_dir: str) -> list:
+    """Write a run's Markdown digest and the radar's RSS feed (its last 20 runs) into ``out_dir``."""
+    import os
+    from pathlib import Path
+
+    from carousel.notifications import to_markdown, to_rss
+
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    run = store.get_run(run_id)
+    digest = _store_digest(store, run, radar_name)
+    md = out / f"{radar_id}-{run['as_of']}-{run_id}.md"
+    md.write_text(to_markdown(digest), encoding="utf-8")
+    recent = [store.get_run(r["run_id"]) for r in store.list_runs(radar_id)[-20:]]
+    feed = out / f"{radar_id}.xml"
+    feed.write_text(to_rss([_store_digest(store, r, radar_name) for r in recent], radar_id=radar_id, radar_name=radar_name,
+                           link=os.environ.get("CAROUSEL_PUBLIC_URL")), encoding="utf-8")
+    return [md, feed]
+
+
+def cmd_digest(args: argparse.Namespace) -> int:
+    from carousel.database import StoreError
+    from carousel.notifications import DeliveryError, SmtpSettings, send_email, to_email, to_markdown, to_rss
+
+    try:
+        store = _open_store(args.store)
+    except (FileNotFoundError, StoreError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    with store:
+        runs = store.list_runs(args.radar)
+        if not runs:
+            print(f"FAIL no runs for radar {args.radar!r} in {args.store}", file=sys.stderr)
+            return 1
+        run = store.get_run(args.run or runs[-1]["run_id"])
+        if run is None or run["radar_id"] != args.radar:
+            print(f"FAIL unknown run {args.run} for radar {args.radar!r}", file=sys.stderr)
+            return 1
+        name = args.name or run["radar_name"]
+        if args.format == "rss":
+            text = to_rss([_store_digest(store, store.get_run(r["run_id"]), name) for r in runs[-20:]],
+                          radar_id=args.radar, radar_name=name)
+        else:
+            digest = _store_digest(store, run, name)
+            text = to_markdown(digest)
+    if args.format == "email":
+        if not args.to:
+            print("FAIL --to ADDRESS is required for --format email", file=sys.stderr)
+            return 1
+        failed = 0
+        settings = SmtpSettings.from_env()
+        for addr in args.to:
+            try:
+                send_email(to_email(digest, sender=settings.sender, recipient=addr), settings)
+                print(f"sent to {addr}")
+            except DeliveryError as exc:
+                failed += 1
+                print(f"FAIL {addr}: {exc}", file=sys.stderr)
+        return 1 if failed else 0
+    if args.out:
+        from pathlib import Path
+
+        Path(args.out).write_text(text, encoding="utf-8")
+        print(f"wrote {args.out}")
+    else:
+        sys.stdout.write(text)
     return 0
 
 
@@ -430,8 +517,19 @@ def build_parser() -> argparse.ArgumentParser:
     sc.add_argument("--feedback", help="Feedback file (default: RADAR.feedback.yml next to the radar)")
     sc.add_argument("--csv", help="Also write the recommendations as CSV")
     sc.add_argument("--json", help="Also write the full run as JSON")
+    sc.add_argument("--digest-dir", help="Also write the run's Markdown digest and the radar's RSS feed here")
     sc.add_argument("-q", "--quiet", action="store_true")
     sc.set_defaults(func=cmd_scan)
+
+    dg = sub.add_parser("digest", help="A run's digest as Markdown, the radar's RSS feed, or an email")
+    dg.add_argument("radar", metavar="RADAR_ID")
+    dg.add_argument("--store", default="carousel.db")
+    dg.add_argument("--run", help="Run ID (default: the radar's latest run)")
+    dg.add_argument("--format", choices=("markdown", "rss", "email"), default="markdown")
+    dg.add_argument("--name", help="Radar name to show (default: the name stored with the run)")
+    dg.add_argument("--out", help="Write here instead of standard output (markdown, rss)")
+    dg.add_argument("--to", action="append", metavar="ADDRESS", help="Email recipient (repeatable); needs CAROUSEL_SMTP_HOST")
+    dg.set_defaults(func=cmd_digest)
 
     ru = sub.add_parser("runs", help="List stored runs")
     ru.add_argument("--store", default="carousel.db")

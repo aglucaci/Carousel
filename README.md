@@ -31,8 +31,9 @@ changed in my field, why does it matter, and what should I read next?"**
 > (daily or weekly, with pause and resume), labels that separate newly
 > published from newly observed papers, Crossref checks for corrections and
 > retractions, Europe PMC (preprints, licensed open-access full texts, and
-> annotations), links between a preprint and its journal article, and
-> versioned explanations with a measured effect of your feedback. See [What works today](#what-works-today) and the
+> annotations), links between a preprint and its journal article,
+> versioned explanations with a measured effect of your feedback, and digests
+> (Markdown, RSS, email). See [What works today](#what-works-today) and the
 > [roadmap](#roadmap). CAROUSEL grew out of the ETHER prototype, so you will
 > still see that name in the manuscript drafts.
 
@@ -55,6 +56,7 @@ changed in my field, why does it matter, and what should I read next?"**
 | **Europe PMC (Phase 2)** | [`src/carousel/connectors/europepmc.py`](src/carousel/connectors/europepmc.py), [`core/fulltext.py`](src/carousel/core/fulltext.py) | Searched in titles and abstracts across MEDLINE, PubMed Central, and preprints (bioRxiv, medRxiv, and others), with each article's licence and open-access status. For a scan's recommended papers it keeps open-access full texts **only under a Creative Commons or public-domain licence, with that licence recorded on the text** (read from the article itself when it states one, and what it permits), plus Europe PMC's text-mined annotations (organisms, diseases, genes, chemicals). The API reports texts and licences but does not serve the text |
 | **Crossref verification (Phase 2)** | [`src/carousel/connectors/crossref.py`](src/carousel/connectors/crossref.py) | With `crossref` in a radar's `sources` (the default for new radars), each scan looks up the DOIs its searches found. Corrections, retractions, and expressions of concern (including Retraction Watch data) are recorded on the paper with who reported them; a retraction flags the paper and keeps it out of recommendations. Preprint links (`has-preprint` / `is-preprint-of`) become version links. Crossref is not searched: its free-text search cannot express a radar's boolean queries |
 | **Explanations and feedback (Phase 2)** | [`src/carousel/ranking/explain.py`](src/carousel/ranking/explain.py), [`ranker.py`](src/carousel/ranking/ranker.py) | Each recommendation stores a **versioned explanation** written when it was ranked (short reasons: matched terms, how it was found, feedback, novelty, methods, integrity flags, linked versions), never regenerated. Saved and relevant papers pull the radar's interest profile toward them and not-relevant papers push it away; each run records **what that changed**, against the same run ranked without feedback (papers moved up, moved down, brought in, and each paper's relevance with and without it). In the app, "Relevant" / "Not relevant" in the drawer |
+| **Digests (Phase 2)** | [`src/carousel/notifications/`](src/carousel/notifications/), `carousel digest`, `carousel scan --digest-dir` | Every scan produces a **Markdown** digest, updates the radar's **RSS** feed (each paper once), and **emails** the digest to the radar's recipients over SMTP (`CAROUSEL_SMTP_HOST` and friends). Each item says how it arrived, its flags, and its stored explanation. Every delivery is recorded, and a failed one keeps its reason (shown on the radar page); a digest failure never fails the scan |
 | **Scheduled scans (Phase 2)** | [`src/carousel/workers/schedule.py`](src/carousel/workers/schedule.py), `carousel scheduler` | Radars scan daily or weekly (UTC periods; a manual scan in the period counts). Pausing stops scheduled scans and keeps every run, saved paper, and feedback event. Each recommendation is labelled against the radar's previous scan: **newly published** (after that scan's window) or **newly observed** (older, but new to this radar, e.g. indexed late) |
 | **REST API v1 (Phase 1B)** | [`src/carousel/api/`](src/carousel/api/), [`openapi/carousel-v1.json`](openapi/carousel-v1.json) | FastAPI over Postgres: radars, scans as background jobs (RQ on Redis, `carousel worker`), ranked papers, delta, paper records, "Why this paper?" explanations from the stored run, full-text search, and feedback. Writes need `CAROUSEL_API_TOKEN` when it is set |
 | **Radar configs** | [`examples/`](examples/), [`src/carousel/core/config.py`](src/carousel/core/config.py) | YAML radars with strict validation and `file:line` error messages |
@@ -147,6 +149,8 @@ docker compose up
 Put optional settings in a `.env` file next to `docker-compose.yml` (it is
 git-ignored): `OPENALEX_API_KEY` (OpenAlex is skipped without one),
 `NCBI_API_KEY`, `CROSSREF_MAILTO`, `CAROUSEL_API_TOKEN`, `POSTGRES_PASSWORD`, `CAROUSEL_WEB_PORT`,
+`CAROUSEL_SMTP_HOST` / `_PORT` / `_SECURITY` / `_USER` / `_PASSWORD` / `_FROM` for digest emails,
+`CAROUSEL_PUBLIC_URL` for links back to the app,
 and `CAROUSEL_EXTRAS=server,semantic` for real embeddings (adds PyTorch to the
 image; without it scans use the hashing embedder). Ports are bound to
 localhost. Data lives in Docker volumes; `docker compose down -v` deletes it.
@@ -389,7 +393,7 @@ done-when checks for each task, is in [`CAROUSEL_PLAN.md`](CAROUSEL_PLAN.md).
 | Phase | Focus | Status |
 | --- | --- | --- |
 | **1. Functional MVP** | **Engine:** canonical paper records, OpenAlex + PubMed, careful dedup, lexical + semantic candidates, relevance/novelty/methods ranking with modes, `carousel scan` and a Python `Radar` API. **App:** FastAPI + Postgres/pgvector, Next.js (For You, Radars, Library, "Why this paper?"), save/dismiss, Docker Compose | Done for local use: the engine, Postgres, the REST API, the web app, and Docker Compose |
-| **2. Continuous intelligence** | Scheduled ingestion, Europe PMC + Crossref (retractions, corrections, preprint links), arXiv, versioned explanations, feedback learning, email/RSS digests, evidence-grounded summaries | In progress: scheduled scans with pause/resume, newly published vs newly observed labels, Crossref corrections/retractions, Europe PMC (licensed full texts, annotations), preprint-publication linking, versioned explanations, and the feedback-adjusted profile are done; digests are next |
+| **2. Continuous intelligence** | Scheduled ingestion, Europe PMC + Crossref (retractions, corrections, preprint links), arXiv, versioned explanations, feedback learning, email/RSS digests, evidence-grounded summaries | In progress: scheduled scans with pause/resume, newly published vs newly observed labels, Crossref corrections/retractions, Europe PMC (licensed full texts, annotations), preprint-publication linking, versioned explanations, the feedback-adjusted profile, and digests are done; the first Research Delta events are next |
 | **3. Research Delta** | Topic clusters and observations, statistical trend detection (negative binomial, multiple-testing control), the **What's New** change log, **Trends** with baselines and uncertainty | Planned |
 | **4. Advanced discovery** | Method Transfer, literature graphs, Zotero, public API docs, collaborative radars, benchmark dataset, software paper | Planned |
 

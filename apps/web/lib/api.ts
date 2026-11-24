@@ -70,7 +70,19 @@ export type RadarConfig = {
 
 export type Schedule = "daily" | "weekly";
 
-export type RadarPatch = { schedule?: Schedule | null; state?: "active" | "paused" };
+export type RadarPatch = { schedule?: Schedule | null; state?: "active" | "paused"; digest_emails?: string[] };
+
+export type DigestDelivery = {
+  id: number;
+  radar_id: string;
+  run_id?: string | null;
+  channel: "email" | "rss" | "markdown";
+  status: "delivered" | "failed";
+  generated_at: string;
+  recipient?: string | null;
+  error?: string | null;
+  characters?: number | null;
+};
 
 export type Radar = {
   radar_id: string;
@@ -84,6 +96,7 @@ export type Radar = {
   config?: RadarConfig | null;
   n_runs: number;
   latest_run?: RunSummary | null;
+  digest_emails?: string[];
 };
 
 export type PaperSummary = {
@@ -285,6 +298,9 @@ export const client = {
     api<Radar>("/radars", { method: "POST", body: schedule ? { config, schedule } : { config } }),
   updateRadar: (id: string, patch: RadarPatch) =>
     api<Radar>(`/radars/${encodeURIComponent(id)}`, { method: "PATCH", body: patch }),
+  digests: (id: string) => api<DigestDelivery[]>(`/radars/${encodeURIComponent(id)}/digests?limit=10`),
+  sendDigest: (id: string) =>
+    api<DigestDelivery[]>(`/radars/${encodeURIComponent(id)}/digests/email`, { method: "POST" }),
   scan: (id: string, opts: ScanOptions) => api<Job>(`/radars/${encodeURIComponent(id)}/runs`, { method: "POST", body: opts }),
   job: (id: string) => api<Job>(`/jobs/${encodeURIComponent(id)}`),
   runs: (id: string) => api<RunSummary[]>(`/radars/${encodeURIComponent(id)}/runs`),

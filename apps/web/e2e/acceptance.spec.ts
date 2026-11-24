@@ -137,4 +137,16 @@ test("define a topic, get a ranked list, save and dismiss, rescan without losing
   await expect(page.getByTestId("schedule-status")).toContainText("Scans weekly");
   await page.getByLabel("Repeat").selectOption("");
   await expect(page.getByTestId("schedule-status")).toHaveText("Scans run only when you start them.");
+
+  // ---- Phase 2: each scan produced its digests; a failed email delivery is recorded with the reason ----
+  const deliveries = page.getByTestId("digest-delivery");
+  await expect(deliveries.filter({ hasText: "Markdown" }).filter({ hasText: "Delivered" })).toHaveCount(2);
+  await expect(deliveries.filter({ hasText: "RSS feed" }).filter({ hasText: "Delivered" })).toHaveCount(2);
+  const feed = await page.request.get("/api/v1/radars/viral-evolution/feed.xml");
+  expect(feed.headers()["content-type"]).toContain("application/rss+xml");
+  expect(await feed.text()).toContain("<rss version=\"2.0\">");
+  await page.getByLabel("Email the digest to").fill("reader@example.org");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.getByRole("button", { name: "Send latest now" }).click();
+  await expect(deliveries.filter({ hasText: "to reader@example.org" }).first()).toContainText("no SMTP server configured");
 });
