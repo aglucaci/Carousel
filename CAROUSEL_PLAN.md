@@ -245,9 +245,44 @@ lands, since it needs only observations to replay).
 
 ### Phase 4 — Advanced discovery and open-source maturity
 
+**Acceptance (proposed; the spec lists features for this phase, not a check):**
+a Method Transfer recommendation is explained as a hypothesis with grounded
+evidence and judged by experts; others can install, extend, cite, and
+reproduce CAROUSEL from its public docs, released benchmark, and paper.
+
 **Method Transfer**, literature graph views, Zotero integration, public API
 docs, collaborative Radars, benchmark dataset release, and a software paper.
 Scientific question tracking is a research feature.
+
+**How Phase 4 builds on Phase 3.** Two things are missing for discovery
+across fields:
+
+- **A citation graph.** Seed papers are stored but only used for the profile
+  `e_u`; there are no citation edges, so ranking Stage A has no citation
+  expansion, Stage B has no graph term `γ`, and the `discovery` signal is
+  reported as not yet scored. Edges are observations like counts: stored with
+  when they were seen, so a replay sees only edges known by its date.
+- **A map shared across radars.** Topics are per radar (decision 6), which
+  cannot say a paper is from a *distant* field. A shared topic map is added
+  as another classifier; per-radar topics and their trends are unchanged.
+
+| # | Task | Done when |
+| --- | --- | --- |
+| 32 | Citation graph v1: OpenAlex `referenced_works` and cited-by for a radar's seed papers and recommended papers, stored as append-only edges with `observed_at` (`edges_as_of(t)`, like `counts_as_of`); a budgeted citation-expansion candidate channel (Stage A); a graph relevance term `γ` (Stage B); `ranking_version` 0.2.0 with the new features stored per item | Recorded-HTTP fixture tests; a leakage test fails if a replay at `t` uses an edge observed after `t`; the OpenAlex budget is never exceeded; a radar with no seeds ranks exactly as under 0.1.0 when `γ = 0` |
+| 33 | **Explore**: literature graph views per radar (the spec's navigation item not yet built): papers as nodes, citation edges, topic membership, seeds and saved papers marked; select a paper to see why it is connected; API for the subgraph | Rendered from stored edges and topics only; readable without colour, keyboard-navigable, with a list view of the same neighbourhood; Playwright on an engine-built fixture checks nodes and edges against the store |
+| 34 | Shared topic map: one classifier fitted over all radars' papers (plus a budgeted sample of each radar's field), versioned like task 24, with each per-radar topic mapped to shared topics; a field distance between any two papers or topics | Deterministic for the same papers and version; per-radar topics, observations, and trends are untouched (their tests unchanged); refits map old→new as in task 24 |
+| 35 | **Method Transfer** v1 (ranking Stage D, the `discovery` signal): a paper that applies a method from the radar's `methods_profile` and lies in a distant shared topic (34) with little citation proximity (32), explained as a hypothesis (*method M is used for problem P in field F; it may apply to your question*) with a grounded quote for the method from the paper (task 22's grounding); `ranking_version` 0.3.0 | A fixture with known transfers recovers them and ranks near-field method papers below them; every explanation has a quote that the grounding check verifies; the UI and digests label it a hypothesis, never a finding; integrity flags still exclude |
+| 36 | Method Transfer judgments (Study C, expert judgment): a judgment format (useful / plausible / not a transfer, with a note), a review queue in the web app, export for two annotators, and agreement reported (Cohen's κ) | `carousel eval transfer` reports precision at K and κ from a fixture of judgments; judgments are stored with the ranking and classifier versions they judged |
+| 37 | Zotero integration: export the Library and runs as BibTeX, RIS, and CSL-JSON; push saved papers into a Zotero collection over the Zotero Web API (the user's key, stored as a server secret, never in the database or logs); import a Zotero collection as seed papers | Recorded-HTTP fixture tests with a fake key; syncing twice creates no duplicates; exports round-trip through a citation parser; a test fails if the key appears in logs or fixtures |
+| 38 | Collaborative radars: users with per-user API tokens (replacing the single `CAROUSEL_API_TOKEN`), radar membership (owner, editor, viewer), radars private by default, feedback kept per user and shown with attribution on shared radars, and the ranker's profile built from the members' feedback with weights stated in the explanation | Tenant-isolation tests: no read or write across radars without membership (every route); a migration keeps existing single-user installs working; Playwright for sharing a radar and leaving it |
+| 39 | Public docs: the API reference rendered from `openapi/carousel-v1.json`, the Python API and CLI reference from docstrings, a user guide (radars, modes, What's New, Trends, evaluation), an API stability policy and changelog, and a contributor guide (connectors, ranking versions, fixtures) published to Pages | Docs build in CI; every code example runs in CI; a check fails if a route or CLI command is undocumented |
+| 40 | Benchmark dataset release: Study A labels, Study B replay dates, and Study C episodes and judgments (36), with identifiers and labels only (no abstracts), a datasheet, licence, and a versioned DOI; `carousel eval` reproduces the reported numbers from the release archive | A clean environment downloads the archive and reproduces every reported metric exactly; the datasheet states annotators, agreement, and known gaps (needs decision 7 settled) |
+| 41 | Software paper (decision 3): statement of need, design (connectors, provenance, versioned ranking and topics, leakage guards), and the Study A–C results from the released benchmark; `CITATION.cff` and a tagged 1.0 release | The journal's paper build passes in CI; every number in the paper is generated from the release archive by a script |
+| 42 | Scientific question tracking (research feature, off by default): a radar's `research_question` drives a `scientific_evidence_update` event when a new publication's grounded findings address the question, quoted with their section; no stance or contradiction labels (excluded, §13) | Derived from stored findings only and recomputed identically (as task 21); every event carries a verified quote; disabled radars produce no such events |
+
+**Order.** 32 → 33 and 32 + 34 → 35 → 36; 37, 38, and 39 are independent
+and can run at any time; 40 needs 36 and decision 7; 41 comes last, after 40;
+42 can proceed after 34 as a research track.
 
 ### Deliberately excluded at first (spec §13)
 
@@ -293,3 +328,6 @@ Scientific question tracking is a research feature.
 5. **Phase 3 numerics.** The trend model (task 26) needs a negative-binomial GLM. Either add `numpy` + `statsmodels` as a `[trends]` extra (recommended: tested implementations, confidence intervals included), or write a small NB2 IRLS fit on `numpy` alone. The engine stays installable without either; topic events then report the model as inactive, as momentum is today. *Task 26 took the recommended `[trends]` extra.*
 6. **Topic scope.** Topics per radar (recommended first: small, interpretable, matches the radar's field and denominator) or one shared topic map across radars (needed later for cross-field Method Transfer in Phase 4). *Task 24 implements per-radar topics; a shared map can be added as another classifier without changing these.*
 7. **Benchmark annotations (task 31).** Who annotates the starter set (the lab, recommended, with two annotators and agreement reported), and which documented episodes to start from (for example variant waves and host jumps already covered by the lab's radars).
+8. **Accounts for collaborative radars (task 38).** Per-user API tokens issued by the server admin (recommended first: no external service, works self-hosted) or sign-in through an identity provider (OIDC), which a public instance would need (decision 4).
+9. **Zotero direction (task 37).** One-way, CAROUSEL to Zotero plus collections imported as seeds (recommended), or two-way sync of saves and tags, which needs conflict rules.
+10. **Dataset licence and host (task 40).** CC BY 4.0 on Zenodo (recommended), releasing identifiers and labels only, since abstracts are not ours to redistribute.
