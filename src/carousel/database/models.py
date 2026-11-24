@@ -283,12 +283,34 @@ class PaperAnnotation(Base):
 # Topics and research events (Phase 3)
 # -------------------------
 
+class TopicModel(Base):
+    """A versioned topic classifier for one radar (carousel.intelligence.topics); one is active per radar."""
+
+    __tablename__ = "topic_models"
+    classifier_version: Mapped[str] = mapped_column(Text, primary_key=True)
+    radar_id: Mapped[str] = mapped_column(ForeignKey("radars.id", ondelete="CASCADE"), index=True)
+    embedder: Mapped[str] = mapped_column(Text)
+    params: Mapped[Dict[str, Any]] = mapped_column()
+    fitted_at: Mapped[dt.datetime] = mapped_column(TS)
+    previous_version: Mapped[Optional[str]] = mapped_column(Text)
+    active: Mapped[bool] = mapped_column(Boolean)
+
+
 class Topic(Base):
+    """A topic of one classifier version. ``topic_key`` is its lineage: the same across refits while the topic is
+    the same (``topic_mappings``)."""
+
     __tablename__ = "topics"
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     label: Mapped[str] = mapped_column(Text)
     classifier_version: Mapped[str] = mapped_column(Text)
     created_at: Mapped[dt.datetime] = _now()
+    radar_id: Mapped[Optional[str]] = mapped_column(ForeignKey("radars.id", ondelete="CASCADE"), index=True)
+    topic_key: Mapped[Optional[str]] = mapped_column(Text)
+    key_terms: Mapped[List[Any]] = mapped_column(server_default="[]")
+    size: Mapped[Optional[int]] = mapped_column(Integer)
+    threshold: Mapped[Optional[float]] = mapped_column(Float)
+    __table_args__ = (UniqueConstraint("classifier_version", "topic_key"),)
 
 
 class PaperTopic(Base):
@@ -296,6 +318,26 @@ class PaperTopic(Base):
     paper_id: Mapped[str] = mapped_column(ForeignKey("papers.id", ondelete="CASCADE"), primary_key=True)
     topic_id: Mapped[int] = mapped_column(ForeignKey("topics.id", ondelete="CASCADE"), primary_key=True)
     confidence: Mapped[float] = mapped_column(Float)
+    origin: Mapped[Optional[str]] = mapped_column(String(16))  # fit | assigned
+    assigned_at: Mapped[Optional[dt.datetime]] = mapped_column(TS)
+
+
+class TopicMapping(Base):
+    """How a refit's topics relate to the previous version's: same | split | merge | new | retired."""
+
+    __tablename__ = "topic_mappings"
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    from_version: Mapped[Optional[str]] = mapped_column(Text)
+    to_version: Mapped[str] = mapped_column(Text, index=True)
+    relation: Mapped[str] = mapped_column(String(16))
+    from_topic: Mapped[Optional[str]] = mapped_column(Text)
+    to_topic: Mapped[Optional[str]] = mapped_column(Text)
+    shared_members: Mapped[int] = mapped_column(Integer)
+    centroid_similarity: Mapped[Optional[float]] = mapped_column(Float)
+    __table_args__ = (
+        CheckConstraint("relation IN ('same', 'split', 'merge', 'new', 'retired')", name="relation"),
+        UniqueConstraint("to_version", "relation", "from_topic", "to_topic"),
+    )
 
 
 class TopicObservation(Base):

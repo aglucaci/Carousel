@@ -11,6 +11,7 @@ carousel command-line interface.
     carousel digest RADAR_ID [--store S] [--run RUN] [--format markdown|rss|email] [--to ADDRESS]
     carousel extract PAPER_ID [--store S] [--provider rules|anthropic] [--text FILE] [--format text|json]
     carousel consent list|grant|revoke [PROVIDER] [--text public|private] [--store S]
+    carousel topics list|fit|papers RADAR_ID [--store S] [--k K] [--topic TOPIC_ID]
     carousel review link STORE.db PREPRINT_ID PUBLISHED_ID [--note TEXT]   # versions of one work, kept apart
     carousel review unlink STORE.db ID_A ID_B [--note TEXT]          # not versions of one work
 
@@ -348,6 +349,66 @@ def cmd_consent(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_topics(args: argparse.Namespace) -> int:
+    import datetime as dt
+
+    from carousel.database import StoreError
+    from carousel.intelligence.topics import fit_radar
+    from carousel.radar import make_embedder
+
+    try:
+        store = _open_store(args.store)
+    except (FileNotFoundError, StoreError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    with store:
+        if args.action == "fit":
+            emb, notes = make_embedder(args.embedder)
+            if emb is None:
+                print("FAIL topics need embeddings (choose --embedder hashing or semantic)", file=sys.stderr)
+                return 1
+            try:
+                now = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+                model, changed = fit_radar(store, args.radar, emb, now, k=args.k)
+            except ValueError as exc:
+                print(f"FAIL {exc}", file=sys.stderr)
+                return 1
+            for n in notes:
+                print(f"note: {n}")
+            if not changed:
+                print(f"unchanged: {model.classifier_version} already fits these papers with these settings")
+                return 0
+            print(f"fitted {model.classifier_version}: {len(model.topics)} topics from "
+                  f"{len(model.members)} papers ({model.embedder})")
+            labels = {t.topic_id: t.label for t in model.topics}
+            for m in model.mapping:
+                print(f"  {m['relation']:<8} {m['from_topic'] or '':<14} -> {m['to_topic'] or '':<14} "
+                      f"{labels.get(m['to_topic'] or '', '')}")
+        model = store.active_topic_model(args.radar)
+        if model is None:
+            print(f"no topic model for radar {args.radar!r} yet (it is fitted after enough scans, or: carousel topics fit)")
+            return 0 if args.action != "papers" else 1
+        if args.action == "list":
+            placed = store.paper_topics(model.classifier_version)
+            counts: dict = {}
+            for v in placed.values():
+                counts[v["topic_id"]] = counts.get(v["topic_id"], 0) + 1
+            print(f"{model.classifier_version} ({model.embedder}, fitted {model.fitted_at}, k={model.params['k']})")
+            for t in model.topics:
+                print(f"  {t.topic_id}  {counts.get(t.topic_id, 0):>4} papers  {t.label}")
+            print(f"  {'unassigned':<13}  {counts.get(None, 0):>4} papers")
+        elif args.action == "papers":
+            if not args.topic or model.topic(args.topic) is None:
+                print(f"FAIL name a topic of {model.classifier_version} with --topic", file=sys.stderr)
+                return 1
+            rows = sorted(((v["confidence"], pid) for pid, v in store.paper_topics(model.classifier_version).items()
+                           if v["topic_id"] == args.topic), reverse=True)
+            for conf, pid in rows:
+                p = store.get(pid)
+                print(f"  {conf:.3f}  {pid}  {(p.title if p else '')[:100]}")
+    return 0
+
+
 def cmd_runs(args: argparse.Namespace) -> int:
     from carousel.database import StoreError
 
@@ -633,6 +694,16 @@ def build_parser() -> argparse.ArgumentParser:
                     help="Which text: public (abstracts, open full texts; the default to grant) or private (your text)")
     co.add_argument("--note", help="Why, or who agreed")
     co.set_defaults(func=cmd_consent)
+
+    tp = sub.add_parser("topics", help="A radar's topics: list them, fit a new version, or list a topic's papers")
+    tp.add_argument("action", choices=("list", "fit", "papers"))
+    tp.add_argument("radar", metavar="RADAR_ID")
+    tp.add_argument("--store", default="carousel.db")
+    tp.add_argument("--k", type=int, help="fit: number of topics (default: chosen by silhouette)")
+    tp.add_argument("--embedder", choices=("auto", "semantic", "hashing"), default="auto",
+                    help="fit: embeddings to cluster (default: semantic when installed)")
+    tp.add_argument("--topic", metavar="TOPIC_ID", help="papers: the topic")
+    tp.set_defaults(func=cmd_topics)
 
     ru = sub.add_parser("runs", help="List stored runs")
     ru.add_argument("--store", default="carousel.db")

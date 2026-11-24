@@ -273,6 +273,30 @@ def _import_store(st: PaperStore, engine: Engine) -> Dict[str, int]:
         _upsert(conn, T["research_events"], events, ["event_key"], ["paper_id", "evidence"])
         counts["research_events"] = len(events)
 
+        # ---- topics: versioned models per radar, topics with lineage keys, assignments, refit mappings ----
+        known_radars = {r[0] for r in conn.execute(select(m.Radar.id))}
+        tm = [{"classifier_version": r["classifier_version"], "radar_id": r["radar_id"], "embedder": r["embedder"],
+               "params": json.loads(r["params"]), "fitted_at": _ts(r["fitted_at"]),
+               "previous_version": r["previous_version"], "active": bool(r["active"])}
+              for r in db.execute("SELECT * FROM topic_models") if r["radar_id"] in known_radars]
+        _upsert(conn, T["topic_models"], tm, ["classifier_version"], ["active", "params"])
+        versions = {r["classifier_version"] for r in tm}
+        tps = [{"classifier_version": r["classifier_version"], "topic_key": r["topic_id"], "label": r["label"],
+                "radar_id": next(x["radar_id"] for x in tm if x["classifier_version"] == r["classifier_version"]),
+                "key_terms": json.loads(r["key_terms"]), "size": r["size"], "threshold": r["threshold"]}
+               for r in db.execute("SELECT * FROM topics") if r["classifier_version"] in versions]
+        _upsert(conn, T["topics"], tps, ["classifier_version", "topic_key"], ["label", "key_terms", "size", "threshold"])
+        topic_ids = {(r.classifier_version, r.topic_key): r.id for r in conn.execute(
+            select(m.Topic.classifier_version, m.Topic.topic_key, m.Topic.id).where(m.Topic.classifier_version.in_(versions)))}
+        pts = [{"paper_id": owner(r["paper_id"]), "topic_id": topic_ids[(r["classifier_version"], r["topic_id"])],
+                "confidence": r["confidence"], "origin": r["origin"], "assigned_at": _ts(r["assigned_at"])}
+               for r in db.execute("SELECT * FROM paper_topics WHERE topic_id IS NOT NULL")
+               if (r["classifier_version"], r["topic_id"]) in topic_ids]
+        _upsert(conn, T["paper_topics"], pts, ["paper_id", "topic_id"], ["confidence", "origin"])
+        maps = [dict(r) for r in db.execute("SELECT * FROM topic_mappings") if r["to_version"] in versions]
+        _upsert(conn, T["topic_mappings"], maps, ["to_version", "relation", "from_topic", "to_topic"])
+        counts["topic_models"], counts["topics"], counts["paper_topics"] = len(tm), len(tps), len(pts)
+
         # ---- feedback history ----
         fb = [{"radar_id": r["radar_id"], "paper_id": st.resolve(r["paper_id"]), "action": r["action"], "change": r["change"],
                "ref": r["ref"], "origin": "file", "at": _ts(r["at"])} for r in db.execute("SELECT * FROM feedback_events ORDER BY id")]

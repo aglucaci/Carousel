@@ -173,6 +173,11 @@ def create_app(settings: Optional[Settings] = None, *, queue: Any = None) -> Fas
 
     # ---- Research Delta ----
 
+    @app.get(f"{API_PREFIX}/radars/{{radar_id}}/topics", response_model=schemas.TopicModelOut, tags=["research delta"])
+    def topics(radar_id: str, version: Optional[str] = None, s: Session = Depends(session)) -> Any:
+        """The radar's topic model (the active one, or a given version): topics, sizes, and the refit mapping."""
+        return services.radar_topics(s, radar_id, version)
+
     @app.get(f"{API_PREFIX}/radars/{{radar_id}}/events", response_model=List[schemas.EventOut], tags=["research delta"])
     def events(radar_id: str, run_id: Optional[str] = None, limit: int = Query(100, ge=1, le=500),
                s: Session = Depends(session)) -> Any:

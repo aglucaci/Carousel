@@ -56,9 +56,10 @@ from carousel.ingestion.dedup import MatchDecision, best_match, title_tokens
 
 if TYPE_CHECKING:
     from carousel.core.fulltext import Annotation, PaperText
+    from carousel.intelligence.topics import TopicModel
     from carousel.summarization.schema import Extraction
 
-STORE_SCHEMA_VERSION = 9
+STORE_SCHEMA_VERSION = 10
 
 _DDL = """
 CREATE TABLE IF NOT EXISTS meta (
@@ -273,6 +274,44 @@ CREATE TABLE IF NOT EXISTS model_consents (          -- consent to send a class 
     note       TEXT,
     revoked_at TEXT,
     PRIMARY KEY (provider, text_class)
+);
+CREATE TABLE IF NOT EXISTS topic_models (            -- one per fit: a versioned classifier per radar
+    classifier_version TEXT PRIMARY KEY,
+    radar_id           TEXT NOT NULL,
+    embedder           TEXT NOT NULL,
+    params             TEXT NOT NULL,             -- JSON (k, seed, thresholds, silhouette per k)
+    fitted_at          TEXT NOT NULL,
+    previous_version   TEXT,
+    active             INTEGER NOT NULL           -- 1 for the radar's current model
+);
+CREATE TABLE IF NOT EXISTS topics (
+    classifier_version TEXT NOT NULL,
+    topic_id           TEXT NOT NULL,             -- lineage: the same ID across refits while the topic is the same
+    label              TEXT NOT NULL,
+    key_terms          TEXT NOT NULL,             -- JSON list
+    centroid           BLOB NOT NULL,             -- little-endian float32
+    size               INTEGER NOT NULL,
+    threshold          REAL NOT NULL,
+    PRIMARY KEY (classifier_version, topic_id)
+);
+CREATE TABLE IF NOT EXISTS paper_topics (
+    classifier_version TEXT NOT NULL,
+    paper_id           TEXT NOT NULL,
+    topic_id           TEXT,                      -- NULL: unassigned (below every topic's threshold)
+    confidence         REAL NOT NULL,             -- cosine similarity to the topic's centroid
+    origin             TEXT NOT NULL,             -- fit | assigned
+    assigned_at        TEXT NOT NULL,
+    PRIMARY KEY (classifier_version, paper_id)
+);
+CREATE INDEX IF NOT EXISTS paper_topics_topic ON paper_topics(classifier_version, topic_id);
+CREATE TABLE IF NOT EXISTS topic_mappings (          -- how a refit's topics relate to the previous version's
+    from_version        TEXT NOT NULL,
+    to_version          TEXT NOT NULL,
+    relation            TEXT NOT NULL,            -- same | split | merge | new | retired
+    from_topic          TEXT,
+    to_topic            TEXT,
+    shared_members      INTEGER NOT NULL,
+    centroid_similarity REAL
 );
 CREATE TABLE IF NOT EXISTS merge_log (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1046,6 +1085,93 @@ class PaperStore:
     def consents(self) -> List[Dict[str, Any]]:
         return [dict(r) for r in self.db.execute("SELECT * FROM model_consents ORDER BY provider, text_class")]
 
+    # ---- topics (versioned classifiers per radar) ----
+
+    def radar_paper_ids(self, radar_id: str) -> List[str]:
+        """Papers this radar's runs observed or recommended, most recently observed first (resolved)."""
+        rows = self.db.execute(
+            """SELECT o.paper_id AS paper_id, MAX(r.started_at) AS last FROM run_observations o
+               JOIN recommendation_runs r ON r.run_id = o.run_id WHERE r.radar_id = ? GROUP BY o.paper_id
+               UNION ALL
+               SELECT i.paper_id AS paper_id, MAX(r.started_at) AS last FROM recommendation_items i
+               JOIN recommendation_runs r ON r.run_id = i.run_id WHERE r.radar_id = ? GROUP BY i.paper_id""",
+            (radar_id, radar_id)).fetchall()
+        last: Dict[str, str] = {}
+        for r in rows:
+            pid = self.resolve(r["paper_id"])
+            last[pid] = max(last.get(pid, ""), r["last"])
+        return sorted(last, key=lambda p: (last[p], p), reverse=True)
+
+    def save_topic_model(self, model: "TopicModel", at: Optional[dt.datetime] = None) -> None:
+        """Store a fitted model as the radar's active one (earlier versions are kept, inactive)."""
+        from carousel.search.embeddings import pack
+
+        now = _iso(at or dt.datetime.now(dt.timezone.utc))
+        with self.db:
+            self.db.execute("UPDATE topic_models SET active = 0 WHERE radar_id = ?", (model.radar_id,))
+            self.db.execute("INSERT OR REPLACE INTO topic_models VALUES (?, ?, ?, ?, ?, ?, 1)",
+                            (model.classifier_version, model.radar_id, model.embedder,
+                             json.dumps(model.params, sort_keys=True), model.fitted_at, model.previous_version))
+            self.db.executemany("INSERT OR REPLACE INTO topics VALUES (?, ?, ?, ?, ?, ?, ?)",
+                                [(model.classifier_version, t.topic_id, t.label, json.dumps(t.key_terms),
+                                  pack(t.centroid), t.size, t.threshold) for t in model.topics])
+            self.db.executemany("INSERT OR REPLACE INTO paper_topics VALUES (?, ?, ?, ?, 'fit', ?)",
+                                [(model.classifier_version, pid, tid, model.confidence.get(pid, 0.0), now)
+                                 for pid, tid in sorted(model.members.items())])
+            self.db.executemany(
+                "INSERT INTO topic_mappings VALUES (?, ?, ?, ?, ?, ?, ?)",
+                [(model.previous_version, model.classifier_version, m["relation"], m["from_topic"], m["to_topic"],
+                  m["shared_members"], m["centroid_similarity"]) for m in model.mapping])
+
+    def topic_model(self, classifier_version: str) -> Optional["TopicModel"]:
+        from carousel.intelligence.topics import Topic, TopicModel
+        from carousel.search.embeddings import unpack
+
+        row = self.db.execute("SELECT * FROM topic_models WHERE classifier_version = ?", (classifier_version,)).fetchone()
+        if row is None:
+            return None
+        topics = [Topic(topic_id=r["topic_id"], label=r["label"], key_terms=json.loads(r["key_terms"]),
+                        centroid=unpack(r["centroid"]), size=r["size"], threshold=r["threshold"])
+                  for r in self.db.execute("SELECT * FROM topics WHERE classifier_version = ? ORDER BY size DESC, topic_id",
+                                           (classifier_version,))]
+        fit_rows = self.db.execute("SELECT paper_id, topic_id, confidence FROM paper_topics WHERE classifier_version = ? "
+                                   "AND origin = 'fit'", (classifier_version,)).fetchall()
+        mapping = [dict(r) for r in self.db.execute(
+            "SELECT relation, from_topic, to_topic, shared_members, centroid_similarity FROM topic_mappings "
+            "WHERE to_version = ? ORDER BY relation, from_topic, to_topic", (classifier_version,))]
+        return TopicModel(classifier_version=row["classifier_version"], radar_id=row["radar_id"], embedder=row["embedder"],
+                          params=json.loads(row["params"]), topics=topics,
+                          members={r["paper_id"]: r["topic_id"] for r in fit_rows},
+                          confidence={r["paper_id"]: r["confidence"] for r in fit_rows},
+                          fitted_at=row["fitted_at"], previous_version=row["previous_version"], mapping=mapping)
+
+    def active_topic_model(self, radar_id: str) -> Optional["TopicModel"]:
+        row = self.db.execute("SELECT classifier_version FROM topic_models WHERE radar_id = ? AND active = 1",
+                              (radar_id,)).fetchone()
+        return self.topic_model(row["classifier_version"]) if row else None
+
+    def topic_models(self, radar_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        sql, args = "SELECT * FROM topic_models", ()
+        if radar_id:
+            sql, args = sql + " WHERE radar_id = ?", (radar_id,)
+        return [{**dict(r), "params": json.loads(r["params"])} for r in self.db.execute(sql + " ORDER BY fitted_at", args)]
+
+    def assign_topics(self, classifier_version: str, rows: Sequence[Tuple[str, Optional[str], float]],
+                      at: Optional[dt.datetime] = None) -> int:
+        """Record assignments [(paper_id, topic_id or None, similarity)]; a paper already placed keeps its place."""
+        now = _iso(at or dt.datetime.now(dt.timezone.utc))
+        with self.db:
+            cur = self.db.executemany("INSERT OR IGNORE INTO paper_topics VALUES (?, ?, ?, ?, 'assigned', ?)",
+                                      [(classifier_version, self.resolve(p), t, c, now) for p, t, c in rows])
+            return cur.rowcount
+
+    def paper_topics(self, classifier_version: str) -> Dict[str, Dict[str, Any]]:
+        """{paper_id: {topic_id, confidence, origin, assigned_at}} under one model (paper IDs resolved)."""
+        return {self.resolve(r["paper_id"]): {"topic_id": r["topic_id"], "confidence": r["confidence"],
+                                              "origin": r["origin"], "assigned_at": r["assigned_at"]}
+                for r in self.db.execute("SELECT * FROM paper_topics WHERE classifier_version = ? ORDER BY paper_id",
+                                         (classifier_version,))}
+
     # ---- reads ----
 
     def resolve(self, paper_id: str) -> str:
@@ -1181,6 +1307,7 @@ class PaperStore:
             "version_links": q("SELECT COUNT(*) FROM paper_links"),
             "events": q("SELECT COUNT(*) FROM research_events"),
             "extractions": q("SELECT COUNT(*) FROM paper_extractions"),
+            "topic_models": q("SELECT COUNT(*) FROM topic_models"),
             "runs": q("SELECT COUNT(*) FROM recommendation_runs"),
             "embeddings": dict(self.db.execute(
                 "SELECT model_version, COUNT(*) FROM embeddings GROUP BY model_version ORDER BY model_version").fetchall()),

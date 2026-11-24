@@ -493,6 +493,18 @@ class Radar:
                     states[pid] = paper_state(paper, st.version_links(pid))
             st.save_paper_states(run_id, states)
             st.save_events(events_for_run(st, run_id))
+
+            # ---- topics: the radar's first model once it has enough papers, then assign each scan's papers ----
+            from carousel.intelligence.topics import update_topics
+
+            try:
+                topic_stats = update_topics(st, self.radar_id, emb, [o[2] for o in observations] + [it["paper_id"] for it in items],
+                                            started)
+            except Exception as exc:  # topics are an add-on: never fail the scan for them
+                topic_stats = {"status": "error", "reason": f"{type(exc).__name__}: {exc}"}
+            st.db.execute("UPDATE recommendation_runs SET ranking = json_set(ranking, '$.topics', json(?)) WHERE run_id = ?",
+                          (json.dumps(topic_stats), run_id))
+            st.db.commit()
             prev_id = st.previous_run_id(self.radar_id, started_iso)
             saved = st.get_run(run_id)
             return ScanResults(saved, st.get_run(prev_id) if prev_id else None, self.summary())  # type: ignore[arg-type]

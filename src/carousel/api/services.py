@@ -736,3 +736,35 @@ def list_events(s: Session, radar_id: str, run_id: Optional[str] = None, limit: 
         "url": p.url if p else None, "is_retracted": p.is_retracted if p else None, "evidence": e.evidence,
         "events_version": e.events_version,
     } for e, p in rows]
+
+
+# -------------------------
+# Topics (plan task 24)
+# -------------------------
+
+def radar_topics(s: Session, radar_id: str, version: Optional[str] = None) -> Dict[str, Any]:
+    """A radar's topic model (the active one, or ``version``): topics with sizes and the refit mapping."""
+    _radar(s, radar_id)
+    q = select(m.TopicModel).where(m.TopicModel.radar_id == radar_id)
+    q = q.where(m.TopicModel.classifier_version == version) if version else q.where(m.TopicModel.active.is_(True))
+    model = s.scalars(q).first()
+    if model is None:
+        raise NotFound(f"topic model for radar {radar_id!r}" + (f" version {version!r}" if version else "")
+                       + " (a radar's first model is fitted once its scans have found enough papers)")
+    topics = s.scalars(select(m.Topic).where(m.Topic.classifier_version == model.classifier_version)
+                       .order_by(m.Topic.size.desc(), m.Topic.topic_key)).all()
+    assigned = dict(s.execute(select(m.PaperTopic.topic_id, func.count()).where(
+        m.PaperTopic.topic_id.in_([t.id for t in topics])).group_by(m.PaperTopic.topic_id)).all())
+    mapping = s.scalars(select(m.TopicMapping).where(m.TopicMapping.to_version == model.classifier_version)
+                        .order_by(m.TopicMapping.relation, m.TopicMapping.from_topic, m.TopicMapping.to_topic)).all()
+    versions = s.scalars(select(m.TopicModel.classifier_version).where(m.TopicModel.radar_id == radar_id)
+                         .order_by(m.TopicModel.fitted_at)).all()
+    return {
+        "radar_id": radar_id, "classifier_version": model.classifier_version, "embedder": model.embedder,
+        "fitted_at": model.fitted_at, "active": model.active, "previous_version": model.previous_version,
+        "k": model.params.get("k"), "silhouette": model.params.get("silhouette", {}), "versions": list(versions),
+        "topics": [{"topic_id": t.topic_key, "label": t.label, "key_terms": t.key_terms, "fit_size": t.size,
+                    "papers": int(assigned.get(t.id, 0))} for t in topics],
+        "mapping": [{"relation": x.relation, "from_topic": x.from_topic, "to_topic": x.to_topic,
+                     "shared_members": x.shared_members, "centroid_similarity": x.centroid_similarity} for x in mapping],
+    }
