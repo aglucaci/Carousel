@@ -323,6 +323,11 @@ if __name__ == "__main__":
     unittest.main()
 
 
+def iso(value: str) -> dt.datetime:
+    """Parse an API timestamp; Python 3.10's fromisoformat doesn't accept a trailing Z."""
+    return dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+
+
 class ScheduleTests(ApiTestCase):
     """Phase 2 task 15: scheduled scans, pause/resume that keeps history, and arrivals."""
 
@@ -363,8 +368,8 @@ class ScheduleTests(ApiTestCase):
         self.assertEqual([r["trigger"] for r in runs], ["scheduled"])
         self.assertEqual(self.tick(), [])  # this period has its run
         radar = self.get("/radars/escape").json()
-        executed = dt.datetime.fromisoformat(runs[0]["executed_at"])
-        self.assertEqual(dt.datetime.fromisoformat(radar["next_scan_at"]),
+        executed = iso(runs[0]["executed_at"])
+        self.assertEqual(iso(radar["next_scan_at"]),
                          executed.astimezone(dt.timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
                          + dt.timedelta(days=1))
 
