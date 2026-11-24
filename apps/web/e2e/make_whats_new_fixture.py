@@ -1,4 +1,5 @@
-"""Build ``fixtures/whats-new.json``: What's New API responses from a real engine computation (no network).
+"""Build ``fixtures/whats-new.json`` and ``fixtures/trends.json``: What's New and Trends API responses from a real
+engine computation (no network).
 
     python apps/web/e2e/make_whats_new_fixture.py     # needs the [trends] extra
 
@@ -34,10 +35,28 @@ def api_event(e, findings=()):
             "papers": e["evidence"].get("papers") or [], "findings": list(findings)}
 
 
+def trends_response(st, model, as_of):
+    from carousel.intelligence.checks import checked_trends, store_topic_papers
+
+    rows = st.topic_observations("lab", model.classifier_version)
+    labels = {t.topic_id: t.label for t in model.topics}
+    reports = []
+    for src in sorted({r["source"] for r in rows}):
+        rep = checked_trends(rows, list(labels), src, as_of, classifier_version=model.classifier_version,
+                             all_rows=st.topic_observations("lab"), topic_papers=store_topic_papers(st, model.classifier_version))
+        for t in rep["topics"]:
+            t["label"] = labels[t["topic_id"]]
+        reports.append(rep)
+    return {"radar_id": "lab", "classifier_version": model.classifier_version, "as_of": as_of.isoformat(),
+            "fitted_at": "2026-12-01T00:00:00Z", "previous_version": None, "versions": [model.classifier_version],
+            "reports": reports}
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory() as d:
         st, model, crispr = build(Path(d))
         before = derive_topic_events(st, RADAR, AS_OF, "run_1")["events"]  # the scan before the refit
+        trends = trends_response(st, model, AS_OF - dt.timedelta(days=7))  # a week earlier: the last week provisional
         rng = random.Random(9)
         words = GROUPS["malaria"].split()
         obs = []
@@ -84,6 +103,8 @@ def main() -> int:
     out = {"radars": [{"radar_id": "lab", "title": "Lab", "description": "", "state": "active", "n_runs": 2,
                        "created_at": "2026-12-01T00:00:00Z", "updated_at": "2026-12-15T00:00:00Z"}],
            "events": [pub, *events, rev]}
+    (HERE / "fixtures" / "trends.json").write_text(json.dumps({"radars": out["radars"], "trends": trends}, indent=1,
+                                                               ensure_ascii=False, default=str) + "\n", encoding="utf-8")
     path = HERE / "fixtures" / "whats-new.json"
     path.write_text(json.dumps(out, indent=1, ensure_ascii=False, default=str) + "\n", encoding="utf-8")
     print("wrote", path, {e["type"] for e in out["events"]})

@@ -232,6 +232,11 @@ if ApiTestCase is not None and np is not None:
             self.assertEqual((rep["source"], rep["trend_model_version"]), ("pubmed", "trend-nb-1"))
             self.assertEqual([t["topic_id"] for t in rep["topics"] if t["flagged"]], ["tp_rising"])
             self.assertEqual(next(t for t in rep["topics"] if t["flagged"])["label"], "rising")
+            rising = next(t for t in rep["topics"] if t["flagged"])
+            self.assertEqual(len(rising["weekly"]), 16)  # every observed week, for the chart and table
+            self.assertEqual(len(rising["baseline_share"]), 16)
+            self.assertFalse(any(w["provisional"] for w in rising["weekly"]))  # long after: all settled
+            self.assertEqual((body["fitted_at"][:10], body["previous_version"]), ("2026-11-20", None))
             early = self.get("/radars/escape/topics/trends", as_of="2026-11-01T00:00:00Z").json()
             self.assertEqual(early["reports"], [])  # nothing had been observed then
 

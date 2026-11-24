@@ -854,7 +854,8 @@ def topic_trends(s: Session, radar_id: str, as_of: Optional[dt.datetime] = None,
         for t in rep["topics"]:
             t["label"] = labels.get(t["topic_id"])
         reports.append(rep)
-    return {"radar_id": radar_id, "classifier_version": model["classifier_version"], "as_of": as_of, "reports": reports}
+    return {"radar_id": radar_id, "classifier_version": model["classifier_version"], "as_of": as_of, "reports": reports,
+            "fitted_at": model["fitted_at"], "previous_version": model["previous_version"], "versions": model["versions"]}
 
 
 def topic_series(s: Session, radar_id: str, as_of: Optional[dt.datetime] = None,
