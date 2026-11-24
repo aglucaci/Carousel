@@ -101,8 +101,11 @@ def checked_trends(rows: Sequence[Mapping[str, Any]], topic_ids: Sequence[str], 
     def cut(s: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         return [x for x in s if dt.date.fromisoformat(x["week"]) in set(settled)]
 
-    by_topic = {tid: cut(series(known, source, tid)) for tid in topic_ids}
+    full = {tid: series(known, source, tid) for tid in topic_ids}
+    by_topic = {tid: cut(full[tid]) for tid in topic_ids}
     report = evaluate(by_topic, recent)
+    for t in report["topics"]:  # every observed week, the unsettled ones marked (for charts and tables)
+        t["weekly"] = [{**x, "provisional": x["week"] in set(provisional)} for x in full[t["topic_id"]]]
 
     # ---- denominator shift (whole source) ----
     field = [known[(source, FIELD, w)]["count"] for w in settled if (source, FIELD, w) in known]

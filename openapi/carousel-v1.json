@@ -2194,6 +2194,30 @@
             "title": "Classifier Version",
             "type": "string"
           },
+          "fitted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When this topic model was fitted (a version boundary)",
+            "title": "Fitted At"
+          },
+          "previous_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Version"
+          },
           "radar_id": {
             "title": "Radar Id",
             "type": "string"
@@ -2205,6 +2229,14 @@
               "type": "object"
             },
             "title": "Reports",
+            "type": "array"
+          },
+          "versions": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Versions",
             "type": "array"
           }
         },

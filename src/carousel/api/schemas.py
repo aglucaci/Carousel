@@ -347,6 +347,9 @@ class TopicSeriesOut(_Out):
 class TopicTrendsOut(_Out):
     radar_id: str
     classifier_version: str
+    fitted_at: Optional[dt.datetime] = Field(None, description="When this topic model was fitted (a version boundary)")
+    previous_version: Optional[str] = None
+    versions: List[str] = []
     as_of: dt.datetime = Field(description="Only observations made by this time are used")
     reports: List[Dict[str, Any]] = Field(description="Per source: trend_model_version, the criteria, and per topic the "
                                                       "rate ratio with its interval, p and BH q values, recent and "

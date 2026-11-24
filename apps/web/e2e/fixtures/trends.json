@@ -1,0 +1,1019 @@
+{
+ "radars": [
+  {
+   "radar_id": "lab",
+   "title": "Lab",
+   "description": "",
+   "state": "active",
+   "n_runs": 2,
+   "created_at": "2026-12-01T00:00:00Z",
+   "updated_at": "2026-12-15T00:00:00Z"
+  }
+ ],
+ "trends": {
+  "radar_id": "lab",
+  "classifier_version": "topics-1:7f3a59b127e8",
+  "as_of": "2026-12-08T09:00:00+00:00",
+  "fitted_at": "2026-12-01T00:00:00Z",
+  "previous_version": null,
+  "versions": [
+   "topics-1:7f3a59b127e8"
+  ],
+  "reports": [
+   {
+    "source": "pubmed",
+    "as_of": "2026-12-08T09:00:00+00:00",
+    "trend_model_version": "trend-nb-1",
+    "checks_version": "checks-1",
+    "classifier_version": "topics-1:7f3a59b127e8",
+    "evaluated_through": "2026-11-15",
+    "provisional_weeks": [
+     "2026-11-16"
+    ],
+    "checks": [
+     {
+      "check": "indexing_lag",
+      "status": "pass",
+      "detail": "weeks ending after 2026-11-15 are provisional (settling time 21 days, default (too few re-observed weeks)); the trend is evaluated through 2026-11-15",
+      "settling_days": 21,
+      "basis": "default (too few re-observed weeks)",
+      "provisional_weeks": [
+       "2026-11-16"
+      ]
+     },
+     {
+      "check": "denominator_shift",
+      "status": "pass",
+      "detail": "the field's weekly count is stable",
+      "ratio": 1.0
+     },
+     {
+      "check": "classifier_change",
+      "status": "pass",
+      "detail": "one topic-model version throughout",
+      "other_versions": []
+     }
+    ],
+    "criteria": {
+     "recent_weeks": 4,
+     "linear_min_baseline": 26,
+     "min_baseline_weeks": 8,
+     "min_rate_ratio": 1.5,
+     "fdr": 0.1,
+     "min_recent_count": 10,
+     "persistence_weeks": 2,
+     "smoothing": 0.5
+    },
+    "topics": [
+     {
+      "topic_id": "tp_59808d4deb",
+      "status": "ok",
+      "method": "negbin",
+      "rate_ratio": 2.027932960894958,
+      "ci_low": 1.3337598537787623,
+      "ci_high": 3.083397721286006,
+      "p_value": 0.001584881616424007,
+      "recent_count": 132,
+      "expected_recent": 65.09090909099751,
+      "dispersion": 0.0698782531747913,
+      "weeks": 15,
+      "note": null,
+      "baseline": "level",
+      "baseline_share": [
+       {
+        "week": "2026-08-03",
+        "share": 0.05424242424249793,
+        "low": 0.04275098169852946,
+        "high": 0.0688227608070187
+       },
+       {
+        "week": "2026-08-10",
+        "share": 0.05424242424249793,
+        "low": 0.04275098169852946,
+        "high": 0.0688227608070187
+       },
+       {
+        "week": "2026-08-17",
+        "share": 0.05424242424249793,
+        "low": 0.04275098169852946,
+        "high": 0.0688227608070187
+       },
+       {
+        "week": "2026-08-24",
+        "share": 0.05424242424249793,
+        "low": 0.04275098169852946,
+        "high": 0.0688227608070187
+       },
+       {
+        "week": "2026-08-31",
+        "share": 0.05424242424249793,
+        "low": 0.04275098169852946,
+        "high": 0.0688227608070187
+       },
+       {
+        "week": "2026-09-07",
+        "share": 0.05424242424249793,
+        "low": 0.04275098169852946,
+        "high": 0.0688227608070187
+       },
+       {
+        "week": "2026-09-14",
+        "share": 0.05424242424249793,
+        "low": 0.04275098169852946,
+        "high": 0.0688227608070187
+       },
+       {
+        "week": "2026-09-21",
+        "share": 0.05424242424249793,
+        "low": 0.04275098169852946,
+        "high": 0.0688227608070187
+       },
+       {
+        "week": "2026-09-28",
+        "share": 0.05424242424249793,
+        "low": 0.04275098169852946,
+        "high": 0.0688227608070187
+       },
+       {
+        "week": "2026-10-05",
+        "share": 0.05424242424249793,
+        "low": 0.04275098169852946,
+        "high": 0.0688227608070187
+       },
+       {
+        "week": "2026-10-12",
+        "share": 0.05424242424249793,
+        "low": 0.04275098169852946,
+        "high": 0.0688227608070187
+       },
+       {
+        "week": "2026-10-19",
+        "share": 0.05424242424249793,
+        "low": 0.04275098169852946,
+        "high": 0.0688227608070187
+       },
+       {
+        "week": "2026-10-26",
+        "share": 0.05424242424249793,
+        "low": 0.04275098169852946,
+        "high": 0.0688227608070187
+       },
+       {
+        "week": "2026-11-02",
+        "share": 0.05424242424249793,
+        "low": 0.04275098169852946,
+        "high": 0.0688227608070187
+       },
+       {
+        "week": "2026-11-09",
+        "share": 0.05424242424249793,
+        "low": 0.04275098169852946,
+        "high": 0.0688227608070187
+       }
+      ],
+      "q_value": 0.0047546448492720205,
+      "flagged": true,
+      "failed": [],
+      "previous_week": {
+       "status": "ok",
+       "rate_ratio": 1.7031250000008429,
+       "q_value": 0.0412760973341693,
+       "recent_count": 109,
+       "passes": true
+      },
+      "smoothed_share": [
+       {
+        "week": "2026-08-03",
+        "share": 0.04809286898839138
+       },
+       {
+        "week": "2026-08-10",
+        "share": 0.05140961857379768
+       },
+       {
+        "week": "2026-08-17",
+        "share": 0.05804311774461028
+       },
+       {
+        "week": "2026-08-24",
+        "share": 0.05804311774461028
+       },
+       {
+        "week": "2026-08-31",
+        "share": 0.05140961857379768
+       },
+       {
+        "week": "2026-09-07",
+        "share": 0.024875621890547265
+       },
+       {
+        "week": "2026-09-14",
+        "share": 0.07462686567164178
+       },
+       {
+        "week": "2026-09-21",
+        "share": 0.05472636815920398
+       },
+       {
+        "week": "2026-09-28",
+        "share": 0.05804311774461028
+       },
+       {
+        "week": "2026-10-05",
+        "share": 0.06799336650082918
+       },
+       {
+        "week": "2026-10-12",
+        "share": 0.06467661691542288
+       },
+       {
+        "week": "2026-10-19",
+        "share": 0.03814262023217247
+       },
+       {
+        "week": "2026-10-26",
+        "share": 0.15422885572139303
+       },
+       {
+        "week": "2026-11-02",
+        "share": 0.1111111111111111
+       },
+       {
+        "week": "2026-11-09",
+        "share": 0.14096185737976782
+       }
+      ],
+      "weekly": [
+       {
+        "week": "2026-08-03",
+        "count": 14,
+        "denominator": 300,
+        "share": 0.04666666666666667,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-08-10",
+        "count": 15,
+        "denominator": 300,
+        "share": 0.05,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-08-17",
+        "count": 17,
+        "denominator": 300,
+        "share": 0.056666666666666664,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-08-24",
+        "count": 17,
+        "denominator": 300,
+        "share": 0.056666666666666664,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-08-31",
+        "count": 15,
+        "denominator": 300,
+        "share": 0.05,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-09-07",
+        "count": 7,
+        "denominator": 300,
+        "share": 0.023333333333333334,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-09-14",
+        "count": 22,
+        "denominator": 300,
+        "share": 0.07333333333333333,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-09-21",
+        "count": 16,
+        "denominator": 300,
+        "share": 0.05333333333333334,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-09-28",
+        "count": 17,
+        "denominator": 300,
+        "share": 0.056666666666666664,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-10-05",
+        "count": 20,
+        "denominator": 300,
+        "share": 0.06666666666666667,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-10-12",
+        "count": 19,
+        "denominator": 300,
+        "share": 0.06333333333333334,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-10-19",
+        "count": 11,
+        "denominator": 300,
+        "share": 0.03666666666666667,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-10-26",
+        "count": 46,
+        "denominator": 300,
+        "share": 0.15333333333333332,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-11-02",
+        "count": 33,
+        "denominator": 300,
+        "share": 0.11,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-11-09",
+        "count": 42,
+        "denominator": 300,
+        "share": 0.14,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-11-16",
+        "count": 43,
+        "denominator": 300,
+        "share": 0.14333333333333334,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": true
+       }
+      ],
+      "checks": [
+       {
+        "check": "duplicate_surge",
+        "status": "pass",
+        "detail": "0 records, 0 distinct works",
+        "records": 0,
+        "works": 0
+       }
+      ],
+      "label": "editing · crispr · base"
+     },
+     {
+      "topic_id": "tp_654b62b9f6",
+      "status": "ok",
+      "method": "poisson",
+      "rate_ratio": 0.8786982248520712,
+      "ci_low": 0.6268670765325007,
+      "ci_high": 1.2316974351709313,
+      "p_value": 0.7884873057447951,
+      "recent_count": 54,
+      "expected_recent": 61.45454545454546,
+      "dispersion": 0.0,
+      "weeks": 15,
+      "note": "negative binomial fit failed (ValueError); Poisson used",
+      "baseline": "level",
+      "baseline_share": [
+       {
+        "week": "2026-08-03",
+        "share": 0.051212121212121216,
+        "low": 0.0433711312891137,
+        "high": 0.060470669800197205
+       },
+       {
+        "week": "2026-08-10",
+        "share": 0.051212121212121216,
+        "low": 0.0433711312891137,
+        "high": 0.060470669800197205
+       },
+       {
+        "week": "2026-08-17",
+        "share": 0.051212121212121216,
+        "low": 0.0433711312891137,
+        "high": 0.060470669800197205
+       },
+       {
+        "week": "2026-08-24",
+        "share": 0.051212121212121216,
+        "low": 0.0433711312891137,
+        "high": 0.060470669800197205
+       },
+       {
+        "week": "2026-08-31",
+        "share": 0.051212121212121216,
+        "low": 0.0433711312891137,
+        "high": 0.060470669800197205
+       },
+       {
+        "week": "2026-09-07",
+        "share": 0.051212121212121216,
+        "low": 0.0433711312891137,
+        "high": 0.060470669800197205
+       },
+       {
+        "week": "2026-09-14",
+        "share": 0.051212121212121216,
+        "low": 0.0433711312891137,
+        "high": 0.060470669800197205
+       },
+       {
+        "week": "2026-09-21",
+        "share": 0.051212121212121216,
+        "low": 0.0433711312891137,
+        "high": 0.060470669800197205
+       },
+       {
+        "week": "2026-09-28",
+        "share": 0.051212121212121216,
+        "low": 0.0433711312891137,
+        "high": 0.060470669800197205
+       },
+       {
+        "week": "2026-10-05",
+        "share": 0.051212121212121216,
+        "low": 0.0433711312891137,
+        "high": 0.060470669800197205
+       },
+       {
+        "week": "2026-10-12",
+        "share": 0.051212121212121216,
+        "low": 0.0433711312891137,
+        "high": 0.060470669800197205
+       },
+       {
+        "week": "2026-10-19",
+        "share": 0.051212121212121216,
+        "low": 0.0433711312891137,
+        "high": 0.060470669800197205
+       },
+       {
+        "week": "2026-10-26",
+        "share": 0.051212121212121216,
+        "low": 0.0433711312891137,
+        "high": 0.060470669800197205
+       },
+       {
+        "week": "2026-11-02",
+        "share": 0.051212121212121216,
+        "low": 0.0433711312891137,
+        "high": 0.060470669800197205
+       },
+       {
+        "week": "2026-11-09",
+        "share": 0.051212121212121216,
+        "low": 0.0433711312891137,
+        "high": 0.060470669800197205
+       }
+      ],
+      "q_value": 0.8864724358725707,
+      "flagged": false,
+      "failed": [
+       "effect_size",
+       "significance"
+      ],
+      "previous_week": {
+       "status": "ok",
+       "rate_ratio": 0.943708609271523,
+       "q_value": 0.8211782407080538,
+       "recent_count": 57,
+       "passes": false
+      },
+      "smoothed_share": [
+       {
+        "week": "2026-08-03",
+        "share": 0.03814262023217247
+       },
+       {
+        "week": "2026-08-10",
+        "share": 0.05140961857379768
+       },
+       {
+        "week": "2026-08-17",
+        "share": 0.05472636815920398
+       },
+       {
+        "week": "2026-08-24",
+        "share": 0.03814262023217247
+       },
+       {
+        "week": "2026-08-31",
+        "share": 0.03482587064676617
+       },
+       {
+        "week": "2026-09-07",
+        "share": 0.0845771144278607
+       },
+       {
+        "week": "2026-09-14",
+        "share": 0.06135986733001658
+       },
+       {
+        "week": "2026-09-21",
+        "share": 0.05472636815920398
+       },
+       {
+        "week": "2026-09-28",
+        "share": 0.05140961857379768
+       },
+       {
+        "week": "2026-10-05",
+        "share": 0.04809286898839138
+       },
+       {
+        "week": "2026-10-12",
+        "share": 0.06135986733001658
+       },
+       {
+        "week": "2026-10-19",
+        "share": 0.04477611940298507
+       },
+       {
+        "week": "2026-10-26",
+        "share": 0.04145936981757877
+       },
+       {
+        "week": "2026-11-02",
+        "share": 0.04809286898839138
+       },
+       {
+        "week": "2026-11-09",
+        "share": 0.05140961857379768
+       }
+      ],
+      "weekly": [
+       {
+        "week": "2026-08-03",
+        "count": 11,
+        "denominator": 300,
+        "share": 0.03666666666666667,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-08-10",
+        "count": 15,
+        "denominator": 300,
+        "share": 0.05,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-08-17",
+        "count": 16,
+        "denominator": 300,
+        "share": 0.05333333333333334,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-08-24",
+        "count": 11,
+        "denominator": 300,
+        "share": 0.03666666666666667,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-08-31",
+        "count": 10,
+        "denominator": 300,
+        "share": 0.03333333333333333,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-09-07",
+        "count": 25,
+        "denominator": 300,
+        "share": 0.08333333333333333,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-09-14",
+        "count": 18,
+        "denominator": 300,
+        "share": 0.06,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-09-21",
+        "count": 16,
+        "denominator": 300,
+        "share": 0.05333333333333334,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-09-28",
+        "count": 15,
+        "denominator": 300,
+        "share": 0.05,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-10-05",
+        "count": 14,
+        "denominator": 300,
+        "share": 0.04666666666666667,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-10-12",
+        "count": 18,
+        "denominator": 300,
+        "share": 0.06,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-10-19",
+        "count": 13,
+        "denominator": 300,
+        "share": 0.043333333333333335,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-10-26",
+        "count": 12,
+        "denominator": 300,
+        "share": 0.04,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-11-02",
+        "count": 14,
+        "denominator": 300,
+        "share": 0.04666666666666667,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-11-09",
+        "count": 15,
+        "denominator": 300,
+        "share": 0.05,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-11-16",
+        "count": 8,
+        "denominator": 300,
+        "share": 0.02666666666666667,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": true
+       }
+      ],
+      "checks": [],
+      "label": "reef · recovery · zooxanthellae"
+     },
+     {
+      "topic_id": "tp_eb1bb4174b",
+      "status": "ok",
+      "method": "negbin",
+      "rate_ratio": 0.8264188248536065,
+      "ci_low": 0.5963580901959513,
+      "ci_high": 1.1452315065399825,
+      "p_value": 0.8864724358725706,
+      "recent_count": 58,
+      "expected_recent": 70.1821750638779,
+      "dispersion": 2.9513351849769288e-08,
+      "weeks": 15,
+      "note": null,
+      "baseline": "level",
+      "baseline_share": [
+       {
+        "week": "2026-08-03",
+        "share": 0.05848514588656493,
+        "low": 0.049995789126187,
+        "high": 0.06841600761095243
+       },
+       {
+        "week": "2026-08-10",
+        "share": 0.05848514588656493,
+        "low": 0.049995789126187,
+        "high": 0.06841600761095243
+       },
+       {
+        "week": "2026-08-17",
+        "share": 0.05848514588656493,
+        "low": 0.049995789126187,
+        "high": 0.06841600761095243
+       },
+       {
+        "week": "2026-08-24",
+        "share": 0.05848514588656493,
+        "low": 0.049995789126187,
+        "high": 0.06841600761095243
+       },
+       {
+        "week": "2026-08-31",
+        "share": 0.05848514588656493,
+        "low": 0.049995789126187,
+        "high": 0.06841600761095243
+       },
+       {
+        "week": "2026-09-07",
+        "share": 0.05848514588656493,
+        "low": 0.049995789126187,
+        "high": 0.06841600761095243
+       },
+       {
+        "week": "2026-09-14",
+        "share": 0.05848514588656493,
+        "low": 0.049995789126187,
+        "high": 0.06841600761095243
+       },
+       {
+        "week": "2026-09-21",
+        "share": 0.05848514588656493,
+        "low": 0.049995789126187,
+        "high": 0.06841600761095243
+       },
+       {
+        "week": "2026-09-28",
+        "share": 0.05848514588656493,
+        "low": 0.049995789126187,
+        "high": 0.06841600761095243
+       },
+       {
+        "week": "2026-10-05",
+        "share": 0.05848514588656493,
+        "low": 0.049995789126187,
+        "high": 0.06841600761095243
+       },
+       {
+        "week": "2026-10-12",
+        "share": 0.05848514588656493,
+        "low": 0.049995789126187,
+        "high": 0.06841600761095243
+       },
+       {
+        "week": "2026-10-19",
+        "share": 0.05848514588656493,
+        "low": 0.049995789126187,
+        "high": 0.06841600761095243
+       },
+       {
+        "week": "2026-10-26",
+        "share": 0.05848514588656493,
+        "low": 0.049995789126187,
+        "high": 0.06841600761095243
+       },
+       {
+        "week": "2026-11-02",
+        "share": 0.05848514588656493,
+        "low": 0.049995789126187,
+        "high": 0.06841600761095243
+       },
+       {
+        "week": "2026-11-09",
+        "share": 0.05848514588656493,
+        "low": 0.049995789126187,
+        "high": 0.06841600761095243
+       }
+      ],
+      "q_value": 0.8864724358725707,
+      "flagged": false,
+      "failed": [
+       "effect_size",
+       "significance"
+      ],
+      "previous_week": {
+       "status": "ok",
+       "rate_ratio": 0.8664773758374146,
+       "q_value": 0.8211782407080538,
+       "recent_count": 61,
+       "passes": false
+      },
+      "smoothed_share": [
+       {
+        "week": "2026-08-03",
+        "share": 0.07131011608623548
+       },
+       {
+        "week": "2026-08-10",
+        "share": 0.06135986733001658
+       },
+       {
+        "week": "2026-08-17",
+        "share": 0.05472636815920398
+       },
+       {
+        "week": "2026-08-24",
+        "share": 0.05804311774461028
+       },
+       {
+        "week": "2026-08-31",
+        "share": 0.0845771144278607
+       },
+       {
+        "week": "2026-09-07",
+        "share": 0.028192371475953566
+       },
+       {
+        "week": "2026-09-14",
+        "share": 0.06799336650082918
+       },
+       {
+        "week": "2026-09-21",
+        "share": 0.03814262023217247
+       },
+       {
+        "week": "2026-09-28",
+        "share": 0.06799336650082918
+       },
+       {
+        "week": "2026-10-05",
+        "share": 0.06799336650082918
+       },
+       {
+        "week": "2026-10-12",
+        "share": 0.05804311774461028
+       },
+       {
+        "week": "2026-10-19",
+        "share": 0.04145936981757877
+       },
+       {
+        "week": "2026-10-26",
+        "share": 0.05140961857379768
+       },
+       {
+        "week": "2026-11-02",
+        "share": 0.05804311774461028
+       },
+       {
+        "week": "2026-11-09",
+        "share": 0.04809286898839138
+       }
+      ],
+      "weekly": [
+       {
+        "week": "2026-08-03",
+        "count": 21,
+        "denominator": 300,
+        "share": 0.07,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-08-10",
+        "count": 18,
+        "denominator": 300,
+        "share": 0.06,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-08-17",
+        "count": 16,
+        "denominator": 300,
+        "share": 0.05333333333333334,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-08-24",
+        "count": 17,
+        "denominator": 300,
+        "share": 0.056666666666666664,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-08-31",
+        "count": 25,
+        "denominator": 300,
+        "share": 0.08333333333333333,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-09-07",
+        "count": 8,
+        "denominator": 300,
+        "share": 0.02666666666666667,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-09-14",
+        "count": 20,
+        "denominator": 300,
+        "share": 0.06666666666666667,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-09-21",
+        "count": 11,
+        "denominator": 300,
+        "share": 0.03666666666666667,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-09-28",
+        "count": 20,
+        "denominator": 300,
+        "share": 0.06666666666666667,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-10-05",
+        "count": 20,
+        "denominator": 300,
+        "share": 0.06666666666666667,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-10-12",
+        "count": 17,
+        "denominator": 300,
+        "share": 0.056666666666666664,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-10-19",
+        "count": 12,
+        "denominator": 300,
+        "share": 0.04,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-10-26",
+        "count": 15,
+        "denominator": 300,
+        "share": 0.05,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-11-02",
+        "count": 17,
+        "denominator": 300,
+        "share": 0.056666666666666664,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-11-09",
+        "count": 14,
+        "denominator": 300,
+        "share": 0.04666666666666667,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": false
+       },
+       {
+        "week": "2026-11-16",
+        "count": 9,
+        "denominator": 300,
+        "share": 0.03,
+        "observed_at": "2026-11-23T12:00:00.000000Z",
+        "provisional": true
+       }
+      ],
+      "checks": [],
+      "label": "antigenic · vaccine · antibody"
+     }
+    ]
+   }
+  ]
+ }
+}

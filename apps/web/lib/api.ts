@@ -140,6 +140,46 @@ export type RankedPapers = {
   events?: Record<string, number>;
 };
 
+export type TrendWeek = { week: string; count: number; denominator: number; share: number | null; provisional?: boolean };
+export type TrendTopic = {
+  topic_id: string;
+  label?: string | null;
+  status: string;
+  flagged: boolean;
+  failed: string[];
+  rate_ratio?: number | null;
+  ci_low?: number | null;
+  ci_high?: number | null;
+  q_value?: number | null;
+  recent_count: number;
+  expected_recent?: number | null;
+  method?: string | null;
+  baseline?: string | null;
+  weekly: TrendWeek[];
+  baseline_share?: { week: string; share: number; low: number; high: number }[] | null;
+  note?: string | null;
+};
+export type TrendReport = {
+  source: string;
+  as_of: string;
+  trend_model_version: string;
+  checks_version: string;
+  evaluated_through: string;
+  provisional_weeks: string[];
+  checks: { check: string; status: string; detail: string }[];
+  criteria: Record<string, number>;
+  topics: TrendTopic[];
+};
+export type TopicTrends = {
+  radar_id: string;
+  classifier_version: string;
+  as_of: string;
+  fitted_at?: string | null;
+  previous_version?: string | null;
+  versions: string[];
+  reports: TrendReport[];
+};
+
 export type ResearchEvent = {
   event_id: string;
   type:
@@ -343,6 +383,8 @@ export const client = {
     api<Radar>(`/radars/${encodeURIComponent(id)}`, { method: "PATCH", body: patch }),
   events: (id: string) => api<ResearchEvent[]>(`/radars/${encodeURIComponent(id)}/events`),
   event: (id: string) => api<ResearchEvent>(`/events/${encodeURIComponent(id)}`),
+  trends: (id: string, asOf?: string) =>
+    api<TopicTrends>(`/radars/${encodeURIComponent(id)}/topics/trends${asOf ? `?as_of=${encodeURIComponent(asOf)}` : ""}`),
   digests: (id: string) => api<DigestDelivery[]>(`/radars/${encodeURIComponent(id)}/digests?limit=10`),
   sendDigest: (id: string) =>
     api<DigestDelivery[]>(`/radars/${encodeURIComponent(id)}/digests/email`, { method: "POST" }),
