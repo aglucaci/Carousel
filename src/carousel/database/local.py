@@ -56,8 +56,9 @@ from carousel.ingestion.dedup import MatchDecision, best_match, title_tokens
 
 if TYPE_CHECKING:
     from carousel.core.fulltext import Annotation, PaperText
+    from carousel.summarization.schema import Extraction
 
-STORE_SCHEMA_VERSION = 8
+STORE_SCHEMA_VERSION = 9
 
 _DDL = """
 CREATE TABLE IF NOT EXISTS meta (
@@ -253,6 +254,26 @@ CREATE TABLE IF NOT EXISTS research_events (         -- Research Delta events, d
     events_version TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS research_events_radar ON research_events(radar_id, date);
+CREATE TABLE IF NOT EXISTS paper_extractions (       -- grounded extractions, cached per paper, model, schema, input
+    paper_id        TEXT NOT NULL,                -- resolved through merges on read
+    provider        TEXT NOT NULL,                -- rules | anthropic | ...
+    requested_model TEXT NOT NULL,                -- the model asked for (the cache key)
+    model_version   TEXT NOT NULL,                -- the model that answered (differs after a fallback)
+    schema_version  TEXT NOT NULL,
+    input_sha256    TEXT NOT NULL,
+    private         INTEGER NOT NULL,             -- 1 when it read text the user supplied (never exported)
+    extraction      TEXT NOT NULL,                -- JSON (carousel.summarization.schema.Extraction)
+    created_at      TEXT NOT NULL,
+    PRIMARY KEY (paper_id, provider, requested_model, schema_version, input_sha256)
+);
+CREATE TABLE IF NOT EXISTS model_consents (          -- consent to send a class of text to an external model provider
+    provider   TEXT NOT NULL,
+    text_class TEXT NOT NULL,                     -- public | private
+    granted_at TEXT NOT NULL,
+    note       TEXT,
+    revoked_at TEXT,
+    PRIMARY KEY (provider, text_class)
+);
 CREATE TABLE IF NOT EXISTS merge_log (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
     at        TEXT NOT NULL,
@@ -963,6 +984,68 @@ class PaperStore:
         rows = self.db.execute(sql + " ORDER BY date DESC, type, kind, paper_id, event_id", args)
         return [{**dict(r), "evidence": json.loads(r["evidence"])} for r in rows]
 
+    # ---- grounded extraction (cache) and consent to external models ----
+
+    def save_extraction(self, extraction: "Extraction", requested_model: Optional[str] = None) -> None:
+        e = extraction
+        with self.db:
+            self.db.execute(
+                "INSERT OR REPLACE INTO paper_extractions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (self.resolve(e.paper_id), e.provider, requested_model or e.model_version, e.model_version,
+                 e.schema_version, e.input_sha256, int(e.private), e.model_dump_json(), e.created_at or _iso(
+                     dt.datetime.now(dt.timezone.utc))))
+
+    def get_extraction(self, paper_id: str, provider: str, model: str, schema_version: str,
+                       input_sha256: str) -> Optional["Extraction"]:
+        from carousel.summarization.schema import Extraction
+
+        ids = self._aliases(self.resolve(paper_id))
+        marks = ",".join("?" * len(ids))
+        row = self.db.execute(
+            f"""SELECT extraction FROM paper_extractions WHERE paper_id IN ({marks}) AND provider = ?
+                AND (requested_model = ? OR model_version = ?) AND schema_version = ? AND input_sha256 = ?
+                ORDER BY created_at DESC LIMIT 1""",
+            (*ids, provider, model, model, schema_version, input_sha256)).fetchone()
+        return Extraction.model_validate_json(row["extraction"]) if row else None
+
+    def extractions(self, paper_id: Optional[str] = None, include_private: bool = True) -> List["Extraction"]:
+        """Stored extractions (all, or one paper's), newest first."""
+        from carousel.summarization.schema import Extraction
+
+        sql, args = "SELECT * FROM paper_extractions", []
+        if paper_id is not None:
+            ids = self._aliases(self.resolve(paper_id))
+            sql += f" WHERE paper_id IN ({','.join('?' * len(ids))})"
+            args = list(ids)
+        rows = self.db.execute(sql + " ORDER BY created_at DESC, provider", args).fetchall()
+        out = [Extraction.model_validate_json(r["extraction"]) for r in rows if include_private or not r["private"]]
+        return [e.model_copy(update={"paper_id": self.resolve(e.paper_id)}) for e in out]
+
+    def grant_consent(self, provider: str, text_classes: Sequence[str], note: Optional[str] = None,
+                      at: Optional[dt.datetime] = None) -> None:
+        bad = [c for c in text_classes if c not in ("public", "private")]
+        if bad:
+            raise StoreError(f"unknown text class {', '.join(bad)} (expected public or private)")
+        with self.db:
+            for c in text_classes:
+                self.db.execute("INSERT OR REPLACE INTO model_consents VALUES (?, ?, ?, ?, NULL)",
+                                (provider, c, _iso(at or dt.datetime.now(dt.timezone.utc)), note))
+
+    def revoke_consent(self, provider: str, text_classes: Sequence[str] = ("public", "private"),
+                       at: Optional[dt.datetime] = None) -> int:
+        with self.db:
+            cur = self.db.executemany(
+                "UPDATE model_consents SET revoked_at = ? WHERE provider = ? AND text_class = ? AND revoked_at IS NULL",
+                [(_iso(at or dt.datetime.now(dt.timezone.utc)), provider, c) for c in text_classes])
+            return cur.rowcount
+
+    def has_consent(self, provider: str, text_class: str) -> bool:
+        return self.db.execute("SELECT 1 FROM model_consents WHERE provider = ? AND text_class = ? AND revoked_at IS NULL",
+                               (provider, text_class)).fetchone() is not None
+
+    def consents(self) -> List[Dict[str, Any]]:
+        return [dict(r) for r in self.db.execute("SELECT * FROM model_consents ORDER BY provider, text_class")]
+
     # ---- reads ----
 
     def resolve(self, paper_id: str) -> str:
@@ -1097,6 +1180,7 @@ class PaperStore:
             "review_pending": q("SELECT COUNT(*) FROM review_queue WHERE status = 'pending'"),
             "version_links": q("SELECT COUNT(*) FROM paper_links"),
             "events": q("SELECT COUNT(*) FROM research_events"),
+            "extractions": q("SELECT COUNT(*) FROM paper_extractions"),
             "runs": q("SELECT COUNT(*) FROM recommendation_runs"),
             "embeddings": dict(self.db.execute(
                 "SELECT model_version, COUNT(*) FROM embeddings GROUP BY model_version ORDER BY model_version").fetchall()),

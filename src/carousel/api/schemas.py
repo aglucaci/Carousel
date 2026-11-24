@@ -196,6 +196,10 @@ class PaperOut(_Out):
     relations: List[Dict[str, Any]] = Field([], description="Links to other works, e.g. has-preprint / is-preprint-of")
     license: Optional[str] = Field(None, description="The article's licence as its sources state it (normalized)")
     open_access: Optional[bool] = None
+    extractions: List[Dict[str, Any]] = Field(
+        [], description="Grounded extractions, newest per provider: coverage (abstract_only | full_text, with a "
+                        "statement), fields (status, claims each citing passages with verbatim quotes), the cited "
+                        "passages, and how many claims the grounding check dropped")
     versions: List[Dict[str, Any]] = Field([], description="Other versions of this work, each its own paper: role "
                                                          "(preprint | published), paper_id, title, venue, "
                                                          "earliest_public_date, doi, linked_by (crossref, europepmc, "

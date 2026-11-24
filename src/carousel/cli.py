@@ -9,6 +9,8 @@ carousel command-line interface.
     carousel review distinct STORE.db ID_A ID_B [--note TEXT]        # different works
     carousel review split STORE.db SOURCE SOURCE_ID [--note TEXT]    # undo a wrong merge
     carousel digest RADAR_ID [--store S] [--run RUN] [--format markdown|rss|email] [--to ADDRESS]
+    carousel extract PAPER_ID [--store S] [--provider rules|anthropic] [--text FILE] [--format text|json]
+    carousel consent list|grant|revoke [PROVIDER] [--text public|private] [--store S]
     carousel review link STORE.db PREPRINT_ID PUBLISHED_ID [--note TEXT]   # versions of one work, kept apart
     carousel review unlink STORE.db ID_A ID_B [--note TEXT]          # not versions of one work
 
@@ -262,6 +264,87 @@ def cmd_digest(args: argparse.Namespace) -> int:
         print(f"wrote {args.out}")
     else:
         sys.stdout.write(text)
+    return 0
+
+
+def _print_extraction(e) -> None:
+    from carousel.summarization import FIELDS
+
+    print(f"{e.paper_id}  {e.provider} {e.model_version} (schema {e.schema_version}, {e.location})")
+    print(f"coverage: {e.coverage.scope}: {e.coverage.statement}")
+    quotes = {p.id: p for p in e.passages}
+    for name in FIELDS:
+        f = e.fields[name]
+        if not f.claims:
+            print(f"\n{name}: not reported")
+            continue
+        print(f"\n{name}:")
+        for c in f.claims:
+            print(f"  - {c.text}")
+            for ev in c.evidence:
+                where = quotes[ev.passage_id].section if ev.passage_id in quotes else ""
+                print(f"      [{ev.passage_id}{', ' + where if where else ''}] \u201c{ev.quote}\u201d")
+    if e.rejected:
+        print(f"\n{len(e.rejected)} claim(s) dropped by the grounding check:")
+        for r in e.rejected[:10]:
+            print(f"  - {r.field}: {r.reason}")
+
+
+def cmd_extract(args: argparse.Namespace) -> int:
+    from pathlib import Path
+
+    from carousel.database import StoreError
+    from carousel.summarization import ConsentRequired, ExtractionError, extract_paper, make_provider
+
+    try:
+        store = _open_store(args.store)
+    except (FileNotFoundError, StoreError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    with store:
+        try:
+            provider = make_provider(args.provider, **({"model": args.model} if args.model else {}))
+            text = Path(args.text).read_text(encoding="utf-8") if args.text else None
+            e = extract_paper(store, args.paper_id, provider, user_text=text, refresh=args.refresh)
+        except (StoreError, KeyError) as exc:
+            print(f"FAIL unknown paper {exc}", file=sys.stderr)
+            return 1
+        except (ConsentRequired, ExtractionError, OSError) as exc:
+            print(f"FAIL {exc}", file=sys.stderr)
+            return 1
+    if args.format == "json":
+        print(e.model_dump_json(indent=2))
+    else:
+        _print_extraction(e)
+    return 0
+
+
+def cmd_consent(args: argparse.Namespace) -> int:
+    from carousel.database import PaperStore, StoreError
+
+    try:
+        with PaperStore(args.store) as store:
+            if args.action == "list":
+                rows = store.consents()
+                for r in rows:
+                    state = f"revoked {r['revoked_at']}" if r["revoked_at"] else f"granted {r['granted_at']}"
+                    print(f"{r['provider']:<12} {r['text_class']:<8} {state}" + (f"  ({r['note']})" if r["note"] else ""))
+                if not rows:
+                    print("no consents recorded: external extraction providers cannot run")
+                return 0
+            if not args.provider:
+                print("FAIL name the provider, e.g. anthropic", file=sys.stderr)
+                return 1
+            classes = args.text or (["public"] if args.action == "grant" else ["public", "private"])
+            if args.action == "grant":
+                store.grant_consent(args.provider, classes, note=args.note)
+                print(f"consent recorded: {', '.join(classes)} text may be sent to {args.provider}")
+            else:
+                store.revoke_consent(args.provider, classes)
+                print(f"consent revoked: {', '.join(classes)} text will not be sent to {args.provider}")
+    except StoreError as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
     return 0
 
 
@@ -531,6 +614,25 @@ def build_parser() -> argparse.ArgumentParser:
     dg.add_argument("--out", help="Write here instead of standard output (markdown, rss)")
     dg.add_argument("--to", action="append", metavar="ADDRESS", help="Email recipient (repeatable); needs CAROUSEL_SMTP_HOST")
     dg.set_defaults(func=cmd_digest)
+
+    ex = sub.add_parser("extract", help="Grounded extraction of a paper: each claim quotes its passage")
+    ex.add_argument("paper_id", metavar="PAPER_ID")
+    ex.add_argument("--store", default="carousel.db")
+    ex.add_argument("--provider", default="rules", help="rules (local, default) or anthropic (external; needs consent)")
+    ex.add_argument("--model", help="Model for an external provider (anthropic: claude-opus-5-5)")
+    ex.add_argument("--text", metavar="FILE", help="Read this text instead (private: never exported)")
+    ex.add_argument("--refresh", action="store_true", help="Ignore the cache")
+    ex.add_argument("--format", choices=("text", "json"), default="text")
+    ex.set_defaults(func=cmd_extract)
+
+    co = sub.add_parser("consent", help="Consent to send text to an external model provider")
+    co.add_argument("action", choices=("list", "grant", "revoke"))
+    co.add_argument("provider", nargs="?", help="e.g. anthropic")
+    co.add_argument("--store", default="carousel.db")
+    co.add_argument("--text", action="append", choices=("public", "private"),
+                    help="Which text: public (abstracts, open full texts; the default to grant) or private (your text)")
+    co.add_argument("--note", help="Why, or who agreed")
+    co.set_defaults(func=cmd_consent)
 
     ru = sub.add_parser("runs", help="List stored runs")
     ru.add_argument("--store", default="carousel.db")

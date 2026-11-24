@@ -786,6 +786,16 @@
             "title": "Dates",
             "type": "object"
           },
+          "extractions": {
+            "default": [],
+            "description": "Grounded extractions, newest per provider: coverage (abstract_only | full_text, with a statement), fields (status, claims each citing passages with verbatim quotes), the cited passages, and how many claims the grounding check dropped",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Extractions",
+            "type": "array"
+          },
           "first_seen": {
             "anyOf": [
               {

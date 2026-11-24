@@ -211,6 +211,20 @@ def _import_store(st: PaperStore, engine: Engine) -> Dict[str, int]:
             conn.execute(insert(m.PaperVersion), version_rows)
         counts["paper_versions"] = len(version_rows)
 
+        # ---- grounded extractions (never the private ones: text a user supplied stays in the engine store) ----
+        ext = []
+        for r in db.execute("SELECT * FROM paper_extractions WHERE private = 0"):
+            e = json.loads(r["extraction"])
+            ext.append({"paper_id": owner(r["paper_id"]), "provider": r["provider"], "requested_model": r["requested_model"],
+                        "model_version": r["model_version"], "schema_version": r["schema_version"],
+                        "input_sha256": r["input_sha256"], "location": e["location"], "coverage": e["coverage"],
+                        "fields": e["fields"], "passages": e["passages"], "rejected": e.get("rejected", []),
+                        "created_at": _ts(r["created_at"])})
+        _upsert(conn, T["paper_extractions"], ext,
+                ["paper_id", "provider", "requested_model", "schema_version", "input_sha256"],
+                ["model_version", "coverage", "fields", "passages", "rejected", "created_at"])
+        counts["paper_extractions"] = len(ext)
+
         # ---- dedup audit ----
         reviews = [{"paper_a": r["paper_a"], "paper_b": r["paper_b"], "kind": r["kind"], "score": r["score"],
                     "reasons": json.loads(r["reasons"]), "features": json.loads(r["features"]), "status": r["status"],

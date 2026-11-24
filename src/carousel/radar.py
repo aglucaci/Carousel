@@ -79,6 +79,24 @@ def _paper_summary(p: CanonicalPaper) -> Dict[str, Any]:
     }
 
 
+def extract_recommended(st: PaperStore, paper_ids: Sequence[str], at: dt.datetime) -> Dict[str, Any]:
+    """Run the local rule-based extractor on recommended papers (cached per text); never fails the scan."""
+    from carousel.summarization import RuleBasedProvider, extract_paper
+
+    provider = RuleBasedProvider()
+    stats: Dict[str, Any] = {"provider": provider.name, "model_version": provider.model_version, "papers": 0,
+                             "abstract_only": 0, "full_text": 0, "errors": []}
+    for pid in paper_ids:
+        try:
+            e = extract_paper(st, pid, provider, at=at)
+        except Exception as exc:  # one paper's text must not stop the scan
+            stats["errors"].append(f"{pid}: {type(exc).__name__}: {exc}")
+            continue
+        stats["papers"] += 1
+        stats[e.coverage.scope] = stats.get(e.coverage.scope, 0) + 1
+    return stats
+
+
 VERSION_FLAGS = {"published": "published_version", "preprint": "has_preprint"}
 """Flag on a recommended paper by the role of its linked version: a preprint since published, an article with
 a preprint."""
@@ -426,6 +444,9 @@ class Radar:
                     if c["source"] == "europepmc" and c["status"] == "ok":
                         c["enrichment"] = stats
 
+            # ---- grounded extraction of what was recommended: local rules only (nothing leaves; cached) ----
+            extraction = extract_recommended(st, [it.paper_id for it in ranking.items], started)
+
             # ---- the other version of what was recommended, looked up where the store lacks it ----
             lookups = {k: v for k, v in conns.items() if k in {s.value for s in cfg.sources}}
             linked_after = fetch_linked(st, lookups, [it.paper_id for it in ranking.items], started)
@@ -439,6 +460,7 @@ class Radar:
                 d["details"]["explanation"] = explain(d, ranking.weights, ranking.inactive_signals)
                 items.append(d)
             ranking_meta = {k: v for k, v in ranking.to_dict().items() if k != "items"}
+            ranking_meta["extraction"] = extraction
             ranking_meta["versions"] = {
                 "linked": linked_before["linked"] + linked_after["linked"],
                 "refused": linked_before["refused"] + linked_after["refused"],
