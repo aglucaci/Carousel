@@ -32,6 +32,7 @@ from carousel.database.local import PaperStore, _iso
 from carousel.ingestion.versions import fetch_linked, link_versions
 from carousel import feedback as fb
 from carousel.ranking import rank
+from carousel.ranking.explain import EXPLANATION_VERSION, explain
 from carousel.search import Embedder, HashingEmbedder, candidates_for_radar
 from carousel.search.candidates import CANDIDATES_VERSION
 
@@ -434,6 +435,7 @@ class Radar:
                 d["details"]["paper"] = _paper_summary(st.get(it.paper_id))  # type: ignore[arg-type]
                 d["details"]["versions"] = versions = version_summaries(st, it.paper_id)
                 d["flags"] += [f for f in dict.fromkeys(VERSION_FLAGS[v["role"]] for v in versions) if f not in d["flags"]]
+                d["details"]["explanation"] = explain(d, ranking.weights, ranking.inactive_signals)
                 items.append(d)
             ranking_meta = {k: v for k, v in ranking.to_dict().items() if k != "items"}
             ranking_meta["versions"] = {
@@ -452,7 +454,7 @@ class Radar:
                 "config_hash": cfg.config_hash(), "as_of": as_of.isoformat(), "started_at": started_iso,
                 "finished_at": _iso(dt.datetime.now(dt.timezone.utc)), "status": status,
                 "ranking_version": ranking.ranking_version, "candidates_version": CANDIDATES_VERSION,
-                "model_version": ranking.model_version, "mode": ranking.mode,
+                "model_version": ranking.model_version, "mode": ranking.mode, "explanation_version": EXPLANATION_VERSION,
                 "n_observed": len(observations), "n_candidates": len(cands.candidates),
                 "coverage": coverage, "ranking": ranking_meta, "notes": notes,
             }

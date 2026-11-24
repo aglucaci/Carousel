@@ -80,6 +80,31 @@
             "title": "Executed At",
             "type": "string"
           },
+          "explanation": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The explanation stored with the recommendation: version, summary, and reasons (kind, text, share of the score). Never regenerated",
+            "title": "Explanation"
+          },
+          "explanation_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null: recorded before explanations were versioned",
+            "title": "Explanation Version"
+          },
           "features": {
             "additionalProperties": {
               "anyOf": [
@@ -1103,6 +1128,18 @@
           "score": {
             "title": "Score",
             "type": "number"
+          },
+          "why": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "One-line summary of the stored explanation (null before versioning)",
+            "title": "Why"
           }
         },
         "required": [
@@ -1189,6 +1226,31 @@
             "title": "Executed At",
             "type": "string"
           },
+          "explanation_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Version of the explanations stored with this run's items; null: recorded before versioning",
+            "title": "Explanation Version"
+          },
+          "feedback_effect": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What the radar's feedback changed in this run, against the same run ranked without it: entered / left (paper IDs), moved_up / moved_down (counts), profile_shift. Null without feedback",
+            "title": "Feedback Effect"
+          },
           "finished_at": {
             "anyOf": [
               {
@@ -1235,6 +1297,19 @@
             },
             "title": "Notes",
             "type": "array"
+          },
+          "profile": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The interest profile used: seeds and feedback counts, and how far feedback moved it (shift)",
+            "title": "Profile"
           },
           "radar_id": {
             "title": "Radar Id",
@@ -1318,6 +1393,31 @@
             "title": "Executed At",
             "type": "string"
           },
+          "explanation_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Version of the explanations stored with this run's items; null: recorded before versioning",
+            "title": "Explanation Version"
+          },
+          "feedback_effect": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What the radar's feedback changed in this run, against the same run ranked without it: entered / left (paper IDs), moved_up / moved_down (counts), profile_shift. Null without feedback",
+            "title": "Feedback Effect"
+          },
           "finished_at": {
             "anyOf": [
               {
@@ -1364,6 +1464,19 @@
             },
             "title": "Notes",
             "type": "array"
+          },
+          "profile": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The interest profile used: seeds and feedback counts, and how far feedback moved it (shift)",
+            "title": "Profile"
           },
           "radar_id": {
             "title": "Radar Id",

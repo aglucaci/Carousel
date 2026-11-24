@@ -34,7 +34,23 @@ export type RunSummary = {
   coverage: Coverage[];
   notes: string[];
   trigger?: "manual" | "scheduled" | null;
+  /** Version of the explanations stored with this run; null for runs recorded before versioning. */
+  explanation_version?: string | null;
+  /** What the radar's feedback changed, against the same run ranked without it; null without feedback. */
+  feedback_effect?: FeedbackEffect | null;
+  profile?: { feedback_positive?: number; feedback_negative?: number; shift?: number | null } | null;
 };
+
+export type FeedbackEffect = {
+  entered: string[];
+  left: string[];
+  moved_up: number;
+  moved_down: number;
+  profile_shift?: number | null;
+};
+
+export type ExplanationReason = { kind: string; text: string; share?: number | null };
+export type StoredExplanation = { version: string; summary: string; reasons: ExplanationReason[] };
 
 export type RadarConfig = {
   radar_id: string;
@@ -96,6 +112,8 @@ export type RankedItem = {
   feedback: string[];
   /** Relative to the radar's earlier runs; null on its first run. */
   arrival?: Arrival | null;
+  /** One-line summary of the stored explanation; null for runs recorded before versioning. */
+  why?: string | null;
 };
 
 export type Arrival = "newly_published" | "newly_observed" | "seen_before";
@@ -118,6 +136,8 @@ export type Delta = {
 };
 
 export type Explanation = {
+  explanation_version?: string | null;
+  explanation?: StoredExplanation | null;
   paper_id: string;
   run_id: string;
   radar_id: string;

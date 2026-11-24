@@ -39,6 +39,7 @@ export function PaperCard({
   features,
   flags,
   arrival,
+  why,
   saved,
   dismissed,
   busy,
@@ -51,6 +52,7 @@ export function PaperCard({
   features: Features;
   flags: string[];
   arrival?: Arrival | null;
+  why?: string | null;
   saved: boolean;
   dismissed: boolean;
   busy?: boolean;
@@ -83,6 +85,11 @@ export function PaperCard({
             </div>
           </div>
           <PaperMeta paper={paper} />
+          {why && (
+            <p data-testid="why-summary" className="mt-1 text-sm text-muted">
+              {why}.
+            </p>
+          )}
           {((arrival && arrival !== "seen_before") || flags.length > 0) && (
             <div className="mt-2 flex flex-wrap gap-1.5">
               {arrival === "newly_published" && (

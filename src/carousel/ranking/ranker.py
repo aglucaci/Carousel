@@ -279,6 +279,8 @@ def rank(
     vectors: Dict[str, Vector] = {}
     hist_items: List[HistoryItem] = []
     e_u: Optional[Vector] = None
+    e_base: Optional[Vector] = None  # the profile before feedback (radar text and seeds), to measure feedback's effect
+    fb_papers: Dict[str, CanonicalPaper] = {}
     if store is not None and embedder is not None:
         hist_papers = {p.paper_id: p for p in (history if history is not None else store.papers())}
         extra = {p.paper_id: p for p in seeds.values()}
@@ -286,6 +288,7 @@ def rank(
             fp = store.get(pid)
             if fp is not None:
                 extra[pid] = fp
+                fb_papers[pid] = fp
         everything = {**extra, **hist_papers, **papers}
         vectors, _ = ensure_embeddings(store, [everything[k] for k in sorted(everything)], embedder)
         hist_items = [HistoryItem(pid, hist_papers[pid].first_seen, vectors[pid])
@@ -294,12 +297,20 @@ def rank(
         pos = [vectors[pid] for pid in sorted(seed_ids | set(feedback.positive)) if pid in vectors]
         neg = [vectors[pid] for pid in feedback.negative if pid in vectors]
         e_u = rocchio(v_profile, pos, neg)
+        if any(pid in vectors for pid in feedback.positive + feedback.negative):
+            e_base = rocchio(v_profile, [vectors[pid] for pid in sorted(seed_ids) if pid in vectors], [])
+            profile_info["shift"] = _r(1.0 - cosine(e_u, e_base))
+            profile_info["feedback_used"] = {
+                "positive": [pid for pid in feedback.positive if pid in vectors],
+                "negative": [pid for pid in feedback.negative if pid in vectors]}
 
     # ---- relevance ----
     max_bm25 = max((c.bm25 for c in cands), default=0.0)
     use_sim = e_u is not None or any(c.similarity is not None for c in cands)
     relevance: Dict[str, float] = {}
+    relevance_base: Optional[Dict[str, float]] = {} if e_base is not None else None
     sim_of: Dict[str, Optional[float]] = {}
+    sim_base: Dict[str, Optional[float]] = {}
     for c in cands:
         if e_u is not None:
             sim = cosine(vectors[c.paper_id], e_u) if c.paper_id in vectors else None
@@ -308,6 +319,21 @@ def rank(
         sim_of[c.paper_id] = sim
         bm = c.bm25 / max_bm25 if max_bm25 > 0 else 0.0
         relevance[c.paper_id] = ALPHA * _clip01(sim or 0.0) + BETA * bm if use_sim else bm
+        if relevance_base is not None and e_base is not None:
+            sb = cosine(vectors[c.paper_id], e_base) if c.paper_id in vectors else None
+            sim_base[c.paper_id] = sb
+            relevance_base[c.paper_id] = ALPHA * _clip01(sb or 0.0) + BETA * bm
+
+    def nearest_feedback(pid: str, ids: Sequence[str]) -> Optional[Dict[str, Any]]:
+        """The feedback paper most like ``pid``, with the feedback given on it."""
+        if pid not in vectors:
+            return None
+        sims = [(cosine(vectors[pid], vectors[f]), f) for f in ids if f in vectors]
+        if not sims:
+            return None
+        sim, f = max(sims, key=lambda x: (x[0], _neg(x[1])))
+        return {"paper_id": f, "title": fb_papers[f].title if f in fb_papers else None,
+                "action": feedback.excluded.get(f), "similarity": _r(sim)}
 
     # ---- novelty (no temporal leakage) ----
     nov_raw: Dict[str, float] = {}
@@ -355,39 +381,48 @@ def rank(
     weights = effective_weights(radar, mode, active)
 
     # ---- score ----
-    max_rel = max(relevance.values(), default=0.0)
-    gate = {pid: (r / max_rel if max_rel > 0 else 0.0) for pid, r in relevance.items()}
-    scored: Dict[str, Tuple[float, Dict[str, Optional[float]], List[str]]] = {}
     excluded: Dict[str, List[str]] = {}
+    eligible: List[Candidate] = []
     for c in cands:
         pid = c.paper_id
         if pid in seed_ids:
             excluded.setdefault("seed_paper", []).append(pid)
-            continue
-        if pid in feedback.excluded:
+        elif pid in feedback.excluded:
             excluded.setdefault(EXCLUDED_BY_FEEDBACK[feedback.excluded[pid]], []).append(pid)
-            continue
-        flags: List[str] = []
-        comp: Dict[str, Optional[float]] = {"relevance": relevance[pid]}
-        if "novelty" in active:
-            if pid in novelty:
-                comp["novelty"] = novelty[pid]
-            else:
-                comp["novelty"] = NEUTRAL_NOVELTY
-                flags.append("novelty_insufficient_history")
-        if "method_match" in active:
-            comp["method_match"] = methods[pid][0]
-        if kinds[pid] == "notice":
-            flags.append("correction_or_notice")
-        if c.paper.is_retracted:
-            flags.append("retracted")
-        update_types = {u.type for u in c.paper.updates}
-        if update_types & CORRECTING_UPDATES:
-            flags.append("corrected")
-        if "expression_of_concern" in update_types:
-            flags.append("expression_of_concern")
-        s = sum(weights[k] * (comp[k] or 0.0) * (gate[pid] if k == "novelty" else 1.0) for k in weights)
-        scored[pid] = (s, comp, flags)
+        else:
+            eligible.append(c)
+
+    def score_all(rel: Dict[str, float]) -> Tuple[Dict[str, Tuple[float, Dict[str, Optional[float]], List[str]]],
+                                                   Dict[str, float]]:
+        max_rel = max(rel.values(), default=0.0)
+        gate = {pid: (r / max_rel if max_rel > 0 else 0.0) for pid, r in rel.items()}
+        scored: Dict[str, Tuple[float, Dict[str, Optional[float]], List[str]]] = {}
+        for c in eligible:
+            pid = c.paper_id
+            flags: List[str] = []
+            comp: Dict[str, Optional[float]] = {"relevance": rel[pid]}
+            if "novelty" in active:
+                if pid in novelty:
+                    comp["novelty"] = novelty[pid]
+                else:
+                    comp["novelty"] = NEUTRAL_NOVELTY
+                    flags.append("novelty_insufficient_history")
+            if "method_match" in active:
+                comp["method_match"] = methods[pid][0]
+            if kinds[pid] == "notice":
+                flags.append("correction_or_notice")
+            if c.paper.is_retracted:
+                flags.append("retracted")
+            update_types = {u.type for u in c.paper.updates}
+            if update_types & CORRECTING_UPDATES:
+                flags.append("corrected")
+            if "expression_of_concern" in update_types:
+                flags.append("expression_of_concern")
+            s = sum(weights[k] * (comp[k] or 0.0) * (gate[pid] if k == "novelty" else 1.0) for k in weights)
+            scored[pid] = (s, comp, flags)
+        return scored, gate
+
+    scored, gate = score_all(relevance)
 
     # ---- MMR selection ----
     tokens = {pid: set(search_tokens(paper_text(papers[pid]))) for pid in scored}
@@ -398,27 +433,47 @@ def rank(
         ta, tb = tokens[a], tokens[b]
         return len(ta & tb) / len(ta | tb) if ta and tb else 0.0
 
-    # MMR runs over the relevance-qualified pool first, so diversity pressure can't pull an off-topic paper
-    # above relevant ones; the rest follow, in the same way, only if top_n isn't filled.
-    qualified = sorted(pid for pid in scored if gate[pid] >= MIN_SELECTION_GATE)
-    low = sorted(pid for pid in scored if gate[pid] < MIN_SELECTION_GATE)
-    for pid in low:
+    def select(scores: Dict[str, Tuple[float, Any, Any]], gates: Dict[str, float]) -> Tuple[List[Tuple[str, float, float]], List[str]]:
+        # MMR runs over the relevance-qualified pool first, so diversity pressure can't pull an off-topic paper
+        # above relevant ones; the rest follow, in the same way, only if top_n isn't filled.
+        qualified = sorted(pid for pid in scores if gates[pid] >= MIN_SELECTION_GATE)
+        low = sorted(pid for pid in scores if gates[pid] < MIN_SELECTION_GATE)
+        low_ids = list(low)
+        chosen: List[Tuple[str, float, float]] = []
+        remaining = qualified
+        while (remaining or low) and len(chosen) < top_n:
+            if not remaining:
+                remaining, low = low, []
+            best = None
+            for pid in remaining:
+                red = max((max(0.0, pair_sim(pid, s)) for s, _, _ in chosen), default=0.0)
+                m = lam * scores[pid][0] - (1 - lam) * red
+                key = (m, scores[pid][0], _neg(pid))
+                if best is None or key > best[0]:
+                    best = (key, pid, m, red)
+            _, pid, m, red = best  # type: ignore[misc]
+            chosen.append((pid, m, red))
+            remaining.remove(pid)
+        return chosen, low_ids
+
+    selected, low_ids = select(scored, gate)
+    for pid in low_ids:
         scored[pid][2].append("low_relevance")
-    selected: List[Tuple[str, float, float]] = []
-    remaining = qualified
-    while (remaining or low) and len(selected) < top_n:
-        if not remaining:
-            remaining, low = low, []
-        best = None
-        for pid in remaining:
-            red = max((max(0.0, pair_sim(pid, s)) for s, _, _ in selected), default=0.0)
-            m = lam * scored[pid][0] - (1 - lam) * red
-            key = (m, scored[pid][0], _neg(pid))
-            if best is None or key > best[0]:
-                best = (key, pid, m, red)
-        _, pid, m, red = best  # type: ignore[misc]
-        selected.append((pid, m, red))
-        remaining.remove(pid)
+
+    # ---- what feedback changed: the same run, ranked with the profile before feedback ----
+    rank_without: Dict[str, int] = {}
+    feedback_effect: Optional[Dict[str, Any]] = None
+    if relevance_base is not None:
+        selected0, _ = select(*score_all(relevance_base))
+        rank_without = {pid: i for i, (pid, _, _) in enumerate(selected0, 1)}
+        now = [pid for pid, _, _ in selected]
+        feedback_effect = {
+            "entered": [pid for pid in now if pid not in rank_without],
+            "left": [pid for pid in rank_without if pid not in set(now)],
+            "moved_up": sum(1 for i, pid in enumerate(now, 1) if pid in rank_without and rank_without[pid] > i),
+            "moved_down": sum(1 for i, pid in enumerate(now, 1) if pid in rank_without and rank_without[pid] < i),
+            "profile_shift": profile_info.get("shift"),
+        }
 
     by_cand = {c.paper_id: c for c in cands}
     signal_terms = {name: list(cat.terms) for name, cat in sorted(radar.signal_profile.items())}
@@ -444,6 +499,14 @@ def rank(
                 "sources": sorted({r.source.value for r in c.paper.sources}),
                 "first_seen": c.paper.first_seen.isoformat(),
                 "earliest_public_date": c.paper.earliest_public_date,
+                **({"feedback": {
+                    "similarity_without_feedback": _r(sim_base.get(pid)),
+                    "relevance_without_feedback": _r(relevance_base[pid]),
+                    "relevance_change": _r(comp["relevance"] - relevance_base[pid]),  # type: ignore[operator]
+                    "rank_without_feedback": rank_without.get(pid),
+                    "nearest_positive": nearest_feedback(pid, feedback.positive),
+                    "nearest_negative": nearest_feedback(pid, feedback.negative),
+                }} if relevance_base is not None else {}),
             },
             flags=tuple(flags),
         ))
@@ -455,6 +518,7 @@ def rank(
         "excluded": {k: sorted(v) for k, v in excluded.items()},
         "history_size": len(hist_items),
         "profile": profile_info,
+        "feedback_effect": feedback_effect,
         "relevance_formula": f"{ALPHA}*sim + {BETA}*bm25_norm" if use_sim else "bm25_norm",
         "candidate_stats": candidates.stats,
     }

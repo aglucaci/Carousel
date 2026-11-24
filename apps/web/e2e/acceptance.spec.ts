@@ -57,8 +57,12 @@ test("define a topic, get a ranked list, save and dismiss, rescan without losing
   await expect(drawer.getByText("Ranked #1")).toBeVisible();
   await expect(drawer.getByRole("cell", { name: "Relevance" })).toBeVisible();
   await expect(drawer.getByText("From the stored run")).toBeVisible();
+  // Phase 2: the explanation stored with the run, with its version.
+  await expect(drawer.getByTestId("explanation")).toContainText("Matches the radar's terms");
+  await expect(drawer.getByText("Explanation version 1,")).toBeVisible();
   await drawer.getByRole("button", { name: "Close" }).click();
   await expect(drawer).toBeHidden();
+  await expect(cards.nth(0).getByTestId("why-summary")).toContainText("Matches");
 
   // Phase 2: a journal article whose preprint was found is linked to it; both stay separate papers.
   const withPreprint = cards.filter({ has: page.getByText("Has preprint", { exact: true }) }).first();
@@ -69,6 +73,15 @@ test("define a topic, get a ranked list, save and dismiss, rescan without losing
   await expect(versions).toContainText("kept as its own paper");
   await drawer.getByRole("button", { name: "Close" }).click();
   await expect(drawer).toBeHidden();
+
+  // ---- Phase 2: judge two papers; the next scan's profile moves toward one and away from the other ----
+  for (const [i, answer] of [[2, "Relevant"], [3, "Not relevant"]] as const) {
+    await cards.nth(i).getByRole("button", { name: "Why this paper?" }).click();
+    await drawer.getByRole("button", { name: answer, exact: true }).click();
+    await expect(drawer.getByRole("button", { name: answer, exact: true })).toHaveAttribute("aria-pressed", "true");
+    await drawer.getByRole("button", { name: "Close" }).click();
+    await expect(drawer).toBeHidden();
+  }
 
   // ---- save one, dismiss another ----
   await cards.nth(1).getByRole("button", { name: "Save" }).click();
@@ -96,6 +109,8 @@ test("define a topic, get a ranked list, save and dismiss, rescan without losing
   expect(after).not.toContain(second); // saved: kept in the Library, not re-recommended
   // Phase 2: arrivals against the previous scan (the same recorded responses, so nothing is new).
   await expect(page.getByTestId("arrivals")).toContainText("Nothing new since the previous scan");
+  // The feedback measurably changed this ranking, compared with the same run ranked without it.
+  await expect(page.getByTestId("feedback-effect")).toContainText("Your feedback (2 saved or relevant, 1 not relevant) changed this list");
 
   // ---- without losing history ----
   await nav.getByRole("link", { name: "Library" }).click();

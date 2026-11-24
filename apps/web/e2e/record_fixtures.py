@@ -59,14 +59,15 @@ def main(record=("pubmed", "openalex", "europepmc", "crossref"), extend: bool = 
         "crossref": CrossrefConnector(HttpClient(transport("crossref"), min_interval=0.5), mailto=""),
     }
     with tempfile.TemporaryDirectory() as d:
-        # The test's two scans: the second follows dismissing the top paper and saving the second, so it
-        # recommends (and enriches) papers the first did not.
+        # The test's two scans: the second follows dismissing the top paper, saving the second, and marking the
+        # third relevant and the fourth not relevant, so it recommends (and enriches) papers the first did not.
         feedback = Path(d) / "feedback.yml"
         radar = Radar(cfg, store=Path(d) / "store.db", feedback_path=feedback)
         res = radar.scan(as_of=as_of, max_results=sc["max_results"], top_n=sc["top_n"], connectors=conns,
                          embedder="hashing")
-        first, second = (it["paper_id"] for it in res.items[:2])
-        fb.save(feedback, {**{a: [] for a in fb.ACTIONS}, "dismiss": [first], "save": [second]}, cfg.radar_id)
+        first, second, third, fourth = (it["paper_id"] for it in res.items[:4])
+        fb.save(feedback, {**{a: [] for a in fb.ACTIONS}, "dismiss": [first], "save": [second], "relevant": [third],
+                           "irrelevant": [fourth]}, cfg.radar_id)
         res = radar.scan(as_of=as_of, max_results=sc["max_results"], top_n=sc["top_n"], connectors=conns,
                          embedder="hashing")
     for r in rec.values():
