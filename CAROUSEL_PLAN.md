@@ -213,6 +213,36 @@ growth, new connections, publication updates), **Trends** with baselines and
 uncertainty, evidence-linked event pages, and checks for indexing or
 classifier artifacts.
 
+**How Phase 3 builds on Phase 2.** Paper-level events (new publication,
+revision; task 21) already come from stored runs. Topic events need two
+things Phase 2 does not have:
+
+- **Topics with stable identities.** A topic must mean the same thing next
+  month, or a "trend" is just a relabelled cluster. Topics are versioned
+  classifiers; papers keep the version they were assigned with; a refit maps
+  old topics to new ones explicitly.
+- **Unbiased counts over time.** A scan is capped (`max_results`) and
+  windowed, so counting a radar's own recommendations measures the radar, not
+  the literature. Counts and their denominators come from the sources' own
+  count queries (OpenAlex `meta.count`, PubMed `esearch` counts), recorded as
+  append-only observations with when they were made, so a past trend can be
+  recomputed exactly as it looked then.
+
+| # | Task | Done when |
+| --- | --- | --- |
+| 24 | Topics v1: cluster each radar's papers into topics from stored embeddings (deterministic clustering), label them from distinctive terms (c-TF-IDF over titles and abstracts) with key-term queries per topic; assign new papers to the nearest topic with a confidence (or *unassigned*); every assignment records its `classifier_version` (embedding model, clustering parameters, fit corpus); a refit is a new version with an explicit old→new topic mapping (centroid similarity and member overlap) | Same papers and model version give the same topics; a fixture corpus with known groups is recovered; a refit maps unchanged topics to themselves and reports splits and merges; `carousel topics` lists them |
+| 25 | `topic_observations`: per period (weekly), each topic's count and the radar field's denominator `N_t`, from source count queries (the topic's key-term query and the radar's base query, per source), with coverage, `observed_at`, and classifier version; past periods are re-observed to measure indexing lag; observations are append-only, and `counts_as_of(t)` rebuilds what was known at `t` | Recorded-HTTP fixture tests; a leakage test fails if `counts_as_of(t)` uses an observation made after `t`; no full-corpus queries (count requests only, budgeted) |
+| 26 | Trend model: smoothed share `s = (n + α)/(N + αK)`; `n_{c,t} ~ NegBin(μ, φ_c)`, `log μ = log N_t + β₀ + f_c(t) + δ_{c,t}` with a baseline `f_c` fitted on earlier periods and the excess `δ` tested over recent ones; rate ratio with a confidence interval; Benjamini–Hochberg across a radar's topics; flagged only with effect size, adjusted significance, a minimum count, and persistence over consecutive periods; `trend_model_version` on every result | Simulation tests: injected accelerations are detected at the target power, and null series stay within the nominal false-discovery rate; results are deterministic for the same observations |
+| 27 | Artifact checks, before any trend is reported: indexing lag (recent periods stay *provisional* until their counts stop changing, as measured by re-observation), denominator shifts (a source's volume or coverage jumps, a source added or removed), classifier changes (no comparison across classifier versions without the task-24 mapping), and duplicate surges (one work counted by several sources) | Each check has a fixture where it fires; a trend it affects is withheld or marked, and the report names the check |
+| 28 | Topic events, derived from stored observations and versions only (like task 21): `topic_acceleration` (from 26 after 27), `new_methodological_connection` (a method term persistently co-occurring with a topic for the first time, in more than one paper), and `research_landscape_shift` (a topic splitting, merging, or newly appearing between classifier versions, or a large centroid drift); each event's evidence names the supporting papers, the counts and denominators, the model fit, and the checks it passed | A test deletes stored topic events and recomputes them identically; every event links at least one traceable publication |
+| 29 | **What's New** v2: the change log grouped as the spec lists (new findings from grounded extraction of new publications, emerging methods, topic growth, new connections, publication updates), with an evidence page per event (papers, counts with denominators, the fitted baseline, the checks); digests include topic events | Playwright on fixture data: every item opens its evidence page, and every claim on it links a stored observation or paper |
+| 30 | **Trends**: per topic, share over time with the fitted baseline and its uncertainty band, provisional periods marked, classifier-version boundaries shown, and the radar's denominator; API for the series | Rendered from stored observations and model results only; a test checks the plotted values against the model output; the chart is readable without colour and has a table view |
+| 31 | Study C harness (§7): an annotated benchmark format for topic events (topic, event type, the date experts would place it, supporting papers), a starter set from documented public history in this lab's areas, and a time-forward replay that runs tasks 25–28 using only what was observable at each date; metrics: event precision and recall, detection latency, trend stability across refits, and explanation faithfulness (does the cited evidence support the event) | `carousel eval delta` runs the starter set end to end and writes a report; the leakage tests from 25 hold during replay |
+
+**Order.** 24 → 25 → 26 → 27 → 28; then 29, 30, and 31 can proceed in
+parallel (31 can start its benchmark format and annotations as soon as 25
+lands, since it needs only observations to replay).
+
 ### Phase 4 — Advanced discovery and open-source maturity
 
 **Method Transfer**, literature graph views, Zotero integration, public API
@@ -260,3 +290,6 @@ Scientific question tracking is a research feature.
 2. **Lab themes.** Keep the current hardcoded themes as `radars/lab_default.yml` (recommended, as a dogfooding case study), or drop them.
 3. **Manuscript framing.** Either retitle the JOSS draft for CAROUSEL now, or publish ETHER first and treat CAROUSEL as its successor.
 4. **Hosting for 1B.** Self-hosted only at first, or also a public instance (which needs quotas for embeddings, LLM calls, and the OpenAlex budget).
+5. **Phase 3 numerics.** The trend model (task 26) needs a negative-binomial GLM. Either add `numpy` + `statsmodels` as a `[trends]` extra (recommended: tested implementations, confidence intervals included), or write a small NB2 IRLS fit on `numpy` alone. The engine stays installable without either; topic events then report the model as inactive, as momentum is today.
+6. **Topic scope.** Topics per radar (recommended first: small, interpretable, matches the radar's field and denominator) or one shared topic map across radars (needed later for cross-field Method Transfer in Phase 4).
+7. **Benchmark annotations (task 31).** Who annotates the starter set (the lab, recommended, with two annotators and agreement reported), and which documented episodes to start from (for example variant waves and host jumps already covered by the lab's radars).
