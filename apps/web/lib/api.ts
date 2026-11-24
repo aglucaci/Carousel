@@ -31,6 +31,7 @@ export type RunSummary = {
   n_items: number;
   coverage: Coverage[];
   notes: string[];
+  trigger?: "manual" | "scheduled" | null;
 };
 
 export type RadarConfig = {
@@ -49,12 +50,17 @@ export type RadarConfig = {
   [key: string]: unknown;
 };
 
+export type Schedule = "daily" | "weekly";
+
+export type RadarPatch = { schedule?: Schedule | null; state?: "active" | "paused" };
+
 export type Radar = {
   radar_id: string;
   title: string;
   description: string;
   state: string;
-  schedule?: string | null;
+  schedule?: Schedule | null;
+  next_scan_at?: string | null;
   created_at: string;
   updated_at: string;
   config?: RadarConfig | null;
@@ -86,9 +92,18 @@ export type RankedItem = {
   dismissed: boolean;
   saved: boolean;
   feedback: string[];
+  /** Relative to the radar's earlier runs; null on its first run. */
+  arrival?: Arrival | null;
 };
 
-export type RankedPapers = { run: RunSummary; items: RankedItem[] };
+export type Arrival = "newly_published" | "newly_observed" | "seen_before";
+
+export type RankedPapers = {
+  run: RunSummary;
+  items: RankedItem[];
+  previous_run_id?: string | null;
+  arrivals?: Record<Arrival, number> | null;
+};
 
 export type Delta = {
   run_id: string;
@@ -96,6 +111,8 @@ export type Delta = {
   entered: string[];
   left: string[];
   moved: { paper_id: string; rank: number; previous_rank: number; change: number }[];
+  newly_published: string[];
+  newly_observed: string[];
 };
 
 export type Explanation = {
@@ -208,7 +225,10 @@ export const client = {
   radars: () => api<Radar[]>("/radars"),
   radar: (id: string) => api<Radar>(`/radars/${encodeURIComponent(id)}`),
   propose: (input: ProposalInput) => api<Proposal>("/radars/proposal", { method: "POST", body: input }),
-  createRadar: (config: RadarConfig) => api<Radar>("/radars", { method: "POST", body: { config } }),
+  createRadar: (config: RadarConfig, schedule?: Schedule | null) =>
+    api<Radar>("/radars", { method: "POST", body: schedule ? { config, schedule } : { config } }),
+  updateRadar: (id: string, patch: RadarPatch) =>
+    api<Radar>(`/radars/${encodeURIComponent(id)}`, { method: "PATCH", body: patch }),
   scan: (id: string, opts: ScanOptions) => api<Job>(`/radars/${encodeURIComponent(id)}/runs`, { method: "POST", body: opts }),
   job: (id: string) => api<Job>(`/jobs/${encodeURIComponent(id)}`),
   runs: (id: string) => api<RunSummary[]>(`/radars/${encodeURIComponent(id)}/runs`),

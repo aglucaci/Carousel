@@ -52,7 +52,7 @@ class OpenApiContractTests(unittest.TestCase):
                              ("get", "/api/v1/radars/{radar_id}/delta"), ("get", "/api/v1/papers/{paper_id}"),
                              ("get", "/api/v1/papers/{paper_id}/explanation"), ("post", "/api/v1/feedback"),
                              ("get", "/api/v1/jobs/{job_id}"), ("post", "/api/v1/radars/proposal"),
-                             ("get", "/api/v1/library")]:
+                             ("get", "/api/v1/library"), ("patch", "/api/v1/radars/{radar_id}")]:
             self.assertIn(method, paths.get(path, {}), f"{method.upper()} {path}")
         self.assertIn("202", paths["/api/v1/radars/{radar_id}/runs"]["post"]["responses"])
 
@@ -195,9 +195,10 @@ class AcceptanceFlowTests(ApiTestCase):
     def test_config_versions(self) -> None:
         self.post("/radars", {"config": RADAR})
         changed = {**RADAR, "mode": "exploratory"}
-        r = self.post("/radars", {"config": changed, "schedule": "0 13 * * *"})
+        r = self.post("/radars", {"config": changed, "schedule": "weekly"})
         self.assertEqual(r.status_code, 200)
-        self.assertEqual((r.json()["config"]["mode"], r.json()["schedule"]), ("exploratory", "0 13 * * *"))
+        self.assertEqual((r.json()["config"]["mode"], r.json()["schedule"]), ("exploratory", "weekly"))
+        self.assertEqual(self.post("/radars", {"config": RADAR, "schedule": "0 13 * * *"}).status_code, 422)
         engine = postgres.engine(URL)
         with engine.connect() as c:
             self.assertEqual(c.execute(text("SELECT count(*) FROM radar_versions WHERE radar_id = 'escape'")).scalar(), 2)
@@ -320,3 +321,118 @@ class AuthTests(ApiTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ScheduleTests(ApiTestCase):
+    """Phase 2 task 15: scheduled scans, pause/resume that keeps history, and arrivals."""
+
+    def patch(self, body):
+        return self.client.patch("/api/v1/radars/escape", json=body, headers=self.auth)
+
+    def sessions(self):
+        from sqlalchemy.orm import sessionmaker
+
+        return sessionmaker(self.app.state.engine)
+
+    def tick(self, now=None):
+        from carousel.workers import schedule
+        from carousel.workers.scan import enqueue_scan
+
+        def enqueue(queue, radar_id, **kw):  # the recorded fixtures answer only this date and size
+            return enqueue_scan(queue, radar_id, max_results=SCAN["max_results"],
+                                as_of=dt.date.fromisoformat(SCAN["as_of"]), **kw)
+        return schedule.tick(self.sessions(), self.queue, now=now, enqueue=enqueue)
+
+    def test_schedule_pause_resume(self) -> None:
+        self.post("/radars", {"config": RADAR})
+        radar = self.get("/radars/escape").json()
+        self.assertEqual((radar["schedule"], radar["state"], radar["next_scan_at"]), (None, "active", None))
+        self.assertEqual(self.tick(), [])  # manual radars are never scheduled
+
+        r = self.patch({"schedule": "daily"})
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertEqual(r.json()["schedule"], "daily")
+        self.assertIsNotNone(r.json()["next_scan_at"])  # due now: no run yet
+
+        jobs = self.tick()
+        self.assertEqual([j.meta["radar_id"] for j in jobs], ["escape"])
+        self.assertEqual(jobs[0].kwargs["trigger"], "scheduled")
+        self.assertEqual(self.tick(), [])  # already queued
+        self.work()
+        runs = self.get("/radars/escape/runs").json()
+        self.assertEqual([r["trigger"] for r in runs], ["scheduled"])
+        self.assertEqual(self.tick(), [])  # this period has its run
+        radar = self.get("/radars/escape").json()
+        executed = dt.datetime.fromisoformat(runs[0]["executed_at"])
+        self.assertEqual(dt.datetime.fromisoformat(radar["next_scan_at"]),
+                         executed.astimezone(dt.timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+                         + dt.timedelta(days=1))
+
+        tomorrow = dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=1)
+        self.assertEqual(self.patch({"state": "paused"}).json()["next_scan_at"], None)
+        self.assertEqual(self.tick(tomorrow), [])  # paused: no scheduled scans
+        self.assertEqual(self.scan_manual()["trigger"], "manual")  # manual scans still work while paused
+        self.assertEqual(len(self.get("/radars/escape/runs").json()), 2)  # history kept
+
+        r = self.patch({"state": "active"})
+        self.assertEqual((r.json()["state"], r.json()["schedule"]), ("active", "daily"))  # schedule kept
+        self.assertEqual(len(self.tick(tomorrow)), 1)
+        self.assertEqual(self.tick(tomorrow), [])
+        self.redis.flushdb()  # drop the queued scan (fakeredis has no Lua for queue.empty())
+
+        # Weekly, and back to manual; bad values are rejected.
+        self.assertEqual(self.patch({"schedule": "weekly"}).json()["schedule"], "weekly")
+        self.assertEqual(self.patch({"schedule": None}).json()["schedule"], None)
+        self.assertEqual(self.patch({"schedule": "0 13 * * *"}).status_code, 422)
+        self.assertEqual(self.patch({"state": "archived"}).status_code, 422)
+        self.assertEqual(self.client.patch("/api/v1/radars/nope", json={"state": "paused"}, headers=self.auth).status_code, 404)
+
+    def scan_manual(self):
+        r = self.post("/radars/escape/runs", SCAN)
+        self.assertEqual(r.status_code, 202, r.text)
+        self.work()
+        return self.get("/radars/escape/runs").json()[0]
+
+    def test_lock_stops_a_second_scheduler(self) -> None:
+        from carousel.workers import schedule
+
+        self.post("/radars", {"config": RADAR, "schedule": "weekly"})
+        enqueued = []
+        def fake(queue, radar_id, **kw):  # enqueue nothing, so the queue check can't help
+            enqueued.append(radar_id)
+            return mock.Mock(id="job_x")
+        schedule.tick(self.sessions(), self.queue, enqueue=fake)
+        schedule.tick(self.sessions(), self.queue, enqueue=fake)
+        self.assertEqual(enqueued, ["escape"])
+
+    def test_arrivals(self) -> None:
+        self.post("/radars", {"config": RADAR})
+        run1 = self.scan_manual()["run_id"]
+        first = self.get("/radars/escape/papers").json()
+        self.assertEqual((first["previous_run_id"], first["arrivals"]), (None, None))
+        self.assertEqual({i["arrival"] for i in first["items"]}, {None})
+
+        run2 = self.scan_manual()["run_id"]
+        second = self.get("/radars/escape/papers").json()
+        self.assertEqual(second["previous_run_id"], run1)
+        self.assertEqual({i["arrival"] for i in second["items"]}, {"seen_before"})  # same fixtures: nothing new
+
+        # Make two of run 2's papers unknown to run 1: one published after run 1's as_of, one before.
+        new, old = second["items"][0]["paper_id"], second["items"][1]["paper_id"]
+        as_of = dt.date.fromisoformat(SCAN["as_of"])
+        with self.app.state.engine.begin() as c:
+            for pid in (new, old):
+                c.execute(text("DELETE FROM run_observations WHERE run_id = :r AND paper_id = :p"), {"r": run1, "p": pid})
+                c.execute(text("DELETE FROM recommendation_items WHERE run_id = :r AND paper_id = :p"), {"r": run1, "p": pid})
+            c.execute(text("UPDATE papers SET earliest_public_date = :d WHERE id = :p"), {"d": as_of + dt.timedelta(days=1), "p": new})
+            c.execute(text("UPDATE papers SET earliest_public_date = :d WHERE id = :p"), {"d": as_of - dt.timedelta(days=30), "p": old})
+        second = self.get("/radars/escape/papers").json()
+        by_id = {i["paper_id"]: i["arrival"] for i in second["items"]}
+        self.assertEqual((by_id[new], by_id[old]), ("newly_published", "newly_observed"))
+        self.assertEqual(second["arrivals"], {"newly_published": 1, "newly_observed": 1,
+                                              "seen_before": len(second["items"]) - 2})
+        delta = self.get("/radars/escape/delta").json()
+        self.assertEqual((delta["run_id"], delta["newly_published"], delta["newly_observed"]), (run2, [new], [old]))
+        # Viewing run 1 later still compares it with nothing before it.
+        self.assertIsNone(self.get("/radars/escape/papers", run_id=run1).json()["arrivals"])
+

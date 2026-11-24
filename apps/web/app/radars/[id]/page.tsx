@@ -5,7 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { JobStatus, ScanOptionsFields } from "@/components/Scan";
 import { Badge, Button, ButtonLink, Card, ErrorNote, Loading, PageHeader, coverageLine, fmtDate, fmtDateTime, sourceName } from "@/components/ui";
-import { client, useApi, type ScanOptions } from "@/lib/api";
+import { client, useApi, type Radar, type RadarPatch, type ScanOptions } from "@/lib/api";
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -13,6 +13,73 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
       <dt className="text-muted">{label}</dt>
       <dd>{children}</dd>
     </>
+  );
+}
+
+const SCHEDULES = [
+  { value: "", label: "Manual only" },
+  { value: "daily", label: "Daily" },
+  { value: "weekly", label: "Weekly (Mondays)" },
+];
+
+function ScheduleCard({ radar, onChange }: { radar: Radar; onChange: (r: Radar) => void }) {
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<Error | undefined>();
+  const paused = radar.state === "paused";
+
+  async function update(patch: RadarPatch) {
+    setSaving(true);
+    setError(undefined);
+    try {
+      onChange(await client.updateRadar(radar.radar_id, patch));
+    } catch (e) {
+      setError(e as Error);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Card className="space-y-2">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-medium">
+          Automatic scans {paused && <Badge tone="warn">paused</Badge>}
+        </h2>
+        <div className="flex flex-wrap items-center gap-2">
+          <label htmlFor="schedule" className="text-sm text-muted">
+            Repeat
+          </label>
+          <select
+            id="schedule"
+            value={radar.schedule ?? ""}
+            disabled={saving}
+            onChange={(e) => update({ schedule: (e.target.value || null) as RadarPatch["schedule"] })}
+            className="rounded-md border border-border bg-surface px-2 py-1.5 text-sm"
+          >
+            {SCHEDULES.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+          {radar.schedule && (
+            <Button onClick={() => update({ state: paused ? "active" : "paused" })} disabled={saving}>
+              {paused ? "Resume" : "Pause"}
+            </Button>
+          )}
+        </div>
+      </div>
+      <p data-testid="schedule-status" className="text-sm text-muted">
+        {!radar.schedule
+          ? "Scans run only when you start them."
+          : paused
+            ? "Paused: no automatic scans until you resume. All runs, saved papers, and feedback are kept, and you can still scan by hand."
+            : radar.next_scan_at && new Date(radar.next_scan_at).getTime() <= Date.now() + 60_000
+              ? `Scans ${radar.schedule} (UTC). The next scan starts within a minute or two.`
+              : `Scans ${radar.schedule} (UTC). Next scan: ${radar.next_scan_at ? fmtDateTime(radar.next_scan_at) : "not scheduled"}.`}
+      </p>
+      <ErrorNote error={error} />
+    </Card>
   );
 }
 
@@ -74,6 +141,8 @@ function RadarDetail() {
           <ErrorNote error={error} />
         </Card>
 
+        <ScheduleCard radar={r} onChange={(updated) => radar.setData(updated)} />
+
         {c && (
           <Card>
             <h2 className="mb-2 font-medium">Search strategy</h2>
@@ -111,6 +180,11 @@ function RadarDetail() {
                         <Badge tone="warn" title="At least one source returned fewer results than it has">
                           {run.status}
                         </Badge>
+                      )}
+                      {run.trigger === "scheduled" && (
+                        <span className="ml-1">
+                          <Badge title="Started by the scheduler">scheduled</Badge>
+                        </span>
                       )}
                       {i === 0 && (
                         <span className="ml-1">

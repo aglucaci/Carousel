@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from carousel.core.config import RadarConfig
 from carousel.database import models as m
 from carousel.feedback import ACTIONS
+from carousel.workers import schedule as sched
 
 
 class NotFound(LookupError):
@@ -28,7 +29,11 @@ class NotFound(LookupError):
 
 def upsert_radar(s: Session, cfg: RadarConfig, *, owner_id: Optional[str] = None,
                  schedule: Optional[str] = None) -> Tuple[Dict[str, Any], bool]:
-    """Create a radar, or add a new version if its config changed. Returns (radar, created)."""
+    """Create a radar, or add a new version if its config changed. Returns (radar, created).
+
+    ``schedule`` ('daily' | 'weekly') is set when given; ``None`` leaves an existing radar's schedule alone.
+    """
+    sched.validate(schedule)
     rid = cfg.radar_id or "radar"
     radar = s.get(m.Radar, rid)
     created = radar is None
@@ -140,7 +145,7 @@ def _run_summary(r: m.RecommendationRun) -> Dict[str, Any]:
         "run_id": r.id, "radar_id": r.radar_id, "executed_at": r.executed_at, "finished_at": r.finished_at,
         "as_of": r.as_of, "status": r.status, "ranking_version": r.ranking_version, "model_version": r.model_version,
         "mode": r.mode, "config_hash": r.config_hash, "n_observed": r.n_observed, "n_candidates": r.n_candidates,
-        "n_items": r.n_items, "coverage": r.coverage, "notes": r.notes,
+        "n_items": r.n_items, "coverage": r.coverage, "notes": r.notes, "trigger": r.trigger,
     }
 
 
@@ -160,7 +165,29 @@ def radar_detail(s: Session, radar_id: str) -> Dict[str, Any]:
         "schedule": radar.schedule, "owner_id": radar.owner_id, "created_at": radar.created_at,
         "updated_at": radar.updated_at, "config": cfg, "n_runs": int(n_runs or 0),
         "latest_run": _run_summary(latest) if latest else None,
+        "next_scan_at": sched.next_scan_at(radar.schedule, radar.state, latest.executed_at if latest else None,
+                                           dt.datetime.now(dt.timezone.utc)),
     }
+
+
+def update_radar(s: Session, radar_id: str, changes: Dict[str, Any]) -> Dict[str, Any]:
+    """Change a radar's ``schedule`` (daily | weekly | None) and/or ``state`` (active | paused).
+
+    Pausing stops scheduled scans only; runs, items, and feedback are kept, and resuming continues from them.
+    """
+    radar = s.get(m.Radar, radar_id)
+    if radar is None:
+        raise NotFound(f"radar {radar_id!r}")
+    if "schedule" in changes:
+        radar.schedule = sched.validate(changes["schedule"])
+    if "state" in changes:
+        if changes["state"] not in ("active", "paused"):
+            raise ValueError("state must be 'active' or 'paused'")
+        radar.state = changes["state"]
+    radar.updated_at = func.now()
+    s.flush()
+    s.refresh(radar)
+    return radar_detail(s, radar_id)
 
 
 def list_radars(s: Session) -> List[Dict[str, Any]]:
@@ -205,8 +232,52 @@ def _identifiers(s: Session, paper_ids: List[str]) -> Dict[str, Dict[str, str]]:
     return out
 
 
+ARRIVALS = ("newly_published", "newly_observed", "seen_before")
+
+
+def arrivals(s: Session, run: m.RecommendationRun) -> Tuple[Optional[str], Dict[str, str]]:
+    """How each of the run's recommended papers arrived, relative to this radar's earlier runs.
+
+    Returns ``(previous_run_id, {paper_id: arrival})``; with no earlier run there is nothing to
+    compare with, so the mapping is empty. A paper is
+
+    - ``seen_before`` when any earlier run of the radar observed or recommended it;
+    - otherwise ``newly_published`` when its earliest public date (a lower bound for partial
+      dates) falls after the previous run's ``as_of``: it did not exist at the last scan;
+    - otherwise ``newly_observed``: it is older, and this radar sees it for the first time
+      (late indexing, a source added, a changed query, or the window moving).
+    """
+    earlier = (select(m.RecommendationRun.id).where(m.RecommendationRun.radar_id == run.radar_id,
+                                                    m.RecommendationRun.executed_at < run.executed_at))
+    previous = s.scalars(select(m.RecommendationRun).where(m.RecommendationRun.id.in_(earlier))
+                         .order_by(m.RecommendationRun.executed_at.desc())).first()
+    if previous is None:
+        return None, {}
+    items = dict(s.execute(select(m.RecommendationItem.paper_id, m.Paper.earliest_public_date)
+                           .join(m.Paper, m.Paper.id == m.RecommendationItem.paper_id)
+                           .where(m.RecommendationItem.run_id == run.id)).all())
+    seen = set(s.scalars(select(m.RunObservation.paper_id).where(m.RunObservation.run_id.in_(earlier),
+                                                                 m.RunObservation.paper_id.in_(items))))
+    seen |= set(s.scalars(select(m.RecommendationItem.paper_id).where(m.RecommendationItem.run_id.in_(earlier),
+                                                                      m.RecommendationItem.paper_id.in_(items))))
+    # Records seen earlier under a paper ID that has since been merged into one of these papers.
+    seen |= set(s.scalars(select(m.Paper.merged_into).where(
+        m.Paper.merged_into.in_(items),
+        m.Paper.id.in_(select(m.RunObservation.paper_id).where(m.RunObservation.run_id.in_(earlier))))))
+    out = {}
+    for pid, published in items.items():
+        if pid in seen:
+            out[pid] = "seen_before"
+        elif published is not None and published > previous.as_of:
+            out[pid] = "newly_published"
+        else:
+            out[pid] = "newly_observed"
+    return previous.id, out
+
+
 def ranked_papers(s: Session, radar_id: str, run_id: Optional[str] = None) -> Dict[str, Any]:
     run = _run(s, radar_id, run_id)
+    previous_run_id, arrival = arrivals(s, run)
     items = s.scalars(select(m.RecommendationItem).where(m.RecommendationItem.run_id == run.id)
                       .order_by(m.RecommendationItem.rank)).all()
     state = current_feedback(s, radar_id)
@@ -220,7 +291,10 @@ def ranked_papers(s: Session, radar_id: str, run_id: Optional[str] = None) -> Di
             "rank": it.rank, "paper_id": it.paper_id, "score": it.score, "features": it.features, "flags": it.flags,
             "paper": (it.explanation or {}).get("paper") or {}, "dismissed": "dismiss" in active.get(it.paper_id, []),
             "saved": "save" in active.get(it.paper_id, []), "feedback": active.get(it.paper_id, []),
+            "arrival": arrival.get(it.paper_id),
         } for it in items],
+        "previous_run_id": previous_run_id,
+        "arrivals": {a: sum(1 for v in arrival.values() if v == a) for a in ARRIVALS} if previous_run_id else None,
     }
 
 
@@ -234,10 +308,14 @@ def delta(s: Session, radar_id: str) -> Dict[str, Any]:
                               .where(m.RecommendationItem.run_id == run.id)).all())
     now = ranks(runs[0])
     if len(runs) < 2:
-        return {"run_id": runs[0].id, "previous_run_id": None, "entered": sorted(now, key=now.get), "left": [], "moved": []}
+        return {"run_id": runs[0].id, "previous_run_id": None, "entered": sorted(now, key=now.get), "left": [], "moved": [],
+                "newly_published": [], "newly_observed": []}
     before = ranks(runs[1])
+    _, arrival = arrivals(s, runs[0])
     return {
         "run_id": runs[0].id, "previous_run_id": runs[1].id,
+        "newly_published": sorted((p for p, a in arrival.items() if a == "newly_published"), key=now.get),
+        "newly_observed": sorted((p for p, a in arrival.items() if a == "newly_observed"), key=now.get),
         "entered": sorted((p for p in now if p not in before), key=now.get),
         "left": sorted((p for p in before if p not in now), key=before.get),
         "moved": [{"paper_id": p, "rank": now[p], "previous_rank": before[p], "change": before[p] - now[p]}

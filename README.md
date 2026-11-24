@@ -22,12 +22,14 @@ your field since you last looked.
 The question it answers is not *"What papers were published?"* but **"What
 changed in my field, why does it matter, and what should I read next?"**
 
-> **Status: early development (Phase 1 in progress).** The engine (Phase 1A)
+> **Status: early development (Phase 1 done, Phase 2 in progress).** The engine (Phase 1A)
 > works end to end: PubMed and OpenAlex retrieval, careful deduplication,
 > lexical and semantic candidates, an interpretable ranker, stored runs, and
 > feedback, running daily on GitHub Actions. The web app (Phase 1B) runs
 > locally with one `docker compose up` (Postgres, Redis, the REST API, a scan
-> worker, and the web app); Research Delta is next. See [What works today](#what-works-today) and the
+> worker, a scheduler, and the web app). Phase 2 has started with scheduled
+> scans (daily or weekly, with pause and resume) and labels that separate newly
+> published from newly observed papers. See [What works today](#what-works-today) and the
 > [roadmap](#roadmap). CAROUSEL grew out of the ETHER prototype, so you will
 > still see that name in the manuscript drafts.
 
@@ -46,6 +48,7 @@ changed in my field, why does it matter, and what should I read next?"**
 | **Ranker** | [`src/carousel/ranking/`](src/carousel/ranking/) | `ranking_version` 0.1.0: relevance, novelty against only earlier-observed papers (guarded against temporal leakage), and method match; weighted by mode (focused / balanced / exploratory), then diversified with MMR. Every item carries its features and flags |
 | **Postgres schema (Phase 1B)** | [`src/carousel/database/models.py`](src/carousel/database/models.py), [`migrations/`](src/carousel/database/migrations/) | The spec's production tables on PostgreSQL + pgvector (papers with full-text search, identifiers, sources, authors, embeddings, runs and items, feedback, collections, topics, events), managed with Alembic. `carousel db import-store` and `import-snapshots` copy the engine's history in and verify counts. Needs `pip install "carousel-research[server]"` |
 | **Web app (Phase 1B)** | [`apps/web/`](apps/web/) | Next.js: **For You** (ranked papers per radar, new since the last run), **Radars** (describe a topic, review and approve the exact searches it proposes, scan, and see each run's history and source coverage), the **"Why this paper?"** drawer (from the stored run only), save and dismiss, and the **Library** of saved papers. A Playwright test runs the spec's acceptance flow end to end in CI |
+| **Scheduled scans (Phase 2)** | [`src/carousel/workers/schedule.py`](src/carousel/workers/schedule.py), `carousel scheduler` | Radars scan daily or weekly (UTC periods; a manual scan in the period counts). Pausing stops scheduled scans and keeps every run, saved paper, and feedback event. Each recommendation is labelled against the radar's previous scan: **newly published** (after that scan's window) or **newly observed** (older, but new to this radar, e.g. indexed late) |
 | **REST API v1 (Phase 1B)** | [`src/carousel/api/`](src/carousel/api/), [`openapi/carousel-v1.json`](openapi/carousel-v1.json) | FastAPI over Postgres: radars, scans as background jobs (RQ on Redis, `carousel worker`), ranked papers, delta, paper records, "Why this paper?" explanations from the stored run, full-text search, and feedback. Writes need `CAROUSEL_API_TOKEN` when it is set |
 | **Radar configs** | [`examples/`](examples/), [`src/carousel/core/config.py`](src/carousel/core/config.py) | YAML radars with strict validation and `file:line` error messages |
 | **`carousel scan` and the `Radar` API** | [`src/carousel/radar.py`](src/carousel/radar.py), [`src/carousel/cli.py`](src/carousel/cli.py) | One command runs the whole engine: query PubMed and OpenAlex, dedup into the local store, find candidates, rank, and save the run with its coverage. Rescans keep history; feedback in `RADAR.feedback.yml` (save / dismiss / relevant / irrelevant) applies on the next scan. Also `runs`, `delta`, `export`, `feedback`, `review`, `site`, `validate`, `show` |
@@ -161,11 +164,18 @@ carousel worker
 ```
 
 ```bash
+carousel scheduler
+```
+
+```bash
 curl -X POST -H "Authorization: Bearer $CAROUSEL_API_TOKEN" http://127.0.0.1:8000/api/v1/radars/lab-default/runs
 ```
 
 The worker reads `CAROUSEL_DATABASE_URL` and `CAROUSEL_STORE` from its own
-environment, so set them for it too.
+environment, so set them for it too. The scheduler (`carousel scheduler`, or
+`--once` from cron) needs `CAROUSEL_DATABASE_URL` and `CAROUSEL_REDIS_URL`; it
+enqueues each daily or weekly radar's scan once per UTC period, and is safe to
+run more than once.
 
 The web app (Node 20.9 or later) talks to the API through its own server, which
 adds `CAROUSEL_API_TOKEN` to writes, so the token never reaches the browser.
@@ -370,7 +380,7 @@ done-when checks for each task, is in [`CAROUSEL_PLAN.md`](CAROUSEL_PLAN.md).
 | Phase | Focus | Status |
 | --- | --- | --- |
 | **1. Functional MVP** | **Engine:** canonical paper records, OpenAlex + PubMed, careful dedup, lexical + semantic candidates, relevance/novelty/methods ranking with modes, `carousel scan` and a Python `Radar` API. **App:** FastAPI + Postgres/pgvector, Next.js (For You, Radars, Library, "Why this paper?"), save/dismiss, Docker Compose | Done for local use: the engine, Postgres, the REST API, the web app, and Docker Compose |
-| **2. Continuous intelligence** | Scheduled ingestion, Europe PMC + Crossref (retractions, corrections, preprint links), arXiv, versioned explanations, feedback learning, email/RSS digests, evidence-grounded summaries | Planned |
+| **2. Continuous intelligence** | Scheduled ingestion, Europe PMC + Crossref (retractions, corrections, preprint links), arXiv, versioned explanations, feedback learning, email/RSS digests, evidence-grounded summaries | In progress: scheduled scans with pause/resume and newly published vs newly observed labels are done; Crossref is next |
 | **3. Research Delta** | Topic clusters and observations, statistical trend detection (negative binomial, multiple-testing control), the **What's New** change log, **Trends** with baselines and uncertainty | Planned |
 | **4. Advanced discovery** | Method Transfer, literature graphs, Zotero, public API docs, collaborative radars, benchmark dataset, software paper | Planned |
 

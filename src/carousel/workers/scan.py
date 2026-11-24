@@ -7,7 +7,9 @@ The API enqueues :func:`run_scan`; ``carousel worker`` runs it. A scan:
    (SQLite, ``CAROUSEL_STORE``), which does retrieval, dedup, candidates,
    ranking, and run persistence exactly as on the command line;
 3. imports the store into Postgres (idempotent), so the new run, papers, and
-   embeddings become visible to the API.
+   embeddings become visible to the API, and records what triggered the run.
+
+``carousel scheduler`` (:mod:`carousel.workers.schedule`) enqueues scheduled scans.
 
 ``CAROUSEL_HTTP_REPLAY=<dir>`` makes scans read recorded responses from
 ``<dir>/<source>.json`` instead of the network (any unrecorded request fails
@@ -44,7 +46,9 @@ def replay_connectors(directory: str) -> Dict[str, Any]:
 
 def run_scan(radar_id: str, *, top_n: int = 25, max_results: int = 200, mode: Optional[str] = None,
              as_of: Optional[dt.date] = None, embedder: Optional[str] = None, database_url: Optional[str] = None,
-             store_path: Optional[str] = None) -> Dict[str, Any]:
+             store_path: Optional[str] = None, trigger: Optional[str] = None) -> Dict[str, Any]:
+    """Scan one radar. ``trigger`` ('manual' or 'scheduled') is recorded on the new run."""
+    from sqlalchemy import update
     from sqlalchemy.orm import Session
 
     from carousel import feedback as fb
@@ -70,6 +74,12 @@ def run_scan(radar_id: str, *, top_n: int = 25, max_results: int = 200, mode: Op
                 embedder=embedder or os.environ.get("CAROUSEL_EMBEDDER", "auto"),
             )
         import_store(store, engine)
+        if trigger:
+            from carousel.database import models as m
+
+            with Session(engine) as s:
+                s.execute(update(m.RecommendationRun).where(m.RecommendationRun.id == res.run_id).values(trigger=trigger))
+                s.commit()
         return {"run_id": res.run_id, "status": res.run["status"], "n_items": len(res)}
     finally:
         engine.dispose()

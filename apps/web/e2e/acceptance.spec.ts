@@ -48,6 +48,7 @@ test("define a topic, get a ranked list, save and dismiss, rescan without losing
   const titles = await cards.locator("h2").allTextContents();
   expect(new Set(titles.map(norm)).size, "each paper appears once").toBe(titles.length);
   await expect(page.getByText("Latest run from")).toBeVisible();
+  await expect(page.getByTestId("arrivals")).toContainText("first scan");
   const [first, second] = titles;
 
   // ---- why this paper? (from the stored run) ----
@@ -83,6 +84,8 @@ test("define a topic, get a ranked list, save and dismiss, rescan without losing
   const after = await cards.locator("h2").allTextContents();
   expect(after).not.toContain(first); // dismissed: not recommended again
   expect(after).not.toContain(second); // saved: kept in the Library, not re-recommended
+  // Phase 2: arrivals against the previous scan (the same recorded responses, so nothing is new).
+  await expect(page.getByTestId("arrivals")).toContainText("Nothing new since the previous scan");
 
   // ---- without losing history ----
   await nav.getByRole("link", { name: "Library" }).click();
@@ -93,4 +96,20 @@ test("define a topic, get a ranked list, save and dismiss, rescan without losing
   await expect(page.getByText("Earlier run from")).toBeVisible();
   await expect(cards.first()).toHaveAttribute("data-dismissed", "true"); // the first run still has it, now dismissed
   await expect(cards.nth(1).locator("h2")).toHaveText(second);
+
+  // ---- Phase 2: schedule, pause, and resume, keeping history ----
+  await nav.getByRole("link", { name: "Radars" }).click();
+  await expect(page.getByRole("heading", { name: "Radars", level: 1 })).toBeVisible();
+  await page.getByRole("link", { name: scenario.topic, exact: true }).click();
+  await expect(page.getByTestId("schedule-status")).toHaveText("Scans run only when you start them.");
+  await page.getByLabel("Repeat").selectOption("weekly");
+  await page.getByRole("button", { name: "Pause" }).click();
+  await expect(page.getByTestId("schedule-status")).toContainText("Paused");
+  await page.reload();
+  await expect(page.getByLabel("Repeat")).toHaveValue("weekly");
+  await expect(page.getByTestId("run-row")).toHaveCount(2); // pausing keeps every run
+  await page.getByRole("button", { name: "Resume" }).click();
+  await expect(page.getByTestId("schedule-status")).toContainText("Scans weekly");
+  await page.getByLabel("Repeat").selectOption("");
+  await expect(page.getByTestId("schedule-status")).toHaveText("Scans run only when you start them.");
 });
