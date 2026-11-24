@@ -153,6 +153,8 @@ class RankedPapersOut(_Out):
     items: List[RankedItem]
     previous_run_id: Optional[str] = Field(None, description="The run before this one, which arrivals compare with")
     arrivals: Optional[Dict[str, int]] = Field(None, description="Count of items per arrival; null on the first run")
+    events: Dict[str, int] = Field({}, description="Research Delta events this run produced, by label "
+                                                    "(new_publication, retraction, correction, new_version, ...)")
 
 
 class Moved(_Out):
@@ -278,3 +280,22 @@ class DigestDelivery(_Out):
     recipient: Optional[str] = Field(None, description="Email deliveries: the address")
     error: Optional[str] = Field(None, description="Why a delivery failed")
     characters: Optional[int] = Field(None, description="Markdown and RSS: size of what was produced")
+
+
+class EventOut(_Out):
+    event_id: str
+    type: Literal["new_publication", "publication_revision"]
+    kind: Optional[str] = Field(None, description="Revisions: retraction, correction, expression_of_concern, "
+                                                  "new_version, or another update type")
+    radar_id: str
+    run_id: Optional[str] = None
+    date: dt.date = Field(description="The day the run that found it started")
+    paper_id: Optional[str] = None
+    title: Optional[str] = None
+    venue: Optional[str] = None
+    earliest_public_date: Optional[dt.date] = None
+    doi: Optional[str] = None
+    url: Optional[str] = None
+    is_retracted: Optional[bool] = None
+    evidence: Dict[str, Any] = Field(description="The runs, window, notice, or version link the event rests on")
+    events_version: Optional[str] = None

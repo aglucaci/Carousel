@@ -136,6 +136,26 @@ export type RankedPapers = {
   items: RankedItem[];
   previous_run_id?: string | null;
   arrivals?: Record<Arrival, number> | null;
+  /** Research Delta events this run produced, by label (new_publication, retraction, ...). */
+  events?: Record<string, number>;
+};
+
+export type ResearchEvent = {
+  event_id: string;
+  type: "new_publication" | "publication_revision";
+  kind?: string | null;
+  radar_id: string;
+  run_id?: string | null;
+  date: string;
+  paper_id?: string | null;
+  title?: string | null;
+  venue?: string | null;
+  earliest_public_date?: string | null;
+  doi?: string | null;
+  url?: string | null;
+  is_retracted?: boolean | null;
+  evidence: Record<string, unknown>;
+  events_version?: string | null;
 };
 
 export type Delta = {
@@ -298,6 +318,7 @@ export const client = {
     api<Radar>("/radars", { method: "POST", body: schedule ? { config, schedule } : { config } }),
   updateRadar: (id: string, patch: RadarPatch) =>
     api<Radar>(`/radars/${encodeURIComponent(id)}`, { method: "PATCH", body: patch }),
+  events: (id: string) => api<ResearchEvent[]>(`/radars/${encodeURIComponent(id)}/events`),
   digests: (id: string) => api<DigestDelivery[]>(`/radars/${encodeURIComponent(id)}/digests?limit=10`),
   sendDigest: (id: string) =>
     api<DigestDelivery[]>(`/radars/${encodeURIComponent(id)}/digests/email`, { method: "POST" }),

@@ -252,6 +252,13 @@ def _import_store(st: PaperStore, engine: Engine) -> Dict[str, int]:
         _upsert(conn, T["run_observations"], obs, ["run_id", "provider", "provider_id"])
         counts["run_observations"] = len(obs)
 
+        # ---- Research Delta events (derived from stored runs; keyed by the engine's event_id) ----
+        events = [{"event_key": e["event_id"], "type": e["type"], "kind": e["kind"], "radar_id": e["radar_id"],
+                   "run_id": e["run_id"], "paper_id": st.resolve(e["paper_id"]), "date": dt.date.fromisoformat(e["date"]),
+                   "evidence": e["evidence"], "events_version": e["events_version"]} for e in st.events()]
+        _upsert(conn, T["research_events"], events, ["event_key"], ["paper_id", "evidence"])
+        counts["research_events"] = len(events)
+
         # ---- feedback history ----
         fb = [{"radar_id": r["radar_id"], "paper_id": st.resolve(r["paper_id"]), "action": r["action"], "change": r["change"],
                "ref": r["ref"], "origin": "file", "at": _ts(r["at"])} for r in db.execute("SELECT * FROM feedback_events ORDER BY id")]

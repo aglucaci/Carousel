@@ -171,6 +171,14 @@ def create_app(settings: Optional[Settings] = None, *, queue: Any = None) -> Fas
         s.commit()
         return out
 
+    # ---- Research Delta ----
+
+    @app.get(f"{API_PREFIX}/radars/{{radar_id}}/events", response_model=List[schemas.EventOut], tags=["research delta"])
+    def events(radar_id: str, run_id: Optional[str] = None, limit: int = Query(100, ge=1, le=500),
+               s: Session = Depends(session)) -> Any:
+        """What changed: new publications and revisions (corrections, retractions, new versions), newest first."""
+        return services.list_events(s, radar_id, run_id, limit)
+
     # ---- digests ----
 
     @app.get(f"{API_PREFIX}/radars/{{radar_id}}/digest.md", tags=["digests"],

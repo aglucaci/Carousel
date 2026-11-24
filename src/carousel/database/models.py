@@ -284,12 +284,23 @@ class TopicObservation(Base):
 
 
 class ResearchEvent(Base):
+    """A Research Delta event, derived from stored runs (see carousel.intelligence.events).
+
+    Phase 2: ``new_publication`` and ``publication_revision`` (``kind``: retraction, correction, new_version, ...),
+    each about one paper and produced by one run; ``evidence`` names the runs, notices, and links it rests on.
+    """
+
     __tablename__ = "research_events"
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    event_key: Mapped[Optional[str]] = mapped_column(String(32), unique=True)  # the engine's deterministic event_id
     type: Mapped[str] = mapped_column(String(32))
+    kind: Mapped[Optional[str]] = mapped_column(String(32))
     radar_id: Mapped[str] = mapped_column(ForeignKey("radars.id", ondelete="CASCADE"), index=True)
+    run_id: Mapped[Optional[str]] = mapped_column(ForeignKey("recommendation_runs.id", ondelete="CASCADE"), index=True)
+    paper_id: Mapped[Optional[str]] = mapped_column(ForeignKey("papers.id", ondelete="CASCADE"), index=True)
     date: Mapped[dt.date] = mapped_column(Date)
     evidence: Mapped[Dict[str, Any]] = mapped_column(server_default="{}")
+    events_version: Mapped[Optional[str]] = mapped_column(String(16))
     created_at: Mapped[dt.datetime] = _now()
 
 
