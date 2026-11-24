@@ -23,6 +23,8 @@ dev = ["pytest>=8", "httpx>=0.27", "fakeredis>=2.20"]
 semantic = ["sentence-transformers>=3"]
 # Phase 2: the external extraction provider (Claude); the local rule-based provider needs nothing.
 llm = ["anthropic>=2.13"]
+# Phase 3: the topic trend model (negative-binomial GLM, multiple-testing control).
+trends = ["numpy>=1.26", "statsmodels>=0.14"]
 # Phase 1B: Postgres + pgvector storage, migrations, and imports.
 server = [
   "SQLAlchemy>=2.0", "alembic>=1.13", "psycopg[binary]>=3.1", "pgvector>=0.2.5",

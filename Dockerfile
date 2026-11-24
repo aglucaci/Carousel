@@ -6,7 +6,7 @@
 # Without the semantic extra, scans use the dependency-free hashing embedder.
 FROM python:3.12-slim
 
-ARG CAROUSEL_EXTRAS=server
+ARG CAROUSEL_EXTRAS=server,trends
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \

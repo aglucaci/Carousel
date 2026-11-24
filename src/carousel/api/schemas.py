@@ -336,3 +336,12 @@ class TopicSeriesOut(_Out):
     field: Dict[str, List[Dict[str, Any]]] = Field(description="Per source: the radar field's weekly count (denominator)")
     topics: List[Dict[str, Any]] = Field(description="Per topic and source: weekly count, denominator, share, and when "
                                                      "that count was observed")
+
+
+class TopicTrendsOut(_Out):
+    radar_id: str
+    classifier_version: str
+    as_of: dt.datetime = Field(description="Only observations made by this time are used")
+    reports: List[Dict[str, Any]] = Field(description="Per source: trend_model_version, the criteria, and per topic the "
+                                                      "rate ratio with its interval, p and BH q values, recent and "
+                                                      "expected counts, whether it is flagged, and which criteria failed")

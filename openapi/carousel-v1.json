@@ -2159,6 +2159,41 @@
         "title": "TopicSeriesOut",
         "type": "object"
       },
+      "TopicTrendsOut": {
+        "properties": {
+          "as_of": {
+            "description": "Only observations made by this time are used",
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "classifier_version": {
+            "title": "Classifier Version",
+            "type": "string"
+          },
+          "radar_id": {
+            "title": "Radar Id",
+            "type": "string"
+          },
+          "reports": {
+            "description": "Per source: trend_model_version, the criteria, and per topic the rate ratio with its interval, p and BH q values, recent and expected counts, whether it is flagged, and which criteria failed",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Reports",
+            "type": "array"
+          }
+        },
+        "required": [
+          "radar_id",
+          "classifier_version",
+          "as_of",
+          "reports"
+        ],
+        "title": "TopicTrendsOut",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -3485,6 +3520,85 @@
           }
         },
         "summary": "Topic Series",
+        "tags": [
+          "research delta"
+        ]
+      }
+    },
+    "/api/v1/radars/{radar_id}/topics/trends": {
+      "get": {
+        "description": "The trend model for each topic and source, from observations as known at ``as_of`` (default now).",
+        "operationId": "topic_trends_api_v1_radars__radar_id__topics_trends_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "radar_id",
+            "required": true,
+            "schema": {
+              "title": "Radar Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "as_of",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "As Of"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicTrendsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "The [trends] extra is not installed"
+          }
+        },
+        "summary": "Topic Trends",
         "tags": [
           "research delta"
         ]

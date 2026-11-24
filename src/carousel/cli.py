@@ -13,6 +13,7 @@ carousel command-line interface.
     carousel consent list|grant|revoke [PROVIDER] [--text public|private] [--store S]
     carousel topics list|fit|papers RADAR_ID [--store S] [--k K] [--topic TOPIC_ID]
     carousel topics observe RADAR_ID --config RADAR.yml [--weeks N] [--budget N]   # weekly counts per topic
+    carousel topics trends RADAR_ID [--source S] [--as-of ISO]   # needs the [trends] extra
     carousel review link STORE.db PREPRINT_ID PUBLISHED_ID [--note TEXT]   # versions of one work, kept apart
     carousel review unlink STORE.db ID_A ID_B [--note TEXT]          # not versions of one work
 
@@ -389,6 +390,36 @@ def cmd_topics(args: argparse.Namespace) -> int:
         if model is None:
             print(f"no topic model for radar {args.radar!r} yet (it is fitted after enough scans, or: carousel topics fit)")
             return 0 if args.action not in ("papers", "observe") else 1
+        if args.action == "trends":
+            from carousel.intelligence.trends import TrendsUnavailable, trends_from_observations
+
+            rows = store.topic_observations(args.radar, model.classifier_version)
+            as_of = dt.datetime.fromisoformat(args.as_of.replace("Z", "+00:00")) if args.as_of else dt.datetime.now(dt.timezone.utc)
+            if as_of.tzinfo is None:
+                as_of = as_of.replace(tzinfo=dt.timezone.utc)
+            cutoff = as_of.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            sources = [args.source] if args.source else sorted({r["source"] for r in rows if r["observed_at"] <= cutoff})
+            if not sources:
+                print("no observations yet: carousel topics observe first")
+                return 0
+            labels = {t.topic_id: t.label for t in model.topics}
+            try:
+                for src in sources:
+                    rep = trends_from_observations(rows, list(labels), src, as_of)
+                    print(f"{src} ({rep['trend_model_version']}, as of {rep['as_of']})")
+                    for t in sorted(rep["topics"], key=lambda x: (not x["flagged"], x.get("q_value") or 2)):
+                        if t["status"] != "ok":
+                            print(f"  {'':<7} {labels[t['topic_id']][:48]:<48}  {t['status']}")
+                            continue
+                        mark = "FLAGGED" if t["flagged"] else ""
+                        print(f"  {mark:<7} {labels[t['topic_id']][:48]:<48}  x{t['rate_ratio']:.2f} "
+                              f"[{t['ci_low']:.2f}, {t['ci_high']:.2f}] q={t['q_value']:.3f} "
+                              f"{t['recent_count']} vs {t['expected_recent']:.0f} expected"
+                              + (f"  ({', '.join(t['failed'])})" if t["failed"] else ""))
+            except TrendsUnavailable as exc:
+                print(f"FAIL {exc}", file=sys.stderr)
+                return 1
+            return 0
         if args.action == "observe":
             from carousel.connectors import CONNECTORS
             from carousel.core.config import load_radar
@@ -716,7 +747,7 @@ def build_parser() -> argparse.ArgumentParser:
     co.set_defaults(func=cmd_consent)
 
     tp = sub.add_parser("topics", help="A radar's topics: list them, fit a new version, or list a topic's papers")
-    tp.add_argument("action", choices=("list", "fit", "papers", "observe"))
+    tp.add_argument("action", choices=("list", "fit", "papers", "observe", "trends"))
     tp.add_argument("radar", metavar="RADAR_ID")
     tp.add_argument("--store", default="carousel.db")
     tp.add_argument("--k", type=int, help="fit: number of topics (default: chosen by silhouette)")
@@ -724,8 +755,10 @@ def build_parser() -> argparse.ArgumentParser:
                     help="fit: embeddings to cluster (default: semantic when installed)")
     tp.add_argument("--topic", metavar="TOPIC_ID", help="papers: the topic")
     tp.add_argument("--config", metavar="RADAR.yml", help="observe: the radar's config (its queries are the field)")
-    tp.add_argument("--weeks", type=int, default=12, help="observe: complete weeks to count, newest first (default 12)")
+    tp.add_argument("--weeks", type=int, default=16, help="observe: complete weeks to count, newest first (default 16)")
     tp.add_argument("--budget", type=int, default=400, help="observe: most count requests to send (default 400)")
+    tp.add_argument("--source", help="trends: one source only (default: every observed source)")
+    tp.add_argument("--as-of", help="trends: use only observations made by this time (ISO; default now)")
     tp.set_defaults(func=cmd_topics)
 
     ru = sub.add_parser("runs", help="List stored runs")

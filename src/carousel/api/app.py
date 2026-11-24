@@ -179,6 +179,18 @@ def create_app(settings: Optional[Settings] = None, *, queue: Any = None) -> Fas
         """The radar's topic model (the active one, or a given version): topics, sizes, and the refit mapping."""
         return services.radar_topics(s, radar_id, version)
 
+    @app.get(f"{API_PREFIX}/radars/{{radar_id}}/topics/trends", response_model=schemas.TopicTrendsOut,
+             tags=["research delta"], responses={501: {"description": "The [trends] extra is not installed"}})
+    def topic_trends(radar_id: str, as_of: Optional[dt.datetime] = None, source: Optional[str] = None,
+                     s: Session = Depends(session)) -> Any:
+        """The trend model for each topic and source, from observations as known at ``as_of`` (default now)."""
+        from carousel.intelligence.trends import TrendsUnavailable
+
+        try:
+            return services.topic_trends(s, radar_id, as_of, source)
+        except TrendsUnavailable as exc:
+            raise HTTPException(501, str(exc)) from None
+
     @app.get(f"{API_PREFIX}/radars/{{radar_id}}/topics/series", response_model=schemas.TopicSeriesOut,
              tags=["research delta"])
     def topic_series(radar_id: str, as_of: Optional[dt.datetime] = None, source: Optional[str] = None,

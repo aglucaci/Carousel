@@ -6,7 +6,7 @@
 #   OPENALEX_API_KEY, NCBI_API_KEY   source API keys (OpenAlex is skipped without one)
 #   CROSSREF_MAILTO                  an email for Crossref's faster "polite" pool (optional; never stored)
 #   CAROUSEL_API_TOKEN               require a bearer token for API writes (the web app adds it)
-#   CAROUSEL_EXTRAS                  server,semantic  for real embeddings (larger image)
+#   CAROUSEL_EXTRAS                  default server,trends; add semantic for real embeddings (larger image)
 #   POSTGRES_PASSWORD                defaults to "carousel"; ports are bound to localhost only
 #   CAROUSEL_WEB_PORT                defaults to 3000
 #   CAROUSEL_SMTP_HOST, _PORT, _SECURITY, _USER, _PASSWORD, _FROM
@@ -21,7 +21,7 @@ x-carousel: &carousel
   build:
     context: .
     args:
-      CAROUSEL_EXTRAS: ${CAROUSEL_EXTRAS:-server}
+      CAROUSEL_EXTRAS: ${CAROUSEL_EXTRAS:-server,trends}
   environment: &carousel-env
     CAROUSEL_DATABASE_URL: postgresql+psycopg://carousel:${POSTGRES_PASSWORD:-carousel}@postgres:5432/carousel
     CAROUSEL_REDIS_URL: redis://redis:6379/0
