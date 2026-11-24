@@ -34,7 +34,7 @@ FEEDBACK_NOTICEABLE = 0.01
 """A relevance change smaller than this is not reported as feedback's doing."""
 
 _ACTION_WORDS = {"save": "you saved", "relevant": "you marked relevant", "irrelevant": "you marked not relevant"}
-_SOURCE_NAMES = {"pubmed": "PubMed", "openalex": "OpenAlex", "europepmc": "Europe PMC", "crossref": "Crossref"}
+_SOURCE_NAMES = {"pubmed": "PubMed", "openalex": "OpenAlex", "europepmc": "Europe PMC", "crossref": "Crossref", "arxiv": "arXiv"}
 _FLAG_TEXT = {
     "retracted": "A source marks it as retracted.",
     "corrected": "A correction or erratum has been published for it.",

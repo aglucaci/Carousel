@@ -373,7 +373,7 @@ class Radar:
                     conn = conns[name] = CONNECTORS[name]()
                 if conn is None:
                     coverage.append({"source": name, "status": "no_connector",
-                                     "note": "no connector for this source yet (Europe PMC, arXiv, bioRxiv/medRxiv arrive in Phase 2)"})
+                                     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)"})
                     continue
                 native = cfg.source_queries.get(src)
                 query = SearchQuery(terms=list(cfg.queries), exclude=list(cfg.exclude), start=start, end=as_of,

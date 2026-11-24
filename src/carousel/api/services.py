@@ -75,6 +75,7 @@ def propose_radar(s: Session, *, topic: str, research_question: str = "", descri
     """
     from carousel.connectors import CONNECTORS, VERIFIERS, SearchQuery
     from carousel.connectors.openalex import OpenAlexConnector, build_search
+    from carousel.connectors.arxiv import build_query as arxiv_query
     from carousel.connectors.europepmc import build_query as epmc_query
     from carousel.connectors.pubmed import build_term
 
@@ -118,6 +119,12 @@ def propose_radar(s: Session, *, topic: str, research_question: str = "", descri
                              "filters": "titles and abstracts; MEDLINE, PubMed Central, and preprints; first publication date in the window",
                              "notes": ["For recommended papers, keeps open-access full texts under a Creative Commons licence "
                                        "(with that licence) and Europe PMC's text-mined annotations."]})
+        elif name == "arxiv":
+            strategy.append({"source": name, "status": "ready", "query": arxiv_query(q),
+                             "filters": "titles and abstracts; first submission date in the window",
+                             "notes": ["Preprints in physics, mathematics, computer science, quantitative biology, and "
+                                       "statistics. arXiv allows one request every three seconds, so large scans are slower.",
+                                       "A preprint's journal version, when arXiv lists one, is linked, not merged."]})
         elif name in VERIFIERS:
             strategy.append({"source": name, "status": "ready", "query": None,
                              "filters": "looks up the DOIs of the papers the searches find",

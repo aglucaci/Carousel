@@ -1,6 +1,6 @@
 """Re-record the connector fixtures from the live APIs.
 
-    python tests/fixtures/http/record_fixtures.py [pubmed] [openalex] [crossref] [europepmc] [europepmc-scan] [versions]   # default: all
+    python tests/fixtures/http/record_fixtures.py [pubmed] [openalex] [crossref] [europepmc] [europepmc-scan] [versions] [arxiv]   # default: all
 
 crossref records two files: a lookup of known DOIs (a retracted paper and its
 notice, a plain paper, a paper with a preprint and that preprint, and an
@@ -9,6 +9,9 @@ unregistered DOI), and the lookup a scan of the pubmed/openalex fixtures makes.
 europepmc-scan re-records only ``europepmc_scan.json``, replaying the
 requests it already holds and sending only new ones (a scan step added
 later) to the API, so the existing responses stay put.
+
+arxiv records ``arxiv_search.json`` (a paged search) and ``arxiv_extras.json``
+(records by ID, one with a journal DOI, and Crossref's record of that DOI).
 
 versions records ``versions.json``: preprint/article pairs that Europe PMC and
 Crossref link, fetched together and one side at a time.
@@ -23,7 +26,7 @@ from pathlib import Path
 
 import tempfile
 
-from carousel.connectors import (CrossrefConnector, EuropePMCConnector, ExtendingTransport, HttpClient, OpenAlexConnector, PubMedConnector, RecordingTransport,
+from carousel.connectors import (ArxivConnector, CrossrefConnector, EuropePMCConnector, ExtendingTransport, HttpClient, OpenAlexConnector, PubMedConnector, RecordingTransport,
                                  ReplayTransport, SearchQuery)
 from carousel.connectors.base import UrllibTransport
 
@@ -47,6 +50,13 @@ KNOWN_DOIS = [
     "10.26434/chemrxiv-2025-8hnzz",    # that preprint
     "10.9999/carousel-not-registered", # not a Crossref DOI
 ]
+
+# arXiv: broader terms than QUERY so the window has enough preprints to page through.
+ARXIV_QUERY = SearchQuery(terms=["immune escape", "antigenic drift", "viral evolution", "protein language model"],
+                          exclude=["case report"], start=dt.date(2026, 10, 1), end=dt.date(2026, 10, 14), max_results=5)
+ARXIV_RECORDS = ["1404.4197",   # v2; published as 10.1371/journal.ppat.1005526 (arxiv:doi)
+                 "2610.01111"]  # v1; also in openalex_search.json under arXiv's DOI 10.48550/arxiv.2610.01111
+ARXIV_JOURNAL_DOI = "10.1371/journal.ppat.1005526"
 
 QUERY = SearchQuery(
     terms=["immune escape", "antigenic drift"],
@@ -144,8 +154,20 @@ def main(sources) -> None:
             print("  crossref", [(r.source_id, [x.value for x in r.relations]) for r in cr.fetch([doi])])
         print("  ", rec.save())
 
+    if "arxiv" in sources:
+        rec = RecordingTransport(UrllibTransport(timeout=60), HERE / "arxiv_search.json")
+        ax = ArxivConnector(HttpClient(rec, min_interval=3.1), page_size=2)
+        res = ax.search(ARXIV_QUERY)
+        print("arxiv search", res.coverage.total_available, len(res.records), res.coverage.pages, rec.save())
+
+        rec = RecordingTransport(UrllibTransport(timeout=60), HERE / "arxiv_extras.json")
+        client = HttpClient(rec, min_interval=3.1)
+        ax, cr = ArxivConnector(client), CrossrefConnector(client, mailto="")
+        print("  records", [(r.source_id, r.version, [x.value for x in r.relations]) for r in ax.fetch(ARXIV_RECORDS)])
+        print("  journal", [r.source_id for r in cr.fetch([ARXIV_JOURNAL_DOI])], rec.save())
+
 
 if __name__ == "__main__":
     import sys
 
-    main(sys.argv[1:] or ["pubmed", "openalex", "crossref", "europepmc", "versions"])
+    main(sys.argv[1:] or ["pubmed", "openalex", "crossref", "europepmc", "versions", "arxiv"])

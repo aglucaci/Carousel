@@ -22,9 +22,10 @@ const SOURCES = [
   { value: "pubmed", label: "PubMed" },
   { value: "openalex", label: "OpenAlex" },
   { value: "europepmc", label: "Europe PMC (adds preprints; keeps open-access full texts)" },
+  { value: "arxiv", label: "arXiv (preprints in computational and quantitative fields)" },
   { value: "crossref", label: "Crossref (checks corrections and retractions)" },
 ];
-const SEARCHED = ["pubmed", "openalex", "europepmc"]; // Crossref verifies what these find, so at least one is needed
+const SEARCHED = ["pubmed", "openalex", "europepmc", "arxiv"]; // Crossref verifies what these find, so at least one is needed
 
 const field = "mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm";
 
@@ -277,7 +278,6 @@ export default function NewRadarPage() {
                   </label>
                 ))}
               </div>
-              <p className="mt-1 text-xs text-muted">arXiv arrives later in Phase 2.</p>
             </fieldset>
             <div>
               <label htmlFor="window" className="block text-sm font-medium">
