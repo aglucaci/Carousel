@@ -23,7 +23,9 @@ evidence behind it.
     the topic's papers.
 
 Event IDs are stable (the same flag in the same evaluation week, connection,
-or mapping gives the same ID), so repeated scans don't repeat an event.
+or mapping gives the same ID), so repeated scans don't repeat an event. Topic
+IDs are lineages that survive refits while a topic stays the same (task 24),
+so a finding recomputed after such a refit keeps its ID too.
 """
 
 from __future__ import annotations
@@ -68,7 +70,7 @@ def _event(kind: str, radar_id: str, run_id: str, day: str, title: str, papers: 
            evidence: Dict[str, Any], key: Sequence[Any], sub: Optional[str] = None) -> Dict[str, Any]:
     return {"event_id": _key(kind, radar_id, *key), "type": kind, "kind": sub, "radar_id": radar_id, "run_id": run_id,
             "paper_id": papers[0]["paper_id"], "date": day, "title": title, "events_version": TOPIC_EVENTS_VERSION,
-            "evidence": {**evidence, "papers": papers}}
+            "evidence": {**evidence, "title": title, "papers": papers}}
 
 
 def derive_topic_events(store: Any, radar: Any, as_of: dt.datetime, run_id: str = "") -> Dict[str, Any]:
@@ -95,6 +97,7 @@ def derive_topic_events(store: Any, radar: Any, as_of: dt.datetime, run_id: str 
     # ---- topic_acceleration ----
     try:
         from carousel.intelligence.checks import checked_trends, store_topic_papers
+        from carousel.intelligence.observations import counts_as_of, series
 
         rows = store.topic_observations(radar.radar_id, model.classifier_version)
         cutoff = as_of.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -106,8 +109,11 @@ def derive_topic_events(store: Any, radar: Any, as_of: dt.datetime, run_id: str 
             for t in rep["topics"]:
                 if not t["flagged"]:
                     continue
-                through = dt.date.fromisoformat(rep["evaluated_through"])
-                start = through - dt.timedelta(days=7 * rep["criteria"]["recent_weeks"] - 1)
+                weekly = [x for x in series(counts_as_of(rows, as_of), src, t["topic_id"])
+                          if x["week"] <= rep["evaluated_through"]]
+                recent_weeks = weekly[-rep["criteria"]["recent_weeks"]:]  # the weeks the model tested
+                start = dt.date.fromisoformat(recent_weeks[0]["week"])
+                through = dt.date.fromisoformat(recent_weeks[-1]["week"]) + dt.timedelta(days=6)
                 conf = dict(by_topic.get(t["topic_id"], []))
                 papers = sorted(lookup(t["topic_id"], start, through), key=lambda x: (-conf.get(x[0], 0), x[0]))
                 shown = [_paper(store, pid, conf.get(pid)) for pid, _ in papers[:MAX_EVIDENCE_PAPERS]]
@@ -118,9 +124,10 @@ def derive_topic_events(store: Any, radar: Any, as_of: dt.datetime, run_id: str 
                             "q_value": t["q_value"], "recent_count": t["recent_count"], "expected_recent": t["expected_recent"],
                             "method": t["method"], "baseline": t["baseline"], "smoothed_share": t["smoothed_share"],
                             "checks": rep["checks"] + t.get("checks", []), "criteria": rep["criteria"],
-                            "papers_in_window": len(papers)}
+                            "papers_in_window": len(papers), "baseline_share": t.get("baseline_share"),
+                            "weekly": weekly}
                 emit(_event("topic_acceleration", radar.radar_id, run_id, day, labels[t["topic_id"]], shown, evidence,
-                            (src, t["topic_id"], rep["evaluated_through"], model.classifier_version))
+                            (src, t["topic_id"], rep["evaluated_through"]))
                      if shown else None, "no traceable paper in the store for the recent weeks",
                      {"type": "topic_acceleration", "topic_id": t["topic_id"], "source": src})
     except ImportError:
@@ -163,7 +170,7 @@ def derive_topic_events(store: Any, radar: Any, as_of: dt.datetime, run_id: str 
                             "earlier_papers_without_term": len(earlier)}
                 out["events"].append(_event("new_methodological_connection", radar.radar_id, run_id, day,
                                             f"{term} → {labels.get(tid, tid)}", shown, evidence,
-                                            (tid, term, model.classifier_version), sub=term))
+                                            (tid, term), sub=term))
 
     # ---- research_landscape_shift ----
     for row in model.mapping:

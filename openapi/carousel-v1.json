@@ -205,9 +205,19 @@
           },
           "evidence": {
             "additionalProperties": true,
-            "description": "The runs, window, notice, or version link the event rests on",
+            "description": "What the event rests on: runs, window, notice, version link; for topic events the counts, model, checks, and mapping",
             "title": "Evidence",
             "type": "object"
+          },
+          "findings": {
+            "default": [],
+            "description": "New publications: findings from the grounded extraction, each with its quote",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Findings",
+            "type": "array"
           },
           "is_retracted": {
             "anyOf": [
@@ -242,6 +252,16 @@
               }
             ],
             "title": "Paper Id"
+          },
+          "papers": {
+            "default": [],
+            "description": "The publications the event rests on (at least one)",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Papers",
+            "type": "array"
           },
           "radar_id": {
             "title": "Radar Id",
@@ -2246,6 +2266,49 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/events/{event_id}": {
+      "get": {
+        "description": "One event with its evidence and the publications it rests on.",
+        "operationId": "event_api_v1_events__event_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_id",
+            "required": true,
+            "schema": {
+              "title": "Event Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Event",
+        "tags": [
+          "research delta"
+        ]
+      }
+    },
     "/api/v1/feedback": {
       "post": {
         "operationId": "feedback_api_v1_feedback_post",

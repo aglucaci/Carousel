@@ -142,7 +142,12 @@ export type RankedPapers = {
 
 export type ResearchEvent = {
   event_id: string;
-  type: "new_publication" | "publication_revision";
+  type:
+    | "new_publication"
+    | "publication_revision"
+    | "topic_acceleration"
+    | "new_methodological_connection"
+    | "research_landscape_shift";
   kind?: string | null;
   radar_id: string;
   run_id?: string | null;
@@ -156,6 +161,10 @@ export type ResearchEvent = {
   is_retracted?: boolean | null;
   evidence: Record<string, unknown>;
   events_version?: string | null;
+  /** The publications the event rests on (at least one). */
+  papers?: { paper_id: string; title?: string | null; doi?: string | null; earliest_public_date?: string | null; confidence?: number }[];
+  /** New publications: findings from the grounded extraction, each with its quote. */
+  findings?: { text: string; quote: string; section?: string | null; provider: string; coverage?: string | null }[];
 };
 
 export type Delta = {
@@ -333,6 +342,7 @@ export const client = {
   updateRadar: (id: string, patch: RadarPatch) =>
     api<Radar>(`/radars/${encodeURIComponent(id)}`, { method: "PATCH", body: patch }),
   events: (id: string) => api<ResearchEvent[]>(`/radars/${encodeURIComponent(id)}/events`),
+  event: (id: string) => api<ResearchEvent>(`/events/${encodeURIComponent(id)}`),
   digests: (id: string) => api<DigestDelivery[]>(`/radars/${encodeURIComponent(id)}/digests?limit=10`),
   sendDigest: (id: string) =>
     api<DigestDelivery[]>(`/radars/${encodeURIComponent(id)}/digests/email`, { method: "POST" }),

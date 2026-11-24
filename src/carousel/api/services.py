@@ -728,14 +728,50 @@ def list_events(s: Session, radar_id: str, run_id: Optional[str] = None, limit: 
         q = q.where(m.ResearchEvent.run_id == run_id)
     rows = s.execute(q.order_by(m.ResearchEvent.date.desc(), m.ResearchEvent.type, m.ResearchEvent.kind,
                                 m.ResearchEvent.id).limit(limit)).all()
-    ids = _identifiers(s, [p.id for _, p in rows if p is not None])
-    return [{
+    return [_event_out(s, e, p) for e, p in rows]
+
+
+TOPIC_EVENT_TYPES = ("topic_acceleration", "new_methodological_connection", "research_landscape_shift")
+
+
+def _findings(s: Session, paper_id: str, n: int = 2) -> List[Dict[str, Any]]:
+    """The first findings of the paper's newest grounded extraction, each with its quote and section."""
+    e = s.scalars(select(m.PaperExtraction).where(m.PaperExtraction.paper_id == paper_id)
+                  .order_by(m.PaperExtraction.created_at.desc(), m.PaperExtraction.id.desc())).first()
+    if e is None:
+        return []
+    sections = {p["id"]: p["section"] for p in e.passages}
+    claims = ((e.fields or {}).get("findings") or {}).get("claims") or []
+    return [{"text": c["text"], "quote": c["evidence"][0]["quote"], "passage_id": c["evidence"][0]["passage_id"],
+             "section": sections.get(c["evidence"][0]["passage_id"]), "provider": e.provider,
+             "coverage": (e.coverage or {}).get("scope")} for c in claims[:n] if c.get("evidence")]
+
+
+def _event_out(s: Session, e: m.ResearchEvent, p: Optional[m.Paper]) -> Dict[str, Any]:
+    doi = _identifiers(s, [p.id]).get(p.id, {}).get("doi") if p else None
+    if e.type in TOPIC_EVENT_TYPES:
+        papers = list((e.evidence or {}).get("papers") or [])
+        title = (e.evidence or {}).get("title") or None
+    else:
+        papers = [{"paper_id": p.id, "title": p.title, "doi": doi,
+                   "earliest_public_date": p.earliest_public_date.isoformat() if p.earliest_public_date else None}] if p else []
+        title = None
+    return {
         "event_id": e.event_key or str(e.id), "type": e.type, "kind": e.kind, "radar_id": e.radar_id, "run_id": e.run_id,
-        "date": e.date, "paper_id": e.paper_id, "title": p.title if p else None, "venue": p.venue if p else None,
-        "earliest_public_date": p.earliest_public_date if p else None, "doi": ids.get(p.id, {}).get("doi") if p else None,
+        "date": e.date, "paper_id": e.paper_id, "title": title or (p.title if p else None),
+        "venue": p.venue if p else None, "earliest_public_date": p.earliest_public_date if p else None, "doi": doi,
         "url": p.url if p else None, "is_retracted": p.is_retracted if p else None, "evidence": e.evidence,
-        "events_version": e.events_version,
-    } for e, p in rows]
+        "events_version": e.events_version, "papers": papers,
+        "findings": _findings(s, p.id) if p is not None and e.type == "new_publication" else [],
+    }
+
+
+def get_event(s: Session, event_id: str) -> Dict[str, Any]:
+    row = s.execute(select(m.ResearchEvent, m.Paper).join(m.Paper, m.Paper.id == m.ResearchEvent.paper_id, isouter=True)
+                    .where(m.ResearchEvent.event_key == event_id)).first()
+    if row is None:
+        raise NotFound(f"event {event_id!r}")
+    return _event_out(s, *row)
 
 
 # -------------------------

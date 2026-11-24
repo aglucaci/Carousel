@@ -303,8 +303,12 @@ class EventOut(_Out):
     doi: Optional[str] = None
     url: Optional[str] = None
     is_retracted: Optional[bool] = None
-    evidence: Dict[str, Any] = Field(description="The runs, window, notice, or version link the event rests on")
+    evidence: Dict[str, Any] = Field(description="What the event rests on: runs, window, notice, version link; for topic "
+                                                 "events the counts, model, checks, and mapping")
     events_version: Optional[str] = None
+    papers: List[Dict[str, Any]] = Field([], description="The publications the event rests on (at least one)")
+    findings: List[Dict[str, Any]] = Field([], description="New publications: findings from the grounded extraction, "
+                                                           "each with its quote")
 
 
 class TopicOut(_Out):
