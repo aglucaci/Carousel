@@ -20,6 +20,29 @@ function arrivalsLine(a: RankedPapers["arrivals"]): ReactNode {
   );
 }
 
+const EVENT_WORDS: Record<string, [string, string]> = {
+  new_publication: ["new publication", "new publications"],
+  retraction: ["retraction", "retractions"],
+  correction: ["correction", "corrections"],
+  expression_of_concern: ["expression of concern", "expressions of concern"],
+  new_version: ["newly linked version", "newly linked versions"],
+};
+
+function eventsLine(events: RankedPapers["events"], radarId: string, hasPrevious: boolean): ReactNode {
+  const entries = Object.entries(events ?? {});
+  if (!hasPrevious) return null;
+  if (!entries.length) return <span className="text-muted">No new publications or revisions in this scan.</span>;
+  const words = entries.map(([k, n]) => `${n} ${(EVENT_WORDS[k] ?? [k.replaceAll("_", " "), k.replaceAll("_", " ")])[n === 1 ? 0 : 1]}`);
+  return (
+    <>
+      What changed: {words.join(", ")}.{" "}
+      <Link href={`/whats-new?radar=${encodeURIComponent(radarId)}`} className="text-accent hover:underline">
+        See What&apos;s New
+      </Link>
+    </>
+  );
+}
+
 function feedbackLine(run: RankedPapers["run"]): ReactNode {
   const e = run.feedback_effect;
   if (!e) return null;
@@ -88,6 +111,9 @@ function Feed({ radarId, runId }: { radarId: string; runId?: string }) {
         </p>
         <p data-testid="arrivals" className="mt-1">
           {arrivalsLine(data.arrivals)}
+        </p>
+        <p data-testid="events-line" className="mt-1">
+          {eventsLine(data.events, radarId, !!data.previous_run_id)}
         </p>
         {run.feedback_effect && (
           <p data-testid="feedback-effect" className="mt-1">

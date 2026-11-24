@@ -75,6 +75,8 @@ class Digest:
     feedback: Optional[str]
     explanation_version: Optional[str]
     app_url: Optional[str] = None        # link back to the run in the app, when CAROUSEL_PUBLIC_URL is set
+    changes: Tuple[str, ...] = ()        # revisions to papers the radar watches (Research Delta), one line each
+    new_publications: int = 0            # new_publication events in this run
 
     @property
     def title(self) -> str:
@@ -91,6 +93,8 @@ class Digest:
         else:
             lines.append(f"Since the previous scan: {self.arrivals.get('newly_published', 0)} newly published, "
                          f"{self.arrivals.get('newly_observed', 0)} newly observed (older, but new to this radar).")
+        if self.new_publications:
+            lines.append(f"New publications (never seen by this radar, published in the window): {self.new_publications}.")
         if self.feedback:
             lines.append(self.feedback)
         return lines
@@ -137,6 +141,27 @@ def _feedback_line(stats: Mapping[str, Any]) -> Optional[str]:
     return f"Your feedback ({given}) changed this list: {', '.join(parts)}, compared with the same run ranked without it."
 
 
+REVISION_LABELS = {"retraction": "Retracted", "correction": "Corrected", "erratum": "Erratum",
+                   "expression_of_concern": "Expression of concern", "new_version": "New version linked",
+                   "partial_retraction": "Partially retracted", "withdrawal": "Withdrawn", "removal": "Removed"}
+
+
+def change_line(e: Mapping[str, Any]) -> str:
+    """One revision event as a sentence, with the evidence a reader can check."""
+    ev = e.get("evidence") or {}
+    label = REVISION_LABELS.get(e.get("kind") or "", (e.get("kind") or "Updated").replace("_", " ").capitalize())
+    text = f"{label}: {e.get('title') or e.get('paper_id')}"
+    n = ev.get("notice") or {}
+    if n.get("notice_doi"):
+        who = {"retraction-watch": "Retraction Watch"}.get(n.get("asserted_by") or "", n.get("asserted_by"))
+        text += f" (notice https://doi.org/{n['notice_doi']}" + (f", reported by {who}" if who else "") + ")"
+    v = ev.get("version") or {}
+    if v:
+        text += f" (its {'preprint' if v.get('role') == 'preprint' else 'published version'} is now linked"
+        text += f" by {', '.join(v.get('linked_by') or ['a source'])})"
+    return text
+
+
 def _url(paper: Mapping[str, Any]) -> Optional[str]:
     if paper.get("doi"):
         return f"https://doi.org/{paper['doi']}"
@@ -145,7 +170,7 @@ def _url(paper: Mapping[str, Any]) -> Optional[str]:
 
 def digest_from_run(run: Mapping[str, Any], items: Sequence[Mapping[str, Any]], *, radar_name: str,
                     arrivals: Optional[Mapping[str, str]], executed_at: dt.datetime,
-                    app_url: Optional[str] = None) -> Digest:
+                    app_url: Optional[str] = None, events: Sequence[Mapping[str, Any]] = ()) -> Digest:
     """A digest from a stored run.
 
     ``run`` holds run_id, radar_id, as_of, n_candidates, coverage, ranking (with stats), explanation_version;
@@ -170,7 +195,9 @@ def digest_from_run(run: Mapping[str, Any], items: Sequence[Mapping[str, Any]], 
     return Digest(radar_id=run["radar_id"], radar_name=radar_name, run_id=run["run_id"], as_of=str(run["as_of"]),
                   executed_at=executed_at, n_candidates=run.get("n_candidates") or 0, items=tuple(out), arrivals=counts,
                   coverage=cov, feedback=_feedback_line(stats), explanation_version=run.get("explanation_version"),
-                  app_url=link)
+                  app_url=link,
+                  changes=tuple(change_line(e) for e in events if e.get("type") == "publication_revision"),
+                  new_publications=sum(1 for e in events if e.get("type") == "new_publication"))
 
 
 def arrivals_from_store(store: Any, run: Mapping[str, Any]) -> Optional[Dict[str, str]]:
@@ -213,6 +240,8 @@ def _md(text: str) -> str:
 
 def to_markdown(d: Digest) -> str:
     lines = [f"# {_md(d.title)}", ""] + [_md(x) for x in d.intro] + [""]
+    if d.changes:
+        lines += ["## Changes to papers you've seen", ""] + [f"- {_md(c)}" for c in d.changes] + [""]
     for it in d.items:
         title = f"[{_md(it.title)}]({it.url})" if it.url else _md(it.title)
         lines.append(f"## {it.rank}. {title}")
@@ -277,6 +306,8 @@ def to_rss(digests: Iterable[Digest], *, radar_id: str, radar_name: str, link: O
 
 def _text(d: Digest) -> str:
     lines = [d.title, "=" * len(d.title), ""] + d.intro + [""]
+    if d.changes:
+        lines += ["Changes to papers you've seen:"] + [f"- {c}" for c in d.changes] + [""]
     for it in d.items:
         lines.append(f"{it.rank}. {it.title}")
         for x in (it.meta, " · ".join(it.labels), f"Why: {it.why}." if it.why else "", it.url or ""):
@@ -296,6 +327,9 @@ def _html(d: Digest) -> str:
     out = [f'<div style="font-family:Georgia,serif;max-width:640px;margin:auto;color:#1f2328">',
            f"<h1 style=\"font-size:22px\">{e(d.title)}</h1>"]
     out += [f'<p style="font-family:sans-serif;font-size:14px;color:#57606a">{e(x)}</p>' for x in d.intro]
+    if d.changes:
+        out.append('<h2 style="font-size:17px">Changes to papers you\'ve seen</h2><ul style="font-family:sans-serif;font-size:14px">'
+                   + "".join(f"<li>{e(c)}</li>" for c in d.changes) + "</ul>")
     for it in d.items:
         title = f'<a href="{e(it.url)}" style="color:#1f4e79">{e(it.title)}</a>' if it.url else e(it.title)
         out.append(f'<h2 style="font-size:17px;margin:20px 0 4px">{it.rank}. {title}</h2>')

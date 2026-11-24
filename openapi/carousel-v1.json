@@ -157,6 +157,159 @@
         "title": "DigestDelivery",
         "type": "object"
       },
+      "EventOut": {
+        "properties": {
+          "date": {
+            "description": "The day the run that found it started",
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "doi": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Doi"
+          },
+          "earliest_public_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Earliest Public Date"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "events_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Events Version"
+          },
+          "evidence": {
+            "additionalProperties": true,
+            "description": "The runs, window, notice, or version link the event rests on",
+            "title": "Evidence",
+            "type": "object"
+          },
+          "is_retracted": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Retracted"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Revisions: retraction, correction, expression_of_concern, new_version, or another update type",
+            "title": "Kind"
+          },
+          "paper_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paper Id"
+          },
+          "radar_id": {
+            "title": "Radar Id",
+            "type": "string"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "type": {
+            "enum": [
+              "new_publication",
+              "publication_revision"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "venue": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Venue"
+          }
+        },
+        "required": [
+          "event_id",
+          "type",
+          "radar_id",
+          "date",
+          "evidence"
+        ],
+        "title": "EventOut",
+        "type": "object"
+      },
       "ExplanationOut": {
         "properties": {
           "details": {
@@ -1284,6 +1437,15 @@
             ],
             "description": "Count of items per arrival; null on the first run",
             "title": "Arrivals"
+          },
+          "events": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "default": {},
+            "description": "Research Delta events this run produced, by label (new_publication, retraction, correction, new_version, ...)",
+            "title": "Events",
+            "type": "object"
           },
           "items": {
             "items": {
@@ -2677,6 +2839,81 @@
         "summary": "Send Digest",
         "tags": [
           "digests"
+        ]
+      }
+    },
+    "/api/v1/radars/{radar_id}/events": {
+      "get": {
+        "description": "What changed: new publications and revisions (corrections, retractions, new versions), newest first.",
+        "operationId": "events_api_v1_radars__radar_id__events_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "radar_id",
+            "required": true,
+            "schema": {
+              "title": "Radar Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "run_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EventOut"
+                  },
+                  "title": "Response Events Api V1 Radars  Radar Id  Events Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Events",
+        "tags": [
+          "research delta"
         ]
       }
     },

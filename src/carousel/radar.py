@@ -30,6 +30,7 @@ from carousel.core.config import Mode, RadarConfig, load_radar
 from carousel.core.paper import CanonicalPaper
 from carousel.database.local import PaperStore, _iso
 from carousel.ingestion.versions import fetch_linked, link_versions
+from carousel.intelligence.events import events_for_run, paper_state, watched_papers
 from carousel import feedback as fb
 from carousel.ranking import rank
 from carousel.ranking.explain import EXPLANATION_VERSION, explain
@@ -459,6 +460,17 @@ class Radar:
                 "coverage": coverage, "ranking": ranking_meta, "notes": notes,
             }
             st.save_run(run, items, observations)
+
+            # ---- Research Delta: snapshot the watched papers, then derive this run's events from stored runs ----
+            earlier = [st.get_run(r["run_id"]) for r in st.list_runs(self.radar_id) if r["started_at"] < started_iso]
+            followed = [pid for pid, action in state if action in fb.POSITIVE]
+            states = {}
+            for pid in sorted({st.resolve(p) for p in watched_papers(earlier, items, followed)}):
+                paper = st.get(pid)
+                if paper is not None:
+                    states[pid] = paper_state(paper, st.version_links(pid))
+            st.save_paper_states(run_id, states)
+            st.save_events(events_for_run(st, run_id))
             prev_id = st.previous_run_id(self.radar_id, started_iso)
             saved = st.get_run(run_id)
             return ScanResults(saved, st.get_run(prev_id) if prev_id else None, self.summary())  # type: ignore[arg-type]

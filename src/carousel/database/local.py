@@ -57,7 +57,7 @@ from carousel.ingestion.dedup import MatchDecision, best_match, title_tokens
 if TYPE_CHECKING:
     from carousel.core.fulltext import Annotation, PaperText
 
-STORE_SCHEMA_VERSION = 7
+STORE_SCHEMA_VERSION = 8
 
 _DDL = """
 CREATE TABLE IF NOT EXISTS meta (
@@ -234,6 +234,25 @@ CREATE TABLE IF NOT EXISTS link_checks (            -- linked works looked up at
     checked_at TEXT NOT NULL,
     PRIMARY KEY (scheme, value)
 );
+CREATE TABLE IF NOT EXISTS run_paper_states (       -- per run: the state of every paper the radar watches
+    run_id   TEXT NOT NULL,
+    paper_id TEXT NOT NULL,
+    state    TEXT NOT NULL,                      -- JSON {title, doi, retracted, notices, versions}
+    PRIMARY KEY (run_id, paper_id)
+);
+CREATE TABLE IF NOT EXISTS research_events (         -- Research Delta events, derived from stored runs
+    event_id       TEXT PRIMARY KEY,
+    radar_id       TEXT NOT NULL,
+    run_id         TEXT NOT NULL,
+    type           TEXT NOT NULL,                -- new_publication | publication_revision
+    kind           TEXT,                         -- revisions: retraction | correction | new_version | ...
+    paper_id       TEXT NOT NULL,
+    date           TEXT NOT NULL,
+    title          TEXT,
+    evidence       TEXT NOT NULL,                -- JSON: the runs, notices, and links it rests on
+    events_version TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS research_events_radar ON research_events(radar_id, date);
 CREATE TABLE IF NOT EXISTS merge_log (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
     at        TEXT NOT NULL,
@@ -913,6 +932,37 @@ class PaperStore:
         rows = self.db.execute("SELECT * FROM merge_log ORDER BY id").fetchall()
         return [{**dict(r), "detail": json.loads(r["detail"])} for r in rows]
 
+    # ---- Research Delta: watched-paper snapshots and events ----
+
+    def save_paper_states(self, run_id: str, states: Dict[str, Dict[str, Any]]) -> None:
+        with self.db:
+            self.db.executemany("INSERT OR REPLACE INTO run_paper_states VALUES (?, ?, ?)",
+                                [(run_id, pid, json.dumps(st, sort_keys=True, ensure_ascii=False))
+                                 for pid, st in sorted(states.items())])
+
+    def paper_states(self, run_id: str) -> Dict[str, Dict[str, Any]]:
+        """The run's snapshot, keyed by the paper ID as it is now (following merges)."""
+        rows = self.db.execute("SELECT paper_id, state FROM run_paper_states WHERE run_id = ? ORDER BY paper_id", (run_id,))
+        return {self.resolve(r["paper_id"]): json.loads(r["state"]) for r in rows}
+
+    def save_events(self, events: Sequence[Dict[str, Any]]) -> None:
+        with self.db:
+            self.db.executemany(
+                "INSERT OR REPLACE INTO research_events VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [(e["event_id"], e["radar_id"], e["run_id"], e["type"], e.get("kind"), e["paper_id"], e["date"],
+                  e.get("title"), json.dumps(e["evidence"], sort_keys=True, ensure_ascii=False), e["events_version"])
+                 for e in events])
+
+    def events(self, radar_id: Optional[str] = None, run_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Stored events, newest first (by date, then type, kind, and paper)."""
+        sql, args = "SELECT * FROM research_events WHERE 1 = 1", []
+        if radar_id:
+            sql, args = sql + " AND radar_id = ?", args + [radar_id]
+        if run_id:
+            sql, args = sql + " AND run_id = ?", args + [run_id]
+        rows = self.db.execute(sql + " ORDER BY date DESC, type, kind, paper_id, event_id", args)
+        return [{**dict(r), "evidence": json.loads(r["evidence"])} for r in rows]
+
     # ---- reads ----
 
     def resolve(self, paper_id: str) -> str:
@@ -1046,6 +1096,7 @@ class PaperStore:
             "conflicts": q("SELECT COUNT(*) FROM identifier_conflicts"),
             "review_pending": q("SELECT COUNT(*) FROM review_queue WHERE status = 'pending'"),
             "version_links": q("SELECT COUNT(*) FROM paper_links"),
+            "events": q("SELECT COUNT(*) FROM research_events"),
             "runs": q("SELECT COUNT(*) FROM recommendation_runs"),
             "embeddings": dict(self.db.execute(
                 "SELECT model_version, COUNT(*) FROM embeddings GROUP BY model_version ORDER BY model_version").fetchall()),

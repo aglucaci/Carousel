@@ -192,7 +192,8 @@ def _store_digest(store, run: dict, radar_name: str):
 
     executed = dt.datetime.strptime(run["started_at"], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=dt.timezone.utc)
     return digest_from_run(run, run["items"], radar_name=radar_name, arrivals=arrivals_from_store(store, run),
-                           executed_at=executed, app_url=os.environ.get("CAROUSEL_PUBLIC_URL"))
+                           executed_at=executed, app_url=os.environ.get("CAROUSEL_PUBLIC_URL"),
+                           events=store.events(run_id=run["run_id"]))
 
 
 def write_digests(store, radar_id: str, radar_name: str, run_id: str, out_dir: str) -> list:

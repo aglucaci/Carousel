@@ -317,6 +317,7 @@ def ranked_papers(s: Session, radar_id: str, run_id: Optional[str] = None) -> Di
         } for it in items],
         "previous_run_id": previous_run_id,
         "arrivals": {a: sum(1 for v in arrival.values() if v == a) for a in ARRIVALS} if previous_run_id else None,
+        "events": event_counts(s, run.id),
     }
 
 
@@ -587,7 +588,7 @@ def _digest(s: Session, radar: m.Radar, run: m.RecommendationRun):
          "coverage": run.coverage, "ranking": run.ranking, "explanation_version": run.explanation_version},
         [{"rank": it.rank, "paper_id": it.paper_id, "flags": it.flags, "details": it.explanation} for it in items],
         radar_name=radar.title, arrivals=arrival if previous else None, executed_at=run.executed_at,
-        app_url=os.environ.get("CAROUSEL_PUBLIC_URL"))
+        app_url=os.environ.get("CAROUSEL_PUBLIC_URL"), events=list_events(s, radar.id, run.id, limit=500))
 
 
 def _radar(s: Session, radar_id: str) -> m.Radar:
@@ -679,3 +680,38 @@ def digest_deliveries(s: Session, radar_id: str, limit: int = 30) -> List[Dict[s
     rows = s.scalars(select(m.DigestRun).where(m.DigestRun.radar_id == radar_id)
                      .order_by(m.DigestRun.generated_at.desc(), m.DigestRun.id.desc()).limit(limit)).all()
     return [_delivery(r) for r in rows]
+
+
+# -------------------------
+# Research Delta events (plan task 21)
+# -------------------------
+
+def _event_label(e: m.ResearchEvent) -> str:
+    return e.type if e.type == "new_publication" else (e.kind or e.type)
+
+
+def event_counts(s: Session, run_id: str) -> Dict[str, int]:
+    """Events a run produced, by label: new_publication, retraction, correction, new_version, ..."""
+    out: Dict[str, int] = {}
+    for e in s.scalars(select(m.ResearchEvent).where(m.ResearchEvent.run_id == run_id)):
+        out[_event_label(e)] = out.get(_event_label(e), 0) + 1
+    return dict(sorted(out.items()))
+
+
+def list_events(s: Session, radar_id: str, run_id: Optional[str] = None, limit: int = 100) -> List[Dict[str, Any]]:
+    """The radar's events, newest first, each with the paper it is about and the evidence it rests on."""
+    _radar(s, radar_id)
+    q = (select(m.ResearchEvent, m.Paper).join(m.Paper, m.Paper.id == m.ResearchEvent.paper_id, isouter=True)
+         .where(m.ResearchEvent.radar_id == radar_id))
+    if run_id:
+        q = q.where(m.ResearchEvent.run_id == run_id)
+    rows = s.execute(q.order_by(m.ResearchEvent.date.desc(), m.ResearchEvent.type, m.ResearchEvent.kind,
+                                m.ResearchEvent.id).limit(limit)).all()
+    ids = _identifiers(s, [p.id for _, p in rows if p is not None])
+    return [{
+        "event_id": e.event_key or str(e.id), "type": e.type, "kind": e.kind, "radar_id": e.radar_id, "run_id": e.run_id,
+        "date": e.date, "paper_id": e.paper_id, "title": p.title if p else None, "venue": p.venue if p else None,
+        "earliest_public_date": p.earliest_public_date if p else None, "doi": ids.get(p.id, {}).get("doi") if p else None,
+        "url": p.url if p else None, "is_retracted": p.is_retracted if p else None, "evidence": e.evidence,
+        "events_version": e.events_version,
+    } for e, p in rows]

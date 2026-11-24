@@ -111,6 +111,11 @@ test("define a topic, get a ranked list, save and dismiss, rescan without losing
   await expect(page.getByTestId("arrivals")).toContainText("Nothing new since the previous scan");
   // The feedback measurably changed this ranking, compared with the same run ranked without it.
   await expect(page.getByTestId("feedback-effect")).toContainText("Your feedback (2 saved or relevant, 1 not relevant) changed this list");
+  // Research Delta: the same recorded responses again, so no new publications and no revisions.
+  await expect(page.getByTestId("events-line")).toHaveText("No new publications or revisions in this scan.");
+  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "What's New" }).click();
+  await expect(page.getByRole("heading", { name: "What's New", level: 1 })).toBeVisible();
+  await expect(page.getByText("Nothing has changed yet")).toBeVisible();
 
   // ---- without losing history ----
   await nav.getByRole("link", { name: "Library" }).click();
