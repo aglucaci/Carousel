@@ -36,7 +36,7 @@ OBSERVATIONS_VERSION = "observations-1"
 FIELD = "__field__"
 """``topic_id`` of the denominator rows: the radar's whole field."""
 TOPIC_TERMS = 4
-DEFAULT_WEEKS = 12
+DEFAULT_WEEKS = 16  # 8 baseline + 4 recent + a week for the persistence check, with room to spare
 DEFAULT_BUDGET = 400
 COUNTING_SOURCES = ("pubmed", "europepmc", "openalex", "arxiv")
 

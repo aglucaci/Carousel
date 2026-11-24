@@ -48,7 +48,7 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev,server]"
+          pip install -e ".[dev,server,trends]"
 
       - name: Unit tests
         run: python -m pytest -q

@@ -770,6 +770,37 @@ def radar_topics(s: Session, radar_id: str, version: Optional[str] = None) -> Di
     }
 
 
+def _observation_rows(s: Session, radar_id: str, version: str, source: Optional[str]) -> List[Dict[str, Any]]:
+    q = select(m.TopicObservation).where(m.TopicObservation.radar_id == radar_id,
+                                         m.TopicObservation.classifier_version == version)
+    if source:
+        q = q.where(m.TopicObservation.source == source)
+    return [{"source": o.source, "topic_id": o.topic_key, "period_start": o.window_start.isoformat(),
+             "period_end": o.window_end.isoformat(), "count": o.count, "status": o.status,
+             "observed_at": o.observed_at.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")}
+            for o in s.scalars(q)]
+
+
+def topic_trends(s: Session, radar_id: str, as_of: Optional[dt.datetime] = None,
+                 source: Optional[str] = None) -> Dict[str, Any]:
+    """The trend model over each source's observations as known at ``as_of`` (raises TrendsUnavailable)."""
+    from carousel.intelligence.trends import trends_from_observations
+
+    model = radar_topics(s, radar_id)
+    as_of = as_of or dt.datetime.now(dt.timezone.utc)
+    rows = _observation_rows(s, radar_id, model["classifier_version"], source)
+    cutoff = as_of.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    sources = sorted({r["source"] for r in rows if r["observed_at"] <= cutoff})  # only what was known then
+    labels = {t["topic_id"]: t["label"] for t in model["topics"]}
+    reports = []
+    for src in sources:
+        rep = trends_from_observations(rows, list(labels), src, as_of)
+        for t in rep["topics"]:
+            t["label"] = labels.get(t["topic_id"])
+        reports.append(rep)
+    return {"radar_id": radar_id, "classifier_version": model["classifier_version"], "as_of": as_of, "reports": reports}
+
+
 def topic_series(s: Session, radar_id: str, as_of: Optional[dt.datetime] = None,
                  source: Optional[str] = None) -> Dict[str, Any]:
     """Each topic's weekly counts and the field denominator, as known at ``as_of`` (default: now)."""
@@ -777,14 +808,7 @@ def topic_series(s: Session, radar_id: str, as_of: Optional[dt.datetime] = None,
 
     model = radar_topics(s, radar_id)
     as_of = as_of or dt.datetime.now(dt.timezone.utc)
-    q = select(m.TopicObservation).where(m.TopicObservation.radar_id == radar_id,
-                                         m.TopicObservation.classifier_version == model["classifier_version"])
-    if source:
-        q = q.where(m.TopicObservation.source == source)
-    rows = [{"source": o.source, "topic_id": o.topic_key, "period_start": o.window_start.isoformat(),
-             "period_end": o.window_end.isoformat(), "count": o.count, "status": o.status,
-             "observed_at": o.observed_at.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")}
-            for o in s.scalars(q)]
+    rows = _observation_rows(s, radar_id, model["classifier_version"], source)
     known = counts_as_of(rows, as_of)
     sources = sorted({k[0] for k in known})
     return {
