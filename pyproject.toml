@@ -21,6 +21,8 @@ dev = ["pytest>=8", "httpx>=0.27", "fakeredis>=2.20"]
 # Real semantic retrieval (sentence-transformers + torch). Without it, CAROUSEL
 # falls back to the dependency-free, non-semantic HashingEmbedder.
 semantic = ["sentence-transformers>=3"]
+# Phase 2: the external extraction provider (Claude); the local rule-based provider needs nothing.
+llm = ["anthropic>=2.13"]
 # Phase 1B: Postgres + pgvector storage, migrations, and imports.
 server = [
   "SQLAlchemy>=2.0", "alembic>=1.13", "psycopg[binary]>=3.1", "pgvector>=0.2.5",

@@ -385,8 +385,22 @@ def paper_detail(s: Session, paper_id: str) -> Dict[str, Any]:
         "open_access": (p.canonical or {}).get("open_access"),
         "texts": _texts(s, p.id),
         "versions": _versions(s, p.id),
+        "extractions": _extractions(s, p.id),
         "annotations": _annotations(s, p.id),
     }
+
+
+def _extractions(s: Session, paper_id: str) -> List[Dict[str, Any]]:
+    """The newest grounded extraction per provider (only cited passages are stored, so every quote is checkable)."""
+    rows = s.scalars(select(m.PaperExtraction).where(m.PaperExtraction.paper_id == paper_id)
+                     .order_by(m.PaperExtraction.created_at.desc(), m.PaperExtraction.id.desc())).all()
+    out: Dict[str, Dict[str, Any]] = {}
+    for e in rows:
+        out.setdefault(e.provider, {
+            "provider": e.provider, "model_version": e.model_version, "schema_version": e.schema_version,
+            "location": e.location, "coverage": e.coverage, "fields": e.fields, "passages": e.passages,
+            "rejected": len(e.rejected or []), "created_at": e.created_at})
+    return list(out.values())
 
 
 def _versions(s: Session, paper_id: str) -> List[Dict[str, Any]]:

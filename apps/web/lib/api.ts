@@ -233,6 +233,19 @@ export type PaperVersion = {
   evidence?: { method: string; relation?: string; asserted_by?: string; note?: string }[];
 };
 
+export type ExtractionClaim = { text: string; evidence: { passage_id: string; quote: string }[] };
+export type PaperExtraction = {
+  provider: string;
+  model_version: string;
+  schema_version: string;
+  location: "local" | "external";
+  coverage: { scope: "abstract_only" | "full_text" | "user_text"; statement: string; passages: number };
+  fields: Record<string, { status: "reported" | "not_reported"; claims: ExtractionClaim[] }>;
+  passages: { id: string; section: string; text: string }[];
+  rejected: number;
+  created_at: string;
+};
+
 export type Paper = {
   paper_id: string;
   title?: string | null;
@@ -245,6 +258,7 @@ export type Paper = {
   texts?: PaperTextInfo[];
   annotations?: PaperAnnotation[];
   versions?: PaperVersion[];
+  extractions?: PaperExtraction[];
 };
 
 export type StrategyStep = { source: string; status: string; query?: string | null; filters?: string | null; notes: string[] };

@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useRef, useState } from "react";
-import { client, useApi, type Explanation, type PaperVersion } from "@/lib/api";
+import { client, useApi, type Explanation, type PaperExtraction, type PaperVersion } from "@/lib/api";
 import { PaperMeta, PaperTitle } from "./PaperCard";
 import { Badge, Button, FLAGS, Flag, Loading, coverageLine, fmtDate, fmtDateTime, sourceName } from "./ui";
 
@@ -248,6 +248,64 @@ function licenceName(l?: string | null) {
   return l.startsWith("cc") ? l.toUpperCase().replace(/^CC-/, "CC ").replace(/-(\d)/, " $1") : l;
 }
 
+const EXTRACTION_FIELDS: [string, string][] = [
+  ["objective", "Objective"],
+  ["study_design", "Study design"],
+  ["population", "Population"],
+  ["sample_size", "Sample size"],
+  ["methods", "Methods"],
+  ["findings", "Findings"],
+  ["limitations", "Limitations"],
+  ["data_availability", "Data availability"],
+];
+const PROVIDERS: Record<string, string> = { rules: "rule-based extraction", anthropic: "Claude" };
+
+/** Grounded extraction: each claim with the passage it quotes (current record, not from the stored run). */
+function Extracted({ paperId }: { paperId: string }) {
+  const { data } = useApi(() => client.paper(paperId), [paperId]);
+  const e: PaperExtraction | undefined = (data?.extractions ?? []).find((x) => x.provider !== "rules") ?? data?.extractions?.[0];
+  if (!e) return null;
+  const section = Object.fromEntries(e.passages.map((p) => [p.id, p.section]));
+  const missing = EXTRACTION_FIELDS.filter(([k]) => e.fields[k]?.status !== "reported").map(([, label]) => label);
+  return (
+    <Section title="Extracted facts (current record)">
+      <div data-testid="extraction" className="space-y-3">
+        <p className={e.coverage.scope === "abstract_only" ? "rounded-md bg-accent-soft px-3 py-2 text-sm" : "text-sm text-muted"}>
+          {e.coverage.statement}
+        </p>
+        <dl className="space-y-2">
+          {EXTRACTION_FIELDS.filter(([k]) => e.fields[k]?.status === "reported").map(([k, label]) => (
+            <div key={k}>
+              <dt className="text-xs font-medium uppercase tracking-wide text-muted">{label}</dt>
+              {e.fields[k].claims.map((c, i) => (
+                <dd key={i} className="mt-1">
+                  {c.evidence.length === 1 && c.evidence[0].quote === c.text ? null : <p>{c.text}</p>}
+                  {c.evidence.map((ev) => (
+                    <blockquote key={ev.passage_id} className="mt-0.5 border-l-2 border-border pl-2 text-xs text-muted">
+                      &ldquo;{ev.quote}&rdquo; <span className="whitespace-nowrap">({section[ev.passage_id] ?? ev.passage_id})</span>
+                    </blockquote>
+                  ))}
+                </dd>
+              ))}
+            </div>
+          ))}
+        </dl>
+        {missing.length > 0 && (
+          <p className="text-sm text-muted">
+            Not reported{e.coverage.scope === "abstract_only" && e.coverage.passages > 1 ? " in the abstract" : ""}:{" "}
+            {missing.join(", ").toLowerCase()}.
+          </p>
+        )}
+        <p className="text-xs text-muted">
+          {PROVIDERS[e.provider] ?? e.provider} ({e.model_version}, schema {e.schema_version}
+          {e.location === "local" ? ", ran locally" : ", external model"}). Every claim quotes its passage verbatim
+          {e.rejected > 0 ? `; ${e.rejected} claim${e.rejected === 1 ? "" : "s"} that didn't were dropped` : ""}.
+        </p>
+      </div>
+    </Section>
+  );
+}
+
 const ROLE: Record<string, string> = { preprint: "Preprint", published: "Published version" };
 
 function linkedBy(v: PaperVersion) {
@@ -425,6 +483,7 @@ export function WhyDrawer({
         {error ? <p className="text-sm text-bad">{error.message}</p> : data ? <Body e={data} /> : <Loading />}
         {data && (
           <div className="mt-4 text-sm">
+            <Extracted paperId={paperId} />
             <Versions paperId={paperId} />
             <Access paperId={paperId} />
           </div>

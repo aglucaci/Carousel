@@ -241,6 +241,33 @@ class PaperText(Base):
     )
 
 
+class PaperExtraction(Base):
+    """A grounded extraction (carousel.summarization): fields of claims, each quoting a cited passage.
+
+    Cached per paper, provider, requested model, schema version, and input hash. Extractions that read text a
+    user supplied are private and never imported here.
+    """
+
+    __tablename__ = "paper_extractions"
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    paper_id: Mapped[str] = mapped_column(ForeignKey("papers.id", ondelete="CASCADE"), index=True)
+    provider: Mapped[str] = mapped_column(String(32))
+    requested_model: Mapped[str] = mapped_column(Text)
+    model_version: Mapped[str] = mapped_column(Text)
+    schema_version: Mapped[str] = mapped_column(String(16))
+    input_sha256: Mapped[str] = mapped_column(String(64))
+    location: Mapped[str] = mapped_column(String(16))
+    coverage: Mapped[Dict[str, Any]] = mapped_column()
+    fields: Mapped[Dict[str, Any]] = mapped_column()
+    passages: Mapped[List[Any]] = mapped_column()
+    rejected: Mapped[List[Any]] = mapped_column(server_default="[]")
+    created_at: Mapped[dt.datetime] = mapped_column(TS)
+    __table_args__ = (
+        UniqueConstraint("paper_id", "provider", "requested_model", "schema_version", "input_sha256"),
+        CheckConstraint("location IN ('local', 'external')", name="location"),
+    )
+
+
 class PaperAnnotation(Base):
     """Text-mined entities a source attached to one article of a paper (one JSON list per article)."""
 
