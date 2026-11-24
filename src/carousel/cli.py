@@ -14,6 +14,7 @@ carousel command-line interface.
     carousel topics list|fit|papers RADAR_ID [--store S] [--k K] [--topic TOPIC_ID]
     carousel topics observe RADAR_ID --config RADAR.yml [--weeks N] [--budget N]   # weekly counts per topic
     carousel topics trends RADAR_ID [--source S] [--as-of ISO]   # needs the [trends] extra
+    carousel topics events RADAR_ID --config RADAR.yml [--as-of ISO]   # derive and store topic events
     carousel review link STORE.db PREPRINT_ID PUBLISHED_ID [--note TEXT]   # versions of one work, kept apart
     carousel review unlink STORE.db ID_A ID_B [--note TEXT]          # not versions of one work
 
@@ -427,6 +428,27 @@ def cmd_topics(args: argparse.Namespace) -> int:
                 print(f"FAIL {exc}", file=sys.stderr)
                 return 1
             return 0
+        if args.action == "events":
+            from carousel.core.config import load_radar
+            from carousel.intelligence.topic_events import derive_topic_events
+
+            if not args.config:
+                print("FAIL events needs the radar's config (its method terms): --config RADAR.yml", file=sys.stderr)
+                return 1
+            as_of = dt.datetime.fromisoformat(args.as_of.replace("Z", "+00:00")) if args.as_of else dt.datetime.now(dt.timezone.utc)
+            if as_of.tzinfo is None:
+                as_of = as_of.replace(tzinfo=dt.timezone.utc)
+            runs = [r for r in store.list_runs(args.radar) if r["started_at"] <= as_of.strftime("%Y-%m-%dT%H:%M:%S.%fZ")]
+            derived = derive_topic_events(store, load_radar(args.config), as_of, runs[-1]["run_id"] if runs else "")
+            store.save_events(derived["events"])
+            for e in derived["events"]:
+                print(f"  {e['type']:<30} {e['title'][:60]:<60} ({len(e['evidence']['papers'])} papers)")
+            for w in derived["withheld"]:
+                print(f"  withheld {w['type']} ({w['reason']})")
+            for n in derived["notes"]:
+                print(f"note: {n}")
+            print(f"{len(derived['events'])} topic event(s) stored")
+            return 0
         if args.action == "observe":
             from carousel.connectors import CONNECTORS
             from carousel.core.config import load_radar
@@ -754,7 +776,7 @@ def build_parser() -> argparse.ArgumentParser:
     co.set_defaults(func=cmd_consent)
 
     tp = sub.add_parser("topics", help="A radar's topics: list them, fit a new version, or list a topic's papers")
-    tp.add_argument("action", choices=("list", "fit", "papers", "observe", "trends"))
+    tp.add_argument("action", choices=("list", "fit", "papers", "observe", "trends", "events"))
     tp.add_argument("radar", metavar="RADAR_ID")
     tp.add_argument("--store", default="carousel.db")
     tp.add_argument("--k", type=int, help="fit: number of topics (default: chosen by silhouette)")

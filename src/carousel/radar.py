@@ -502,6 +502,15 @@ class Radar:
                                             started)
             except Exception as exc:  # topics are an add-on: never fail the scan for them
                 topic_stats = {"status": "error", "reason": f"{type(exc).__name__}: {exc}"}
+            try:  # topic events (task 28), from what is stored now
+                from carousel.intelligence.topic_events import derive_topic_events
+
+                derived = derive_topic_events(st, cfg, started, run_id)
+                st.save_events(derived["events"])
+                topic_stats["events"] = len(derived["events"])
+                topic_stats["events_withheld"] = len(derived["withheld"])
+            except Exception as exc:
+                topic_stats["events_error"] = f"{type(exc).__name__}: {exc}"
             st.db.execute("UPDATE recommendation_runs SET ranking = json_set(ranking, '$.topics', json(?)) WHERE run_id = ?",
                           (json.dumps(topic_stats), run_id))
             st.db.commit()
