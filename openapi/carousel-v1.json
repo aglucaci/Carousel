@@ -1966,6 +1966,143 @@
         "title": "StrategyStep",
         "type": "object"
       },
+      "TopicModelOut": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "classifier_version": {
+            "title": "Classifier Version",
+            "type": "string"
+          },
+          "embedder": {
+            "title": "Embedder",
+            "type": "string"
+          },
+          "fitted_at": {
+            "format": "date-time",
+            "title": "Fitted At",
+            "type": "string"
+          },
+          "k": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "K"
+          },
+          "mapping": {
+            "description": "How these topics relate to the previous version's: same, split, merge, new, retired",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Mapping",
+            "type": "array"
+          },
+          "previous_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Version"
+          },
+          "radar_id": {
+            "title": "Radar Id",
+            "type": "string"
+          },
+          "silhouette": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "default": {},
+            "description": "Mean silhouette per k tried when choosing the number of topics",
+            "title": "Silhouette",
+            "type": "object"
+          },
+          "topics": {
+            "items": {
+              "$ref": "#/components/schemas/TopicOut"
+            },
+            "title": "Topics",
+            "type": "array"
+          },
+          "versions": {
+            "description": "All of this radar's topic model versions, oldest first",
+            "items": {
+              "type": "string"
+            },
+            "title": "Versions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "radar_id",
+          "classifier_version",
+          "embedder",
+          "fitted_at",
+          "active",
+          "versions",
+          "topics",
+          "mapping"
+        ],
+        "title": "TopicModelOut",
+        "type": "object"
+      },
+      "TopicOut": {
+        "properties": {
+          "fit_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Papers in the topic when the model was fitted",
+            "title": "Fit Size"
+          },
+          "key_terms": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Key Terms",
+            "type": "array"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "papers": {
+            "description": "Papers assigned to it now (fit members and later assignments)",
+            "title": "Papers",
+            "type": "integer"
+          },
+          "topic_id": {
+            "description": "The topic's lineage ID: unchanged across refits while the topic is the same",
+            "title": "Topic Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "topic_id",
+          "label",
+          "key_terms",
+          "papers"
+        ],
+        "title": "TopicOut",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -3159,6 +3296,65 @@
         "summary": "Start Scan",
         "tags": [
           "runs"
+        ]
+      }
+    },
+    "/api/v1/radars/{radar_id}/topics": {
+      "get": {
+        "description": "The radar's topic model (the active one, or a given version): topics, sizes, and the refit mapping.",
+        "operationId": "topics_api_v1_radars__radar_id__topics_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "radar_id",
+            "required": true,
+            "schema": {
+              "title": "Radar Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "version",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Version"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicModelOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Topics",
+        "tags": [
+          "research delta"
         ]
       }
     },

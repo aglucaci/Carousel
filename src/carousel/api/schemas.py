@@ -303,3 +303,26 @@ class EventOut(_Out):
     is_retracted: Optional[bool] = None
     evidence: Dict[str, Any] = Field(description="The runs, window, notice, or version link the event rests on")
     events_version: Optional[str] = None
+
+
+class TopicOut(_Out):
+    topic_id: str = Field(description="The topic's lineage ID: unchanged across refits while the topic is the same")
+    label: str
+    key_terms: List[str]
+    fit_size: Optional[int] = Field(None, description="Papers in the topic when the model was fitted")
+    papers: int = Field(description="Papers assigned to it now (fit members and later assignments)")
+
+
+class TopicModelOut(_Out):
+    radar_id: str
+    classifier_version: str
+    embedder: str
+    fitted_at: dt.datetime
+    active: bool
+    previous_version: Optional[str] = None
+    k: Optional[int] = None
+    silhouette: Dict[str, float] = Field({}, description="Mean silhouette per k tried when choosing the number of topics")
+    versions: List[str] = Field(description="All of this radar's topic model versions, oldest first")
+    topics: List[TopicOut]
+    mapping: List[Dict[str, Any]] = Field(description="How these topics relate to the previous version's: same, split, "
+                                                      "merge, new, retired")
