@@ -9,6 +9,10 @@ The API enqueues :func:`run_scan`; ``carousel worker`` runs it. A scan:
 3. imports the store into Postgres (idempotent), so the new run, papers, and
    embeddings become visible to the API.
 
+``CAROUSEL_HTTP_REPLAY=<dir>`` makes scans read recorded responses from
+``<dir>/<source>.json`` instead of the network (any unrecorded request fails
+the scan). The web app's end-to-end test uses it; see ``apps/web/e2e``.
+
 The engine store is a single SQLite file, so run **one** scan worker. Porting
 the engine's store to Postgres is a later step; until then this keeps the web
 app on the same tested code path as ``carousel scan`` and the daily Actions run.
@@ -24,6 +28,18 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 QUEUE = "carousel-scans"
+
+
+def replay_connectors(directory: str) -> Dict[str, Any]:
+    """Connectors that answer from recorded HTTP fixtures in ``directory`` (``pubmed.json``, ``openalex.json``)."""
+    from carousel.connectors import HttpClient, OpenAlexConnector, PubMedConnector, ReplayTransport
+
+    out = {}
+    for name, cls in (("pubmed", PubMedConnector), ("openalex", OpenAlexConnector)):
+        path = Path(directory) / f"{name}.json"
+        if path.exists():
+            out[name] = cls(client=HttpClient(transport=ReplayTransport(path)), api_key="")
+    return out
 
 
 def run_scan(radar_id: str, *, top_n: int = 25, max_results: int = 200, mode: Optional[str] = None,
@@ -47,8 +63,10 @@ def run_scan(radar_id: str, *, top_n: int = 25, max_results: int = 200, mode: Op
         with tempfile.TemporaryDirectory() as d:
             feedback_file = Path(d) / f"{radar_id}.feedback.yml"
             fb.save(feedback_file, state, radar_id)
+            replay = os.environ.get("CAROUSEL_HTTP_REPLAY")
             res = Radar(cfg, store=store, feedback_path=feedback_file).scan(
                 top_n=top_n, max_results=max_results, mode=mode, as_of=as_of,
+                connectors=replay_connectors(replay) if replay else None,
                 embedder=embedder or os.environ.get("CAROUSEL_EMBEDDER", "auto"),
             )
         import_store(store, engine)

@@ -386,6 +386,47 @@
         "title": "JobOut",
         "type": "object"
       },
+      "LibraryItem": {
+        "properties": {
+          "paper": {
+            "additionalProperties": true,
+            "title": "Paper",
+            "type": "object"
+          },
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          },
+          "radar_id": {
+            "title": "Radar Id",
+            "type": "string"
+          },
+          "radar_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Radar Title"
+          },
+          "saved_at": {
+            "format": "date-time",
+            "title": "Saved At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "radar_id",
+          "paper_id",
+          "saved_at",
+          "paper"
+        ],
+        "title": "LibraryItem",
+        "type": "object"
+      },
       "Moved": {
         "properties": {
           "change": {
@@ -573,6 +614,150 @@
         "title": "PaperOut",
         "type": "object"
       },
+      "ProposalIn": {
+        "additionalProperties": false,
+        "description": "What a user tells a new radar; everything but the topic is optional (progressive disclosure).",
+        "properties": {
+          "description": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Description",
+            "type": "string"
+          },
+          "exclude": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Exclude",
+            "type": "array"
+          },
+          "methods": {
+            "default": [],
+            "description": "Methods, assays, data types to match",
+            "items": {
+              "type": "string"
+            },
+            "title": "Methods",
+            "type": "array"
+          },
+          "mode": {
+            "default": "balanced",
+            "enum": [
+              "focused",
+              "balanced",
+              "exploratory"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "publication_types": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Publication Types",
+            "type": "array"
+          },
+          "research_question": {
+            "default": "",
+            "maxLength": 1000,
+            "title": "Research Question",
+            "type": "string"
+          },
+          "seed_papers": {
+            "default": [],
+            "description": "DOIs of papers that define the radar",
+            "items": {
+              "type": "string"
+            },
+            "title": "Seed Papers",
+            "type": "array"
+          },
+          "sources": {
+            "default": [
+              "pubmed",
+              "openalex"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "terms": {
+            "default": [],
+            "description": "Search terms; default: the topic itself",
+            "items": {
+              "type": "string"
+            },
+            "title": "Terms",
+            "type": "array"
+          },
+          "topic": {
+            "description": "What to watch, in plain words; also the radar name",
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Topic",
+            "type": "string"
+          },
+          "window_days": {
+            "default": 90,
+            "maximum": 3650.0,
+            "minimum": 1.0,
+            "title": "Window Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "topic"
+        ],
+        "title": "ProposalIn",
+        "type": "object"
+      },
+      "ProposalOut": {
+        "properties": {
+          "config": {
+            "additionalProperties": true,
+            "description": "The radar config to create (POST /radars) once approved",
+            "title": "Config",
+            "type": "object"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "ranking": {
+            "additionalProperties": true,
+            "title": "Ranking",
+            "type": "object"
+          },
+          "strategy": {
+            "items": {
+              "$ref": "#/components/schemas/StrategyStep"
+            },
+            "title": "Strategy",
+            "type": "array"
+          },
+          "window": {
+            "additionalProperties": true,
+            "title": "Window",
+            "type": "object"
+          }
+        },
+        "required": [
+          "config",
+          "window",
+          "strategy",
+          "ranking",
+          "notes"
+        ],
+        "title": "ProposalOut",
+        "type": "object"
+      },
       "RadarIn": {
         "additionalProperties": false,
         "properties": {
@@ -712,6 +897,15 @@
             "title": "Features",
             "type": "object"
           },
+          "feedback": {
+            "default": [],
+            "description": "Feedback actions currently on for this paper in this radar",
+            "items": {
+              "type": "string"
+            },
+            "title": "Feedback",
+            "type": "array"
+          },
           "flags": {
             "items": {
               "type": "string"
@@ -732,6 +926,12 @@
           "rank": {
             "title": "Rank",
             "type": "integer"
+          },
+          "saved": {
+            "default": false,
+            "description": "In the radar's saved list now",
+            "title": "Saved",
+            "type": "boolean"
           },
           "score": {
             "title": "Score",
@@ -1091,6 +1291,56 @@
         "title": "SearchHit",
         "type": "object"
       },
+      "StrategyStep": {
+        "properties": {
+          "filters": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filters"
+          },
+          "notes": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The exact query this source will receive",
+            "title": "Query"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "status": {
+            "description": "ready | not_available",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "status"
+        ],
+        "title": "StrategyStep",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -1261,6 +1511,60 @@
         "summary": "Get Job",
         "tags": [
           "runs"
+        ]
+      }
+    },
+    "/api/v1/library": {
+      "get": {
+        "description": "Saved papers across radars (or one radar), most recently saved first.",
+        "operationId": "library_api_v1_library_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "radar_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Radar Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LibraryItem"
+                  },
+                  "title": "Response Library Api V1 Library Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Library",
+        "tags": [
+          "feedback"
         ]
       }
     },
@@ -1523,6 +1827,48 @@
           }
         },
         "summary": "Create Radar",
+        "tags": [
+          "radars"
+        ]
+      }
+    },
+    "/api/v1/radars/proposal": {
+      "post": {
+        "description": "Propose a radar config and the exact searches it will run. Saves nothing; approve by POSTing the config.",
+        "operationId": "propose_api_v1_radars_proposal_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposalIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposalOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Propose",
         "tags": [
           "radars"
         ]

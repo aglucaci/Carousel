@@ -8,6 +8,9 @@ Configuration (environment):
                            Reads are open. Unset = open API, suitable only for local use.
 ``CAROUSEL_STORE``         The engine's working store used by scans (default ``carousel.db``)
 
+The worker (``carousel worker``) reads ``CAROUSEL_DATABASE_URL`` and ``CAROUSEL_STORE``
+from its own environment; jobs carry only the scan settings.
+
 Long operations never block a request: ``POST /radars/{id}/runs`` returns 202
 with a job ID to poll at ``/jobs/{id}``.
 """
@@ -144,6 +147,14 @@ def create_app(settings: Optional[Settings] = None, *, queue: Any = None) -> Fas
             response.status_code = 200
         return radar
 
+    @app.post(f"{API_PREFIX}/radars/proposal", response_model=schemas.ProposalOut, tags=["radars"])
+    def propose(body: schemas.ProposalIn, s: Session = Depends(session)) -> Any:
+        """Propose a radar config and the exact searches it will run. Saves nothing; approve by POSTing the config."""
+        try:
+            return services.propose_radar(s, **body.model_dump())
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from None
+
     @app.get(f"{API_PREFIX}/radars/{{radar_id}}", response_model=schemas.RadarOut, tags=["radars"])
     def get_radar(radar_id: str, s: Session = Depends(session)) -> Any:
         return services.radar_detail(s, radar_id)
@@ -157,12 +168,9 @@ def create_app(settings: Optional[Settings] = None, *, queue: Any = None) -> Fas
 
         services.radar_config(s, radar_id)  # 404 if the radar or its config is missing
         body = body or schemas.ScanRequest()
-        kwargs = body.model_dump(exclude_none=True)
-        if settings.database_url:
-            kwargs["database_url"] = settings.database_url
-        if settings.store_path:
-            kwargs["store_path"] = settings.store_path
-        return job_out(enqueue_scan(queue, radar_id, **kwargs))
+        # Only the scan settings go on the queue: the worker takes the database URL (a credential)
+        # and the store path from its own environment, so they never sit in Redis or its logs.
+        return job_out(enqueue_scan(queue, radar_id, **body.model_dump(exclude_none=True)))
 
     @app.get(f"{API_PREFIX}/jobs/{{job_id}}", response_model=schemas.JobOut, tags=["runs"])
     def get_job(job_id: str) -> Any:
@@ -210,6 +218,11 @@ def create_app(settings: Optional[Settings] = None, *, queue: Any = None) -> Fas
         return services.explanation(s, paper_id, radar_id, run_id)
 
     # ---- feedback ----
+
+    @app.get(f"{API_PREFIX}/library", response_model=List[schemas.LibraryItem], tags=["feedback"])
+    def library(radar_id: Optional[str] = None, s: Session = Depends(session)) -> Any:
+        """Saved papers across radars (or one radar), most recently saved first."""
+        return services.library(s, radar_id)
 
     @app.post(f"{API_PREFIX}/feedback", response_model=schemas.FeedbackOut, status_code=201, tags=["feedback"],
               dependencies=[Depends(require_token)])

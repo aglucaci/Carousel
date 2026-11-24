@@ -5,6 +5,7 @@ need CAROUSEL_TEST_DATABASE_URL (a disposable Postgres with pgvector); Redis is
 faked with fakeredis, and scans replay the recorded PubMed/OpenAlex fixtures.
 """
 
+import datetime as dt
 import json
 import os
 import tempfile
@@ -50,7 +51,8 @@ class OpenApiContractTests(unittest.TestCase):
                              ("post", "/api/v1/radars/{radar_id}/runs"), ("get", "/api/v1/radars/{radar_id}/papers"),
                              ("get", "/api/v1/radars/{radar_id}/delta"), ("get", "/api/v1/papers/{paper_id}"),
                              ("get", "/api/v1/papers/{paper_id}/explanation"), ("post", "/api/v1/feedback"),
-                             ("get", "/api/v1/jobs/{job_id}")]:
+                             ("get", "/api/v1/jobs/{job_id}"), ("post", "/api/v1/radars/proposal"),
+                             ("get", "/api/v1/library")]:
             self.assertIn(method, paths.get(path, {}), f"{method.upper()} {path}")
         self.assertIn("202", paths["/api/v1/radars/{radar_id}/runs"]["post"]["responses"])
 
@@ -81,7 +83,8 @@ class ApiTestCase(unittest.TestCase):
 
         factories = {"pubmed": lambda: connectors()["pubmed"], "openalex": lambda: connectors()["openalex"]}
         self.patches = [mock.patch.dict("carousel.radar.CONNECTORS", factories, clear=True),
-                        mock.patch.dict(os.environ, {"CAROUSEL_EMBEDDER": "hashing"})]
+                        mock.patch.dict(os.environ, {"CAROUSEL_EMBEDDER": "hashing", "CAROUSEL_DATABASE_URL": URL,
+                                                     "CAROUSEL_STORE": settings.store_path})]
         for p in self.patches:
             p.start()
 
@@ -107,6 +110,11 @@ class ApiTestCase(unittest.TestCase):
         self.assertEqual(r.status_code, 202, r.text)
         job = r.json()
         self.assertEqual(job["status"], "queued")
+        from rq.job import Job
+
+        queued = Job.fetch(job["job_id"], connection=self.redis)
+        self.assertNotIn("database_url", queued.kwargs)  # credentials stay out of Redis
+        self.assertNotIn("postgresql", repr((queued.args, queued.kwargs)))
         self.work()
         done = self.get(f"/jobs/{job['job_id']}").json()
         self.assertEqual(done["status"], "finished", done)
@@ -152,7 +160,12 @@ class AcceptanceFlowTests(ApiTestCase):
         self.assertEqual(fb.json()["state"]["dismiss"], [top["paper_id"]])
         saved = ranked["items"][1]["paper_id"]
         self.post("/feedback", {"radar_id": "escape", "paper_id": saved, "action": "save"})
-        self.assertTrue(self.get("/radars/escape/papers").json()["items"][0]["dismissed"])
+        now = self.get("/radars/escape/papers").json()["items"]
+        self.assertTrue(now[0]["dismissed"])
+        self.assertEqual((now[1]["saved"], now[1]["feedback"]), (True, ["save"]))
+        lib = self.get("/library").json()
+        self.assertEqual([(x["radar_id"], x["radar_title"], x["paper_id"]) for x in lib], [("escape", "Escape radar", saved)])
+        self.assertTrue(lib[0]["paper"]["title"])
 
         run2 = self.scan()
         second = self.get("/radars/escape/papers").json()
@@ -166,6 +179,7 @@ class AcceptanceFlowTests(ApiTestCase):
 
         runs = self.get("/radars/escape/runs").json()
         self.assertEqual([r["run_id"] for r in runs], [run2, run1])  # history kept
+        self.assertEqual([x["paper_id"] for x in self.get("/library", radar_id="escape").json()], [saved])
         self.assertEqual(self.get("/radars/escape/papers", run_id=run1).json()["items"][0]["paper_id"], top["paper_id"])
         self.assertEqual(self.get(f"/runs/{run1}").json()["ranking"]["window"]["days"], 14)
 
@@ -200,6 +214,64 @@ class AcceptanceFlowTests(ApiTestCase):
         engine.dispose()
         p = self.get(f"/papers/{gone}").json()
         self.assertEqual((p["paper_id"], p["requested_id"]), (keep, gone))
+
+
+class ProposalTests(ApiTestCase):
+    def test_propose_then_approve(self) -> None:
+        r = self.post("/radars/proposal", {"topic": "Immune escape", "exclude": ["case report"], "window_days": 14})
+        self.assertEqual(r.status_code, 200, r.text)
+        prop = r.json()
+        cfg = prop["config"]
+        self.assertEqual((cfg["radar_id"], cfg["radar_name"], cfg["queries"]), ("immune-escape", "Immune escape", ["Immune escape"]))
+        steps = {s["source"]: s for s in prop["strategy"]}
+        self.assertEqual(steps["pubmed"]["query"], '(Immune escape) NOT ("case report"[Title/Abstract])')
+        self.assertEqual(steps["openalex"]["query"], '("Immune escape") NOT ("case report")')
+        self.assertIn("type:article", steps["openalex"]["filters"])
+        self.assertEqual(prop["window"]["days"], 14)
+        self.assertTrue(any("method match is inactive" in n for n in prop["notes"]))
+        self.assertEqual(self.get("/radars").json(), [])  # a proposal saves nothing
+
+        created = self.post("/radars", {"config": cfg})
+        self.assertEqual(created.status_code, 201, created.text)
+        self.assertEqual(created.json()["config"], cfg)
+        again = self.post("/radars/proposal", {"topic": "Immune escape"}).json()
+        self.assertEqual(again["config"]["radar_id"], "immune-escape-2")
+
+    def test_options_and_errors(self) -> None:
+        r = self.post("/radars/proposal", {"topic": "tumour evolution", "terms": ["clonal evolution", "tumor phylogeny"],
+                                           "methods": ["single-cell"], "sources": ["pubmed", "biorxiv"],
+                                           "mode": "exploratory", "seed_papers": ["https://doi.org/10.1038/S41586-020-2008-3"]})
+        self.assertEqual(r.status_code, 200, r.text)
+        prop = r.json()
+        self.assertEqual(prop["config"]["seed_papers"], ["10.1038/s41586-020-2008-3"])
+        self.assertEqual(prop["strategy"][0]["query"], "((clonal evolution) OR (tumor phylogeny))")
+        self.assertEqual(prop["strategy"][1]["status"], "not_available")
+        self.assertEqual(prop["ranking"]["mode"], "exploratory")
+        bad = self.post("/radars/proposal", {"topic": "x y", "seed_papers": ["not a doi"]})
+        self.assertEqual(bad.status_code, 422)
+        self.assertIn("not a doi", bad.text)
+        self.assertEqual(self.post("/radars/proposal", {"topic": "x y", "sources": ["scopus"]}).status_code, 422)
+        self.assertEqual(self.post("/radars/proposal", {"topic": " "}).status_code, 422)
+
+
+class ReplayTests(ApiTestCase):
+    def test_worker_replays_recorded_http(self) -> None:
+        import shutil
+
+        from carousel.workers.scan import run_scan
+
+        fixtures = Path(self.tmp.name) / "http"
+        fixtures.mkdir()
+        shutil.copy(REPO / "tests" / "fixtures" / "http" / "openalex_search.json", fixtures / "openalex.json")
+        self.post("/radars", {"config": {**RADAR, "sources": ["openalex"]}})
+        with mock.patch.dict(os.environ, {"CAROUSEL_HTTP_REPLAY": str(fixtures)}), \
+                mock.patch("carousel.radar.CONNECTORS", {}):  # the default connectors aren't used
+            out = run_scan("escape", database_url=URL, store_path=str(Path(self.tmp.name) / "replay.db"),
+                           max_results=5, as_of=dt.date(2026, 10, 14))
+        self.assertIn(out["status"], ("ok", "partial"))  # partial: max_results truncated the source
+        self.assertGreater(out["n_items"], 0)
+        cov = self.get("/radars/escape/papers").json()["run"]["coverage"]
+        self.assertEqual([(c["source"], c["status"]) for c in cov], [("openalex", "ok")])
 
 
 class ErrorTests(ApiTestCase):

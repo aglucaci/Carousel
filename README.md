@@ -25,8 +25,9 @@ changed in my field, why does it matter, and what should I read next?"**
 > **Status: early development (Phase 1 in progress).** The engine (Phase 1A)
 > works end to end: PubMed and OpenAlex retrieval, careful deduplication,
 > lexical and semantic candidates, an interpretable ranker, stored runs, and
-> feedback, running daily on GitHub Actions. The web app (Phase 1B) and
-> Research Delta are next. See [What works today](#what-works-today) and the
+> feedback, running daily on GitHub Actions. The web app (Phase 1B) works
+> locally on Postgres, Redis, the REST API, and a scan worker; Docker Compose
+> and Research Delta are next. See [What works today](#what-works-today) and the
 > [roadmap](#roadmap). CAROUSEL grew out of the ETHER prototype, so you will
 > still see that name in the manuscript drafts.
 
@@ -44,6 +45,7 @@ changed in my field, why does it matter, and what should I read next?"**
 | **Candidate retrieval** | [`src/carousel/search/`](src/carousel/search/) | BM25 over titles and abstracts, semantic similarity to the radar's profile, and source-query hits, after recorded hard filters (retracted, date window, type, excluded terms). Embeddings are cached per paper and model version. Real semantic search needs `pip install "carousel-research[semantic]"` |
 | **Ranker** | [`src/carousel/ranking/`](src/carousel/ranking/) | `ranking_version` 0.1.0: relevance, novelty against only earlier-observed papers (guarded against temporal leakage), and method match; weighted by mode (focused / balanced / exploratory), then diversified with MMR. Every item carries its features and flags |
 | **Postgres schema (Phase 1B)** | [`src/carousel/database/models.py`](src/carousel/database/models.py), [`migrations/`](src/carousel/database/migrations/) | The spec's production tables on PostgreSQL + pgvector (papers with full-text search, identifiers, sources, authors, embeddings, runs and items, feedback, collections, topics, events), managed with Alembic. `carousel db import-store` and `import-snapshots` copy the engine's history in and verify counts. Needs `pip install "carousel-research[server]"` |
+| **Web app (Phase 1B)** | [`apps/web/`](apps/web/) | Next.js: **For You** (ranked papers per radar, new since the last run), **Radars** (describe a topic, review and approve the exact searches it proposes, scan, and see each run's history and source coverage), the **"Why this paper?"** drawer (from the stored run only), save and dismiss, and the **Library** of saved papers. A Playwright test runs the spec's acceptance flow end to end in CI |
 | **REST API v1 (Phase 1B)** | [`src/carousel/api/`](src/carousel/api/), [`openapi/carousel-v1.json`](openapi/carousel-v1.json) | FastAPI over Postgres: radars, scans as background jobs (RQ on Redis, `carousel worker`), ranked papers, delta, paper records, "Why this paper?" explanations from the stored run, full-text search, and feedback. Writes need `CAROUSEL_API_TOKEN` when it is set |
 | **Radar configs** | [`examples/`](examples/), [`src/carousel/core/config.py`](src/carousel/core/config.py) | YAML radars with strict validation and `file:line` error messages |
 | **`carousel scan` and the `Radar` API** | [`src/carousel/radar.py`](src/carousel/radar.py), [`src/carousel/cli.py`](src/carousel/cli.py) | One command runs the whole engine: query PubMed and OpenAlex, dedup into the local store, find candidates, rank, and save the run with its coverage. Rescans keep history; feedback in `RADAR.feedback.yml` (save / dismiss / relevant / irrelevant) applies on the next scan. Also `runs`, `delta`, `export`, `feedback`, `review`, `site`, `validate`, `show` |
@@ -144,11 +146,39 @@ carousel worker
 curl -X POST -H "Authorization: Bearer $CAROUSEL_API_TOKEN" http://127.0.0.1:8000/api/v1/radars/lab-default/runs
 ```
 
+The worker reads `CAROUSEL_DATABASE_URL` and `CAROUSEL_STORE` from its own
+environment, so set them for it too.
+
+The web app (Node 20.9 or later) talks to the API through its own server, which
+adds `CAROUSEL_API_TOKEN` to writes, so the token never reaches the browser.
+Anyone who can open the web app can therefore write, so keep it local or put it
+behind your own access control:
+
+```bash
+cd apps/web && npm install && npm run build
+```
+
+```bash
+CAROUSEL_API_URL=http://127.0.0.1:8000 npm run start
+```
+
 Run the tests (the Postgres and API tests run when `CAROUSEL_TEST_DATABASE_URL`
 points at a disposable database):
 
 ```bash
 python -m pytest -q
+```
+
+The web app's end-to-end test starts its own API and worker on a disposable
+database, which it **wipes** (the name must contain `test` or `e2e`), and
+replays recorded PubMed and OpenAlex responses:
+
+```bash
+cd apps/web && npx playwright install chromium && npm run build
+```
+
+```bash
+CAROUSEL_E2E_DATABASE_URL=postgresql://user:pass@localhost/carousel_e2e CAROUSEL_E2E_REDIS_URL=redis://localhost:6379/15 npm run e2e
 ```
 
 ## Defining a radar
@@ -281,6 +311,7 @@ src/carousel/        Python package: radar.py (Radar API), feedback.py, core/ (r
                      ranking/ (ranker),
                      database/ (SQLite store; Postgres models, migrations, importer),
                      api/ (REST API v1), workers/ (scan jobs), site.py (dashboard), cli.py
+apps/web/            Next.js web app (For You, Radars, Library); e2e/ holds the Playwright acceptance test
 radars/              Radars scanned daily by Actions (lab_default.yml = the lab's ten themes)
 examples/            Starter radar configs (validated in CI)
 openapi/             The committed API contract (checked against the app in CI)
@@ -303,7 +334,7 @@ done-when checks for each task, is in [`CAROUSEL_PLAN.md`](CAROUSEL_PLAN.md).
 
 | Phase | Focus | Status |
 | --- | --- | --- |
-| **1. Functional MVP** | **Engine:** canonical paper records, OpenAlex + PubMed, careful dedup, lexical + semantic candidates, relevance/novelty/methods ranking with modes, `carousel scan` and a Python `Radar` API. **App:** FastAPI + Postgres/pgvector, Next.js (For You, Radars, Library, "Why this paper?"), save/dismiss, Docker Compose | In progress: scheduling, snapshots, and the config/CLI are done |
+| **1. Functional MVP** | **Engine:** canonical paper records, OpenAlex + PubMed, careful dedup, lexical + semantic candidates, relevance/novelty/methods ranking with modes, `carousel scan` and a Python `Radar` API. **App:** FastAPI + Postgres/pgvector, Next.js (For You, Radars, Library, "Why this paper?"), save/dismiss, Docker Compose | In progress: the engine, Postgres, the REST API, and the web app are done; Docker Compose is next |
 | **2. Continuous intelligence** | Scheduled ingestion, Europe PMC + Crossref (retractions, corrections, preprint links), arXiv, versioned explanations, feedback learning, email/RSS digests, evidence-grounded summaries | Planned |
 | **3. Research Delta** | Topic clusters and observations, statistical trend detection (negative binomial, multiple-testing control), the **What's New** change log, **Trends** with baselines and uncertainty | Planned |
 | **4. Advanced discovery** | Method Transfer, literature graphs, Zotero, public API docs, collaborative radars, benchmark dataset, software paper | Planned |
