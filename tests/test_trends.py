@@ -177,7 +177,7 @@ class CliTests(unittest.TestCase):
                         today=dt.date(2026, 11, 23))
             out = io.StringIO()
             with contextlib.redirect_stdout(out):
-                self.assertEqual(cli.main(["topics", "trends", "escape", "--store", db, "--as-of", "2026-11-24T00:00:00Z"]), 0)
+                self.assertEqual(cli.main(["topics", "trends", "escape", "--store", db, "--as-of", "2026-12-14T00:00:00Z"]), 0)
             lines = out.getvalue().splitlines()
             self.assertTrue(lines[0].startswith("pubmed (trend-nb-1"))
             self.assertTrue(lines[1].lstrip().startswith("FLAGGED rising label"))
@@ -227,7 +227,7 @@ if ApiTestCase is not None and np is not None:
                 observe(st, RadarConfig.model_validate({**OBS_RADAR, "sources": ["pubmed"]}), model,
                         {"pubmed": Scripted(counts)}, at=at, weeks=16, today=dt.date(2026, 11, 23))
             import_store(store, self.app.state.engine)
-            body = self.get("/radars/escape/topics/trends", as_of="2026-11-24T00:00:00Z").json()
+            body = self.get("/radars/escape/topics/trends", as_of="2026-12-14T00:00:00Z").json()
             [rep] = body["reports"]
             self.assertEqual((rep["source"], rep["trend_model_version"]), ("pubmed", "trend-nb-1"))
             self.assertEqual([t["topic_id"] for t in rep["topics"] if t["flagged"]], ["tp_rising"])

@@ -391,7 +391,8 @@ def cmd_topics(args: argparse.Namespace) -> int:
             print(f"no topic model for radar {args.radar!r} yet (it is fitted after enough scans, or: carousel topics fit)")
             return 0 if args.action not in ("papers", "observe") else 1
         if args.action == "trends":
-            from carousel.intelligence.trends import TrendsUnavailable, trends_from_observations
+            from carousel.intelligence.checks import checked_trends, store_topic_papers
+            from carousel.intelligence.trends import TrendsUnavailable
 
             rows = store.topic_observations(args.radar, model.classifier_version)
             as_of = dt.datetime.fromisoformat(args.as_of.replace("Z", "+00:00")) if args.as_of else dt.datetime.now(dt.timezone.utc)
@@ -404,9 +405,15 @@ def cmd_topics(args: argparse.Namespace) -> int:
                 return 0
             labels = {t.topic_id: t.label for t in model.topics}
             try:
+                all_rows = store.topic_observations(args.radar)
                 for src in sources:
-                    rep = trends_from_observations(rows, list(labels), src, as_of)
-                    print(f"{src} ({rep['trend_model_version']}, as of {rep['as_of']})")
+                    rep = checked_trends(rows, list(labels), src, as_of, classifier_version=model.classifier_version,
+                                         all_rows=all_rows, topic_papers=store_topic_papers(store, model.classifier_version))
+                    print(f"{src} ({rep['trend_model_version']}, {rep['checks_version']}, as of {rep['as_of']}; "
+                          f"evaluated through {rep['evaluated_through']})")
+                    for c in rep["checks"]:
+                        if c["status"] == "fired":
+                            print(f"  check fired: {c['check']}: {c['detail']}")
                     for t in sorted(rep["topics"], key=lambda x: (not x["flagged"], x.get("q_value") or 2)):
                         if t["status"] != "ok":
                             print(f"  {'':<7} {labels[t['topic_id']][:48]:<48}  {t['status']}")
