@@ -101,7 +101,7 @@ def pending_radars(queue: Any) -> set:
     jobs = list(queue.get_jobs())
     started = StartedJobRegistry(queue=queue)
     jobs += [j for j in queue.job_class.fetch_many(started.get_job_ids(), connection=queue.connection) if j]
-    return {(j.meta or {}).get("radar_id") for j in jobs}
+    return {(j.meta or {}).get("radar_id") for j in jobs if (j.meta or {}).get("kind") != "observe"}
 
 
 def tick(session_factory: Callable[[], Any], queue: Any, now: Optional[dt.datetime] = None,
@@ -131,6 +131,41 @@ def tick(session_factory: Callable[[], Any], queue: Any, now: Optional[dt.dateti
     return jobs
 
 
+OBSERVE_LOCK_PREFIX = "carousel:observe:"
+
+
+def observable_radars(session: Any) -> List[str]:
+    """Active radars that have a topic model (so there is something to count)."""
+    from sqlalchemy import select
+
+    from carousel.database import models as m
+
+    return list(session.scalars(
+        select(m.Radar.id).join(m.TopicModel, m.TopicModel.radar_id == m.Radar.id)
+        .where(m.Radar.state == "active", m.TopicModel.active.is_(True)).order_by(m.Radar.id)))
+
+
+def tick_observations(session_factory: Callable[[], Any], queue: Any, now: Optional[dt.datetime] = None,
+                      enqueue: Optional[Callable[..., Any]] = None) -> List[Any]:
+    """Enqueue each observable radar's weekly topic observation once per ISO week (task 27)."""
+    from carousel.workers.observe import enqueue_observe
+
+    now = _utc(now or dt.datetime.now(dt.timezone.utc))
+    enqueue = enqueue or enqueue_observe
+    week = period_start("weekly", now).date().isoformat()
+    with session_factory() as s:
+        radars = observable_radars(s)
+    jobs = []
+    for rid in radars:
+        key = f"{OBSERVE_LOCK_PREFIX}{rid}:{week}"
+        if not queue.connection.set(key, "1", nx=True, ex=8 * 24 * 3600):
+            continue  # already enqueued this week
+        job = enqueue(queue, rid)
+        log.info("%s: weekly topic observation enqueued (job %s)", rid, job.id)
+        jobs.append(job)
+    return jobs
+
+
 def run_forever(session_factory: Callable[[], Any], queue: Any, interval: float = 60.0,
                 ticks: Optional[int] = None, sleep: Callable[[float], None] = time.sleep) -> None:
     """Tick every ``interval`` seconds (``ticks`` bounds the loop, for tests). Errors are logged, not fatal."""
@@ -139,6 +174,7 @@ def run_forever(session_factory: Callable[[], Any], queue: Any, interval: float 
     while ticks is None or n < ticks:
         try:
             tick(session_factory, queue)
+            tick_observations(session_factory, queue)
         except Exception:  # keep scheduling through a database or Redis outage
             log.exception("scheduler tick failed; retrying in %.0f s", interval)
         n += 1

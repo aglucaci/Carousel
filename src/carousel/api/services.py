@@ -770,12 +770,29 @@ def radar_topics(s: Session, radar_id: str, version: Optional[str] = None) -> Di
     }
 
 
-def _observation_rows(s: Session, radar_id: str, version: str, source: Optional[str]) -> List[Dict[str, Any]]:
-    q = select(m.TopicObservation).where(m.TopicObservation.radar_id == radar_id,
-                                         m.TopicObservation.classifier_version == version)
+def _pg_topic_papers(s: Session, version: str):
+    """Topic papers for the duplicate check: (paper_id, work key), a work key shared by linked versions."""
+    def lookup(topic_key: str, start: dt.date, end: dt.date) -> List[Tuple[str, str]]:
+        ids = list(s.scalars(select(m.PaperTopic.paper_id).join(m.Topic, m.Topic.id == m.PaperTopic.topic_id)
+                             .join(m.Paper, m.Paper.id == m.PaperTopic.paper_id)
+                             .where(m.Topic.classifier_version == version, m.Topic.topic_key == topic_key,
+                                    m.Paper.earliest_public_date >= start, m.Paper.earliest_public_date <= end)))
+        links: Dict[str, List[str]] = {}
+        for pid, other in s.execute(select(m.PaperVersion.paper_id, m.PaperVersion.related_paper_id).where(
+                m.PaperVersion.paper_id.in_(ids), m.PaperVersion.version_type.in_(("preprint", "published")))):
+            links.setdefault(pid, []).append(other)
+        return [(pid, sorted([pid] + links.get(pid, []))[0]) for pid in ids]
+    return lookup
+
+
+def _observation_rows(s: Session, radar_id: str, version: Optional[str], source: Optional[str]) -> List[Dict[str, Any]]:
+    q = select(m.TopicObservation).where(m.TopicObservation.radar_id == radar_id)
+    if version:
+        q = q.where(m.TopicObservation.classifier_version == version)
     if source:
         q = q.where(m.TopicObservation.source == source)
     return [{"source": o.source, "topic_id": o.topic_key, "period_start": o.window_start.isoformat(),
+             "classifier_version": o.classifier_version,
              "period_end": o.window_end.isoformat(), "count": o.count, "status": o.status,
              "observed_at": o.observed_at.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")}
             for o in s.scalars(q)]
@@ -784,17 +801,20 @@ def _observation_rows(s: Session, radar_id: str, version: str, source: Optional[
 def topic_trends(s: Session, radar_id: str, as_of: Optional[dt.datetime] = None,
                  source: Optional[str] = None) -> Dict[str, Any]:
     """The trend model over each source's observations as known at ``as_of`` (raises TrendsUnavailable)."""
-    from carousel.intelligence.trends import trends_from_observations
+    from carousel.intelligence.checks import checked_trends
 
     model = radar_topics(s, radar_id)
     as_of = as_of or dt.datetime.now(dt.timezone.utc)
-    rows = _observation_rows(s, radar_id, model["classifier_version"], source)
+    version = model["classifier_version"]
+    rows = _observation_rows(s, radar_id, version, source)
+    all_rows = _observation_rows(s, radar_id, None, source)
     cutoff = as_of.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     sources = sorted({r["source"] for r in rows if r["observed_at"] <= cutoff})  # only what was known then
     labels = {t["topic_id"]: t["label"] for t in model["topics"]}
     reports = []
     for src in sources:
-        rep = trends_from_observations(rows, list(labels), src, as_of)
+        rep = checked_trends(rows, list(labels), src, as_of, classifier_version=version, all_rows=all_rows,
+                             topic_papers=_pg_topic_papers(s, version))
         for t in rep["topics"]:
             t["label"] = labels.get(t["topic_id"])
         reports.append(rep)
