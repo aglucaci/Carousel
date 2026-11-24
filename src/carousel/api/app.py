@@ -23,6 +23,7 @@ import os
 from typing import Any, Iterator, List, Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response, status
+from fastapi.responses import PlainTextResponse
 from sqlalchemy import text
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -162,8 +163,38 @@ def create_app(settings: Optional[Settings] = None, *, queue: Any = None) -> Fas
     @app.patch(f"{API_PREFIX}/radars/{{radar_id}}", response_model=schemas.RadarOut, tags=["radars"],
                dependencies=[Depends(require_token)])
     def update_radar(radar_id: str, body: schemas.RadarPatch, s: Session = Depends(session)) -> Any:
-        """Set the scan schedule, or pause and resume scheduled scans. History is never deleted."""
-        out = services.update_radar(s, radar_id, body.model_dump(include=body.model_fields_set))
+        """Set the scan schedule, pause and resume scheduled scans, or set digest recipients. History is never deleted."""
+        try:
+            out = services.update_radar(s, radar_id, body.model_dump(include=body.model_fields_set))
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from None
+        s.commit()
+        return out
+
+    # ---- digests ----
+
+    @app.get(f"{API_PREFIX}/radars/{{radar_id}}/digest.md", tags=["digests"],
+             response_class=PlainTextResponse, responses={200: {"content": {"text/markdown": {}}}})
+    def digest_markdown(radar_id: str, run_id: Optional[str] = None, s: Session = Depends(session)) -> Any:
+        """A run's digest as Markdown (the latest run by default)."""
+        return PlainTextResponse(services.digest_markdown(s, radar_id, run_id), media_type="text/markdown; charset=utf-8")
+
+    @app.get(f"{API_PREFIX}/radars/{{radar_id}}/feed.xml", tags=["digests"],
+             response_class=PlainTextResponse, responses={200: {"content": {"application/rss+xml": {}}}})
+    def digest_feed(radar_id: str, s: Session = Depends(session)) -> Any:
+        """RSS 2.0 over the radar's recent runs; each paper appears once."""
+        return PlainTextResponse(services.digest_feed(s, radar_id), media_type="application/rss+xml; charset=utf-8")
+
+    @app.get(f"{API_PREFIX}/radars/{{radar_id}}/digests", response_model=List[schemas.DigestDelivery], tags=["digests"])
+    def digest_deliveries(radar_id: str, limit: int = Query(30, ge=1, le=200), s: Session = Depends(session)) -> Any:
+        """Digest deliveries, newest first, failures included with the reason."""
+        return services.digest_deliveries(s, radar_id, limit)
+
+    @app.post(f"{API_PREFIX}/radars/{{radar_id}}/digests/email", response_model=List[schemas.DigestDelivery],
+              tags=["digests"], dependencies=[Depends(require_token)])
+    def send_digest(radar_id: str, run_id: Optional[str] = None, s: Session = Depends(session)) -> Any:
+        """Email a run's digest (latest by default) to the radar's recipients now; every attempt is recorded."""
+        out = services.send_digest_emails(s, radar_id, run_id)
         s.commit()
         return out
 

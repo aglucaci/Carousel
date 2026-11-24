@@ -25,6 +25,8 @@ class RadarPatch(BaseModel):
         None, description="daily | weekly, or null for manual scans only. Omit to leave unchanged")
     state: Optional[Literal["active", "paused"]] = Field(
         None, description="paused stops scheduled scans and keeps all history; manual scans still work")
+    digest_emails: Optional[List[str]] = Field(
+        None, description="Addresses that get each run's digest by email (replaces the list; [] to stop)")
 
 
 class RunSummary(_Out):
@@ -71,6 +73,7 @@ class RadarOut(_Out):
     config: Optional[Dict[str, Any]] = None
     n_runs: int
     latest_run: Optional[RunSummary] = None
+    digest_emails: List[str] = Field([], description="Addresses that get each run's digest by email")
     next_scan_at: Optional[dt.datetime] = Field(
         None, description="When the scheduler will next scan this radar (now, if due); null if manual or paused")
 
@@ -263,3 +266,15 @@ class Health(_Out):
     version: str
     database: str
     queue: str
+
+
+class DigestDelivery(_Out):
+    id: int
+    radar_id: str
+    run_id: Optional[str] = None
+    channel: Literal["email", "rss", "markdown"]
+    status: Literal["delivered", "failed"]
+    generated_at: dt.datetime
+    recipient: Optional[str] = Field(None, description="Email deliveries: the address")
+    error: Optional[str] = Field(None, description="Why a delivery failed")
+    characters: Optional[int] = Field(None, description="Markdown and RSS: size of what was produced")

@@ -5,7 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { JobStatus, ScanOptionsFields } from "@/components/Scan";
 import { Badge, Button, ButtonLink, Card, ErrorNote, Loading, PageHeader, coverageLine, fmtDate, fmtDateTime, sourceName } from "@/components/ui";
-import { client, useApi, type Radar, type RadarPatch, type ScanOptions } from "@/lib/api";
+import { client, useApi, type DigestDelivery, type Radar, type RadarPatch, type ScanOptions } from "@/lib/api";
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -83,6 +83,93 @@ function ScheduleCard({ radar, onChange }: { radar: Radar; onChange: (r: Radar) 
   );
 }
 
+const CHANNELS: Record<DigestDelivery["channel"], string> = { markdown: "Markdown", rss: "RSS feed", email: "Email" };
+
+function DigestsCard({ radar, onChange }: { radar: Radar; onChange: (r: Radar) => void }) {
+  const id = radar.radar_id;
+  const deliveries = useApi(() => client.digests(id), [id, radar.n_runs]);
+  const [emails, setEmails] = useState((radar.digest_emails ?? []).join(", "));
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<Error | undefined>();
+  const base = `/api/v1/radars/${encodeURIComponent(id)}`;
+  const saved = (radar.digest_emails ?? []).join(", ");
+
+  async function run(action: () => Promise<void>) {
+    setBusy(true);
+    setError(undefined);
+    try {
+      await action();
+    } catch (e) {
+      setError(e as Error);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const save = () =>
+    run(async () => {
+      const updated = await client.updateRadar(id, { digest_emails: emails.split(/[,;\s]+/).filter(Boolean) });
+      onChange(updated);
+      setEmails((updated.digest_emails ?? []).join(", "));
+    });
+  const send = () =>
+    run(async () => {
+      await client.sendDigest(id);
+      await deliveries.reload();
+    });
+
+  return (
+    <Card className="space-y-3">
+      <h2 className="font-medium">Digests</h2>
+      <p className="text-sm">
+        Every scan produces a digest:{" "}
+        <a href={`${base}/digest.md`} target="_blank" rel="noreferrer" className="text-accent hover:underline">
+          the latest as Markdown
+        </a>
+        ,{" "}
+        <a href={`${base}/feed.xml`} target="_blank" rel="noreferrer" className="text-accent hover:underline">
+          an RSS feed
+        </a>{" "}
+        for your feed reader, and an email to the addresses below.
+      </p>
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="min-w-0 flex-1 text-sm">
+          <span className="mb-1 block text-muted">Email the digest to</span>
+          <input
+            id="digest-emails"
+            value={emails}
+            onChange={(e) => setEmails(e.target.value)}
+            placeholder="you@example.org, colleague@example.org"
+            className="w-full rounded-md border border-border bg-surface px-2 py-1.5"
+          />
+        </label>
+        <Button onClick={save} disabled={busy || emails === saved}>
+          Save
+        </Button>
+        {saved && radar.n_runs > 0 && (
+          <Button onClick={send} disabled={busy}>
+            Send latest now
+          </Button>
+        )}
+      </div>
+      <ErrorNote error={error} />
+      {deliveries.data && deliveries.data.length > 0 && (
+        <ul className="space-y-1 text-sm" aria-label="Digest deliveries">
+          {deliveries.data.map((d) => (
+            <li key={d.id} data-testid="digest-delivery" className="flex flex-wrap items-baseline gap-x-2">
+              <span className="text-muted">{fmtDateTime(d.generated_at)}</span>
+              <span>{CHANNELS[d.channel]}</span>
+              {d.recipient && <span className="text-muted">to {d.recipient}</span>}
+              <Badge tone={d.status === "delivered" ? "good" : "bad"}>{d.status === "delivered" ? "Delivered" : "Failed"}</Badge>
+              {d.error && <span className="text-bad">{d.error}</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
 function RadarDetail() {
   const { id } = useParams<{ id: string }>();
   const params = useSearchParams();
@@ -142,6 +229,7 @@ function RadarDetail() {
         </Card>
 
         <ScheduleCard radar={r} onChange={(updated) => radar.setData(updated)} />
+        <DigestsCard radar={r} onChange={(updated) => radar.setData(updated)} />
 
         {c && (
           <Card>

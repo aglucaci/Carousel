@@ -7,7 +7,10 @@ The API enqueues :func:`run_scan`; ``carousel worker`` runs it. A scan:
    (SQLite, ``CAROUSEL_STORE``), which does retrieval, dedup, candidates,
    ranking, and run persistence exactly as on the command line;
 3. imports the store into Postgres (idempotent), so the new run, papers, and
-   embeddings become visible to the API, and records what triggered the run.
+   embeddings become visible to the API, and records what triggered the run;
+4. produces the run's digests (Markdown, the RSS feed, an email per
+   recipient; :func:`carousel.api.services.deliver_digests`), recording each
+   delivery, failed ones included. A digest failure never fails the scan.
 
 ``carousel scheduler`` (:mod:`carousel.workers.schedule`) enqueues scheduled scans.
 
@@ -23,11 +26,14 @@ app on the same tested code path as ``carousel scan`` and the daily Actions run.
 from __future__ import annotations
 
 import datetime as dt
+import logging
 import os
 import tempfile
 import uuid
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+log = logging.getLogger("carousel.digests")
 
 QUEUE = "carousel-scans"
 
@@ -88,9 +94,29 @@ def run_scan(radar_id: str, *, top_n: int = 25, max_results: int = 200, mode: Op
             with Session(engine) as s:
                 s.execute(update(m.RecommendationRun).where(m.RecommendationRun.id == res.run_id).values(trigger=trigger))
                 s.commit()
-        return {"run_id": res.run_id, "status": res.run["status"], "n_items": len(res)}
+        digests = deliver(engine, radar_id, res.run_id)
+        return {"run_id": res.run_id, "status": res.run["status"], "n_items": len(res), "digests": digests}
     finally:
         engine.dispose()
+
+
+def deliver(engine, radar_id: str, run_id: str) -> Dict[str, int]:
+    """Produce the run's digests (Markdown, RSS, email per recipient), recording each; never fails the scan."""
+    from sqlalchemy.orm import Session
+
+    from carousel.api import services
+
+    try:
+        with Session(engine) as s:
+            rows = services.deliver_digests(s, radar_id, run_id)
+            s.commit()
+    except Exception as exc:  # the scan itself succeeded; say so in the log and keep it
+        log.warning("digests for %s run %s failed: %s", radar_id, run_id, exc)
+        return {"delivered": 0, "failed": 0}
+    for r in rows:
+        if r["status"] == "failed":
+            log.warning("digest %s%s failed: %s", r["channel"], f" to {r['recipient']}" if r["recipient"] else "", r["error"])
+    return {"delivered": sum(r["status"] == "delivered" for r in rows), "failed": sum(r["status"] == "failed" for r in rows)}
 
 
 def enqueue_scan(queue, radar_id: str, **kwargs: Any):
