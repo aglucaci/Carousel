@@ -5,63 +5,55 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useMemo } from "react";
 import { Badge, Empty, ErrorNote, Loading, PageHeader, fmtDate, sourceName } from "@/components/ui";
 import { client, useApi, type ResearchEvent } from "@/lib/api";
+import { GROUPS, WHO, kindOf } from "./groups";
 
-const KIND: Record<string, { label: string; tone: "accent" | "warn" | "bad" | "neutral" }> = {
-  new_publication: { label: "New publication", tone: "accent" },
-  retraction: { label: "Retracted", tone: "bad" },
-  removal: { label: "Removed", tone: "bad" },
-  withdrawal: { label: "Withdrawn", tone: "bad" },
-  expression_of_concern: { label: "Expression of concern", tone: "bad" },
-  correction: { label: "Corrected", tone: "warn" },
-  erratum: { label: "Erratum", tone: "warn" },
-  partial_retraction: { label: "Partially retracted", tone: "bad" },
-  new_version: { label: "New version linked", tone: "neutral" },
-};
-
-function kindOf(e: ResearchEvent) {
-  const k = e.type === "new_publication" ? "new_publication" : (e.kind ?? "revision");
-  return KIND[k] ?? { label: k.replaceAll("_", " "), tone: "warn" as const };
-}
-
-/** The evidence an event rests on, in words, with links a reader can check. */
-function Evidence({ e }: { e: ResearchEvent }) {
+/** One line saying what the event is, before its evidence page. */
+function Summary({ e }: { e: ResearchEvent }) {
   const ev = e.evidence as Record<string, any>;
-  if (e.type === "new_publication") {
-    return (
-      <>
-        Published {fmtDate(ev.earliest_public_date)}, within the window {fmtDate(ev.window?.start)} – {fmtDate(ev.window?.end)},
-        and never seen by this radar before (found by {(ev.sources ?? []).map(sourceName).join(", ") || "its sources"}; ranked #
-        {ev.rank}).
-      </>
-    );
+  switch (e.type) {
+    case "new_publication":
+      return (
+        <>
+          Published {fmtDate(ev.earliest_public_date)}; never seen by this radar before.
+          {e.findings?.length ? (
+            <span className="mt-1 block text-text">
+              &ldquo;{e.findings[0].quote}&rdquo;{" "}
+              <span className="text-muted">({e.findings[0].section ?? "abstract"})</span>
+            </span>
+          ) : null}
+        </>
+      );
+    case "topic_acceleration":
+      return (
+        <>
+          {Number(ev.rate_ratio).toFixed(1)}&times; its usual share of the field in {sourceName(ev.source)} (95% interval{" "}
+          {Number(ev.ci?.[0]).toFixed(1)}&ndash;{Number(ev.ci?.[1]).toFixed(1)}), weeks through {fmtDate(ev.evaluated_through)};{" "}
+          {ev.recent_count} papers where about {Math.round(ev.expected_recent)} were expected.
+        </>
+      );
+    case "new_methodological_connection":
+      return (
+        <>
+          In {ev.recent_papers_with_term} recent papers of the topic, and none of its {ev.earlier_papers_without_term} earlier
+          ones.
+        </>
+      );
+    case "research_landscape_shift":
+      return <>After the topic model was refitted ({ev.relation}); {(e.papers ?? []).length} papers shown.</>;
+    default: {
+      const n = ev.notice;
+      if (n) {
+        return (
+          <>
+            Notice {n.notice_doi ?? "without a DOI"}
+            {n.asserted_by && <> reported by {WHO[n.asserted_by] ?? n.asserted_by}</>}. Not known at the previous scan.
+          </>
+        );
+      }
+      if (ev.version) return <>Its {ev.version.role === "preprint" ? "preprint" : "published version"} is now linked.</>;
+      return <>A source now marks it as retracted.</>;
+    }
   }
-  if (ev.notice) {
-    const n = ev.notice;
-    return (
-      <>
-        Notice{" "}
-        {n.notice_doi ? (
-          <a href={`https://doi.org/${n.notice_doi}`} target="_blank" rel="noreferrer" className="text-accent hover:underline">
-            {n.notice_doi}
-          </a>
-        ) : (
-          "without a DOI"
-        )}
-        {n.asserted_by && <> reported by {n.asserted_by === "retraction-watch" ? "Retraction Watch" : n.asserted_by}</>}
-        {n.via && <> via {sourceName(n.via)}</>}. Not known at the previous scan.
-      </>
-    );
-  }
-  if (ev.version) {
-    return (
-      <>
-        Its {ev.version.role === "preprint" ? "preprint" : "published version"} is now linked (by{" "}
-        {(ev.version.linked_by ?? []).map((m: string) => (m === "manual" ? "a reviewer" : sourceName(m))).join(", ")}); both
-        stay separate papers.
-      </>
-    );
-  }
-  return <>A source now marks it as retracted.</>;
 }
 
 function Events({ radarId }: { radarId: string }) {
@@ -71,53 +63,51 @@ function Events({ radarId }: { radarId: string }) {
   if (!data?.length) {
     return (
       <Empty title="Nothing has changed yet">
-        A radar&apos;s first scan is its baseline. From the next scan on, this page lists new publications (never seen by the
-        radar and published in its window) and revisions to papers it has shown you: corrections, retractions, and newly
-        linked versions.
+        A radar&apos;s first scan is its baseline. From the next scan on, this page lists what changed: new findings,
+        emerging methods, topic growth, new connections between topics, and updates to papers it has shown you. Topic changes
+        need the radar&apos;s topics and a few weeks of counts.
       </Empty>
     );
   }
-  const days = [...new Set(data.map((e) => e.date))];
   return (
-    <div className="space-y-6">
-      {days.map((day) => (
-        <section key={day}>
-          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Scan of {fmtDate(day)}</h2>
-          <ul className="space-y-2">
-            {data
-              .filter((e) => e.date === day)
-              .map((e) => {
-                const k = kindOf(e);
-                const href = e.doi ? `https://doi.org/${e.doi}` : e.url;
-                return (
-                  <li key={e.event_id} data-testid="event" className="rounded-lg border border-border bg-surface px-4 py-3 text-sm">
-                    <p>
-                      <Badge tone={k.tone}>{k.label}</Badge>{" "}
-                      {href ? (
-                        <a href={href} target="_blank" rel="noreferrer" className="font-serif text-base hover:underline">
+    <div className="space-y-8">
+      {GROUPS.map((g) => {
+        const items = data.filter((e) => g.types.includes(e.type));
+        return (
+          <section key={g.key} data-testid={`group-${g.key}`} aria-labelledby={`h-${g.key}`}>
+            <h2 id={`h-${g.key}`} className="font-serif text-lg font-semibold">
+              {g.title} <span className="text-sm font-normal text-muted">({items.length})</span>
+            </h2>
+            <p className="mb-2 text-sm text-muted">{g.help}</p>
+            {items.length === 0 ? (
+              <p className="text-sm text-muted">Nothing in this group yet.</p>
+            ) : (
+              <ul className="space-y-2">
+                {items.map((e) => {
+                  const k = kindOf(e);
+                  return (
+                    <li key={e.event_id} data-testid="event" className="rounded-lg border border-border bg-surface px-4 py-3 text-sm">
+                      <p>
+                        <Badge tone={k.tone}>{k.label}</Badge>{" "}
+                        <Link
+                          href={`/whats-new/${encodeURIComponent(e.event_id)}?radar=${encodeURIComponent(radarId)}`}
+                          className="font-serif text-base hover:underline"
+                        >
                           {e.title ?? e.paper_id}
-                        </a>
-                      ) : (
-                        <span className="font-serif text-base">{e.title ?? e.paper_id}</span>
-                      )}
-                    </p>
-                    <p className="mt-1 text-muted">
-                      <Evidence e={e} />
-                    </p>
-                    {e.run_id && (
-                      <p className="mt-1 text-xs text-muted">
-                        From the stored run{" "}
-                        <Link href={`/?radar=${encodeURIComponent(radarId)}&run=${encodeURIComponent(e.run_id)}`} className="font-mono hover:underline">
-                          {e.run_id}
                         </Link>
+                        <span className="ml-2 text-xs text-muted">{fmtDate(e.date)}</span>
                       </p>
-                    )}
-                  </li>
-                );
-              })}
-          </ul>
-        </section>
-      ))}
+                      <p className="mt-1 text-muted">
+                        <Summary e={e} />
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }
@@ -132,7 +122,7 @@ function WhatsNew() {
   if (loading && !radars) return <Loading />;
   return (
     <>
-      <PageHeader title="What's New" subtitle="What changed in your radars' areas since earlier scans, with the evidence for each change." />
+      <PageHeader title="What's New" subtitle="What changed in your radars' areas since earlier scans. Every item opens the evidence for it." />
       {!selected ? (
         <Empty title="No scans yet">Run a scan from Radars first.</Empty>
       ) : (

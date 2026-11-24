@@ -82,6 +82,9 @@ class Fit:
     weeks: int = 0
     note: Optional[str] = None
     baseline: Optional[str] = None   # level | linear (f_c)
+    # The fitted baseline share per week (exp f_c(w)) with a 95% band from the baseline intercept's uncertainty;
+    # what the topic's share would be without the recent excess (task 29's evidence pages, task 30's chart).
+    baseline_share: Optional[List[Dict[str, Any]]] = None
 
 
 def fit_series(series: Sequence[Mapping[str, Any]], recent: int = RECENT_WEEKS) -> Fit:
@@ -124,6 +127,7 @@ def fit_series(series: Sequence[Mapping[str, Any]], recent: int = RECENT_WEEKS) 
     else:
         b0, delta = (float(x) for x in res.params[:2])
         b1, se = 0.0, float(res.bse[1])
+    se_b0 = float(res.bse[0])
     if not math.isfinite(se) or se <= 0:
         return Fit(status="failed", weeks=weeks, recent_count=recent_n, method=method, note="no standard error for the excess")
     expected = float((N[-recent:] * np.exp(b0 + b1 * w[-recent:])).sum())
@@ -131,7 +135,10 @@ def fit_series(series: Sequence[Mapping[str, Any]], recent: int = RECENT_WEEKS) 
     # dispersion the Wald z-test was anti-conservative in simulation (too many flags under the null).
     df = max(1, weeks - X.shape[1] - (1 if method == "negbin" else 0))
     crit = float(student_t.ppf(0.975, df))
-    return Fit(status="ok", method=method, rate_ratio=math.exp(delta), ci_low=math.exp(delta - crit * se),
+    base = [{"week": r["week"], "share": math.exp(b0 + b1 * float(wi)),
+             "low": math.exp(b0 - crit * se_b0 + b1 * float(wi)), "high": math.exp(b0 + crit * se_b0 + b1 * float(wi))}
+            for r, wi in zip(rows, w)]
+    return Fit(status="ok", baseline_share=base, method=method, rate_ratio=math.exp(delta), ci_low=math.exp(delta - crit * se),
                ci_high=math.exp(delta + crit * se), p_value=float(student_t.sf(delta / se, df)), recent_count=recent_n,
                expected_recent=expected, dispersion=alpha, weeks=weeks, note=note,
                baseline="linear" if linear else "level")

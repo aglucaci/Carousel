@@ -1,0 +1,757 @@
+{
+ "radars": [
+  {
+   "radar_id": "lab",
+   "title": "Lab",
+   "description": "",
+   "state": "active",
+   "n_runs": 2,
+   "created_at": "2026-12-01T00:00:00Z",
+   "updated_at": "2026-12-15T00:00:00Z"
+  }
+ ],
+ "events": [
+  {
+   "event_id": "ev_newpub_demo",
+   "type": "new_publication",
+   "kind": null,
+   "radar_id": "lab",
+   "run_id": "run_2",
+   "date": "2026-12-15",
+   "paper_id": "cp_eee32833b940911b",
+   "title": "Prime editing restores function in a mouse model of retinal degeneration",
+   "evidence": {
+    "run_id": "run_2",
+    "previous_run_id": "run_1",
+    "rank": 3,
+    "earliest_public_date": "2026-12-08",
+    "window": {
+     "start": "2026-09-23",
+     "end": "2026-12-14"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "doi": "10.5555/carousel-demo"
+   },
+   "events_version": "1",
+   "papers": [
+    {
+     "paper_id": "cp_eee32833b940911b",
+     "title": "Prime editing restores function in a mouse model of retinal degeneration",
+     "doi": "10.5555/carousel-demo",
+     "earliest_public_date": "2026-12-08"
+    }
+   ],
+   "findings": [
+    {
+     "text": "We found that a single dose restored visual function in 12 of 14 mice.",
+     "quote": "We found that a single dose restored visual function in 12 of 14 mice.",
+     "section": "Abstract",
+     "provider": "rules",
+     "coverage": "abstract_only"
+    }
+   ]
+  },
+  {
+   "event_id": "ev_584f4ecfca0ae568",
+   "type": "new_methodological_connection",
+   "kind": "cryo-em",
+   "radar_id": "lab",
+   "run_id": "run_2",
+   "date": "2026-12-15",
+   "paper_id": "cp_8f914b16cf6159a0",
+   "title": "cryo-em → editing · crispr · base",
+   "evidence": {
+    "method_term": "cryo-em",
+    "topic_id": "tp_59808d4deb",
+    "classifier_version": "topics-1:40080fd529b7",
+    "recent_window": [
+     "2026-11-17",
+     "2026-12-15"
+    ],
+    "recent_papers_with_term": 3,
+    "earlier_papers_without_term": 9,
+    "title": "cryo-em → editing · crispr · base",
+    "papers": [
+     {
+      "paper_id": "cp_8f914b16cf6159a0",
+      "title": "efficiency editor crispr knock-in base prime",
+      "doi": null,
+      "earliest_public_date": "2026-11-18",
+      "confidence": 0.8524
+     },
+     {
+      "paper_id": "cp_8c6592f63554b046",
+      "title": "off-target base cas9 knock-in editing prime",
+      "doi": null,
+      "earliest_public_date": "2026-11-19",
+      "confidence": 0.8509
+     },
+     {
+      "paper_id": "cp_d15ec8e663dfeecb",
+      "title": "rna guide editor efficiency cas9 off-target",
+      "doi": null,
+      "earliest_public_date": "2026-11-20",
+      "confidence": 0.833
+     }
+    ],
+    "as_of": "2026-12-15T09:00:00+00:00"
+   },
+   "events_version": "topic-events-1",
+   "papers": [
+    {
+     "paper_id": "cp_8f914b16cf6159a0",
+     "title": "efficiency editor crispr knock-in base prime",
+     "doi": null,
+     "earliest_public_date": "2026-11-18",
+     "confidence": 0.8524
+    },
+    {
+     "paper_id": "cp_8c6592f63554b046",
+     "title": "off-target base cas9 knock-in editing prime",
+     "doi": null,
+     "earliest_public_date": "2026-11-19",
+     "confidence": 0.8509
+    },
+    {
+     "paper_id": "cp_d15ec8e663dfeecb",
+     "title": "rna guide editor efficiency cas9 off-target",
+     "doi": null,
+     "earliest_public_date": "2026-11-20",
+     "confidence": 0.833
+    }
+   ],
+   "findings": []
+  },
+  {
+   "event_id": "ev_830574a7b94d6d59",
+   "type": "research_landscape_shift",
+   "kind": "new",
+   "radar_id": "lab",
+   "run_id": "run_2",
+   "date": "2026-12-15",
+   "paper_id": "cp_be349e8da9ab79f9",
+   "title": "falciparum · plasmodium · kelch13",
+   "evidence": {
+    "relation": "new",
+    "from_topic": null,
+    "to_topic": "tp_d47260807d",
+    "from_version": "topics-1:7f3a59b127e8",
+    "to_version": "topics-1:40080fd529b7",
+    "shared_members": 0,
+    "centroid_similarity": null,
+    "title": "falciparum · plasmodium · kelch13",
+    "papers": [
+     {
+      "paper_id": "cp_be349e8da9ab79f9",
+      "title": "artemisinin falciparum kelch13 vector clearance resistance",
+      "doi": null,
+      "earliest_public_date": "2026-10-15",
+      "confidence": 0.8578
+     },
+     {
+      "paper_id": "cp_6380884d141e8431",
+      "title": "vector artemisinin parasite falciparum mosquito kelch13",
+      "doi": null,
+      "earliest_public_date": "2026-10-15",
+      "confidence": 0.8576
+     },
+     {
+      "paper_id": "cp_d3aa7ca9fa5fcf6b",
+      "title": "clearance resistance artemisinin vector mosquito kelch13",
+      "doi": null,
+      "earliest_public_date": "2026-10-15",
+      "confidence": 0.8572
+     },
+     {
+      "paper_id": "cp_fc4a9e1566a28b6e",
+      "title": "resistance parasite artemisinin mosquito plasmodium clearance",
+      "doi": null,
+      "earliest_public_date": "2026-10-15",
+      "confidence": 0.8531
+     },
+     {
+      "paper_id": "cp_e8c12469ea50a631",
+      "title": "artemisinin vector resistance plasmodium kelch13 clearance",
+      "doi": null,
+      "earliest_public_date": "2026-10-15",
+      "confidence": 0.851
+     },
+     {
+      "paper_id": "cp_57229c4342a2fd5b",
+      "title": "parasite clearance resistance vector falciparum plasmodium",
+      "doi": null,
+      "earliest_public_date": "2026-10-15",
+      "confidence": 0.843
+     },
+     {
+      "paper_id": "cp_9dec502d709a8a65",
+      "title": "clearance vector artemisinin falciparum kelch13 plasmodium",
+      "doi": null,
+      "earliest_public_date": "2026-10-15",
+      "confidence": 0.8383
+     },
+     {
+      "paper_id": "cp_6f995c84c54dd151",
+      "title": "plasmodium kelch13 artemisinin mosquito vector falciparum",
+      "doi": null,
+      "earliest_public_date": "2026-10-15",
+      "confidence": 0.837
+     },
+     {
+      "paper_id": "cp_416751f544431678",
+      "title": "artemisinin clearance resistance vector falciparum mosquito",
+      "doi": null,
+      "earliest_public_date": "2026-10-15",
+      "confidence": 0.8338
+     },
+     {
+      "paper_id": "cp_da70f6f6b50db8c5",
+      "title": "resistance artemisinin kelch13 parasite mosquito vector",
+      "doi": null,
+      "earliest_public_date": "2026-10-15",
+      "confidence": 0.8289
+     }
+    ],
+    "as_of": "2026-12-15T09:00:00+00:00"
+   },
+   "events_version": "topic-events-1",
+   "papers": [
+    {
+     "paper_id": "cp_be349e8da9ab79f9",
+     "title": "artemisinin falciparum kelch13 vector clearance resistance",
+     "doi": null,
+     "earliest_public_date": "2026-10-15",
+     "confidence": 0.8578
+    },
+    {
+     "paper_id": "cp_6380884d141e8431",
+     "title": "vector artemisinin parasite falciparum mosquito kelch13",
+     "doi": null,
+     "earliest_public_date": "2026-10-15",
+     "confidence": 0.8576
+    },
+    {
+     "paper_id": "cp_d3aa7ca9fa5fcf6b",
+     "title": "clearance resistance artemisinin vector mosquito kelch13",
+     "doi": null,
+     "earliest_public_date": "2026-10-15",
+     "confidence": 0.8572
+    },
+    {
+     "paper_id": "cp_fc4a9e1566a28b6e",
+     "title": "resistance parasite artemisinin mosquito plasmodium clearance",
+     "doi": null,
+     "earliest_public_date": "2026-10-15",
+     "confidence": 0.8531
+    },
+    {
+     "paper_id": "cp_e8c12469ea50a631",
+     "title": "artemisinin vector resistance plasmodium kelch13 clearance",
+     "doi": null,
+     "earliest_public_date": "2026-10-15",
+     "confidence": 0.851
+    },
+    {
+     "paper_id": "cp_57229c4342a2fd5b",
+     "title": "parasite clearance resistance vector falciparum plasmodium",
+     "doi": null,
+     "earliest_public_date": "2026-10-15",
+     "confidence": 0.843
+    },
+    {
+     "paper_id": "cp_9dec502d709a8a65",
+     "title": "clearance vector artemisinin falciparum kelch13 plasmodium",
+     "doi": null,
+     "earliest_public_date": "2026-10-15",
+     "confidence": 0.8383
+    },
+    {
+     "paper_id": "cp_6f995c84c54dd151",
+     "title": "plasmodium kelch13 artemisinin mosquito vector falciparum",
+     "doi": null,
+     "earliest_public_date": "2026-10-15",
+     "confidence": 0.837
+    },
+    {
+     "paper_id": "cp_416751f544431678",
+     "title": "artemisinin clearance resistance vector falciparum mosquito",
+     "doi": null,
+     "earliest_public_date": "2026-10-15",
+     "confidence": 0.8338
+    },
+    {
+     "paper_id": "cp_da70f6f6b50db8c5",
+     "title": "resistance artemisinin kelch13 parasite mosquito vector",
+     "doi": null,
+     "earliest_public_date": "2026-10-15",
+     "confidence": 0.8289
+    }
+   ],
+   "findings": []
+  },
+  {
+   "event_id": "ev_e4cd5be0ad80b709",
+   "type": "topic_acceleration",
+   "kind": null,
+   "radar_id": "lab",
+   "run_id": "run_1",
+   "date": "2026-12-15",
+   "paper_id": "cp_8f914b16cf6159a0",
+   "title": "editing · crispr · base",
+   "evidence": {
+    "source": "pubmed",
+    "classifier_version": "topics-1:7f3a59b127e8",
+    "trend_model_version": "trend-nb-1",
+    "checks_version": "checks-1",
+    "evaluated_through": "2026-11-22",
+    "recent_window": [
+     "2026-10-26",
+     "2026-11-22"
+    ],
+    "rate_ratio": 2.5894584792411393,
+    "ci": [
+     2.0568635248809826,
+     3.2599611664083676
+    ],
+    "p_value": 3.3031589374098817e-07,
+    "q_value": 9.909476812229645e-07,
+    "recent_count": 164,
+    "expected_recent": 63.33354883328752,
+    "method": "negbin",
+    "baseline": "level",
+    "smoothed_share": [
+     {
+      "week": "2026-08-03",
+      "share": 0.04809286898839138
+     },
+     {
+      "week": "2026-08-10",
+      "share": 0.05140961857379768
+     },
+     {
+      "week": "2026-08-17",
+      "share": 0.05804311774461028
+     },
+     {
+      "week": "2026-08-24",
+      "share": 0.05804311774461028
+     },
+     {
+      "week": "2026-08-31",
+      "share": 0.05140961857379768
+     },
+     {
+      "week": "2026-09-07",
+      "share": 0.024875621890547265
+     },
+     {
+      "week": "2026-09-14",
+      "share": 0.07462686567164178
+     },
+     {
+      "week": "2026-09-21",
+      "share": 0.05472636815920398
+     },
+     {
+      "week": "2026-09-28",
+      "share": 0.05804311774461028
+     },
+     {
+      "week": "2026-10-05",
+      "share": 0.06799336650082918
+     },
+     {
+      "week": "2026-10-12",
+      "share": 0.06467661691542288
+     },
+     {
+      "week": "2026-10-19",
+      "share": 0.03814262023217247
+     },
+     {
+      "week": "2026-10-26",
+      "share": 0.15422885572139303
+     },
+     {
+      "week": "2026-11-02",
+      "share": 0.1111111111111111
+     },
+     {
+      "week": "2026-11-09",
+      "share": 0.14096185737976782
+     },
+     {
+      "week": "2026-11-16",
+      "share": 0.14427860696517414
+     }
+    ],
+    "checks": [
+     {
+      "check": "indexing_lag",
+      "status": "pass",
+      "detail": "weeks ending after 2026-11-22 are provisional (settling time 21 days, default (too few re-observed weeks)); the trend is evaluated through 2026-11-22",
+      "settling_days": 21,
+      "basis": "default (too few re-observed weeks)",
+      "provisional_weeks": []
+     },
+     {
+      "check": "denominator_shift",
+      "status": "pass",
+      "detail": "the field's weekly count is stable",
+      "ratio": 1.0
+     },
+     {
+      "check": "classifier_change",
+      "status": "pass",
+      "detail": "one topic-model version throughout",
+      "other_versions": []
+     },
+     {
+      "check": "duplicate_surge",
+      "status": "pass",
+      "detail": "5 records, 5 distinct works",
+      "records": 5,
+      "works": 5
+     }
+    ],
+    "criteria": {
+     "recent_weeks": 4,
+     "linear_min_baseline": 26,
+     "min_baseline_weeks": 8,
+     "min_rate_ratio": 1.5,
+     "fdr": 0.1,
+     "min_recent_count": 10,
+     "persistence_weeks": 2,
+     "smoothing": 0.5
+    },
+    "papers_in_window": 5,
+    "baseline_share": [
+     {
+      "week": "2026-08-03",
+      "share": 0.052777957361072936,
+      "low": 0.04512174445722945,
+      "high": 0.06173326888652541
+     },
+     {
+      "week": "2026-08-10",
+      "share": 0.052777957361072936,
+      "low": 0.04512174445722945,
+      "high": 0.06173326888652541
+     },
+     {
+      "week": "2026-08-17",
+      "share": 0.052777957361072936,
+      "low": 0.04512174445722945,
+      "high": 0.06173326888652541
+     },
+     {
+      "week": "2026-08-24",
+      "share": 0.052777957361072936,
+      "low": 0.04512174445722945,
+      "high": 0.06173326888652541
+     },
+     {
+      "week": "2026-08-31",
+      "share": 0.052777957361072936,
+      "low": 0.04512174445722945,
+      "high": 0.06173326888652541
+     },
+     {
+      "week": "2026-09-07",
+      "share": 0.052777957361072936,
+      "low": 0.04512174445722945,
+      "high": 0.06173326888652541
+     },
+     {
+      "week": "2026-09-14",
+      "share": 0.052777957361072936,
+      "low": 0.04512174445722945,
+      "high": 0.06173326888652541
+     },
+     {
+      "week": "2026-09-21",
+      "share": 0.052777957361072936,
+      "low": 0.04512174445722945,
+      "high": 0.06173326888652541
+     },
+     {
+      "week": "2026-09-28",
+      "share": 0.052777957361072936,
+      "low": 0.04512174445722945,
+      "high": 0.06173326888652541
+     },
+     {
+      "week": "2026-10-05",
+      "share": 0.052777957361072936,
+      "low": 0.04512174445722945,
+      "high": 0.06173326888652541
+     },
+     {
+      "week": "2026-10-12",
+      "share": 0.052777957361072936,
+      "low": 0.04512174445722945,
+      "high": 0.06173326888652541
+     },
+     {
+      "week": "2026-10-19",
+      "share": 0.052777957361072936,
+      "low": 0.04512174445722945,
+      "high": 0.06173326888652541
+     },
+     {
+      "week": "2026-10-26",
+      "share": 0.052777957361072936,
+      "low": 0.04512174445722945,
+      "high": 0.06173326888652541
+     },
+     {
+      "week": "2026-11-02",
+      "share": 0.052777957361072936,
+      "low": 0.04512174445722945,
+      "high": 0.06173326888652541
+     },
+     {
+      "week": "2026-11-09",
+      "share": 0.052777957361072936,
+      "low": 0.04512174445722945,
+      "high": 0.06173326888652541
+     },
+     {
+      "week": "2026-11-16",
+      "share": 0.052777957361072936,
+      "low": 0.04512174445722945,
+      "high": 0.06173326888652541
+     }
+    ],
+    "weekly": [
+     {
+      "week": "2026-08-03",
+      "count": 14,
+      "denominator": 300,
+      "share": 0.04666666666666667,
+      "observed_at": "2026-11-23T12:00:00.000000Z"
+     },
+     {
+      "week": "2026-08-10",
+      "count": 15,
+      "denominator": 300,
+      "share": 0.05,
+      "observed_at": "2026-11-23T12:00:00.000000Z"
+     },
+     {
+      "week": "2026-08-17",
+      "count": 17,
+      "denominator": 300,
+      "share": 0.056666666666666664,
+      "observed_at": "2026-11-23T12:00:00.000000Z"
+     },
+     {
+      "week": "2026-08-24",
+      "count": 17,
+      "denominator": 300,
+      "share": 0.056666666666666664,
+      "observed_at": "2026-11-23T12:00:00.000000Z"
+     },
+     {
+      "week": "2026-08-31",
+      "count": 15,
+      "denominator": 300,
+      "share": 0.05,
+      "observed_at": "2026-11-23T12:00:00.000000Z"
+     },
+     {
+      "week": "2026-09-07",
+      "count": 7,
+      "denominator": 300,
+      "share": 0.023333333333333334,
+      "observed_at": "2026-11-23T12:00:00.000000Z"
+     },
+     {
+      "week": "2026-09-14",
+      "count": 22,
+      "denominator": 300,
+      "share": 0.07333333333333333,
+      "observed_at": "2026-11-23T12:00:00.000000Z"
+     },
+     {
+      "week": "2026-09-21",
+      "count": 16,
+      "denominator": 300,
+      "share": 0.05333333333333334,
+      "observed_at": "2026-11-23T12:00:00.000000Z"
+     },
+     {
+      "week": "2026-09-28",
+      "count": 17,
+      "denominator": 300,
+      "share": 0.056666666666666664,
+      "observed_at": "2026-11-23T12:00:00.000000Z"
+     },
+     {
+      "week": "2026-10-05",
+      "count": 20,
+      "denominator": 300,
+      "share": 0.06666666666666667,
+      "observed_at": "2026-11-23T12:00:00.000000Z"
+     },
+     {
+      "week": "2026-10-12",
+      "count": 19,
+      "denominator": 300,
+      "share": 0.06333333333333334,
+      "observed_at": "2026-11-23T12:00:00.000000Z"
+     },
+     {
+      "week": "2026-10-19",
+      "count": 11,
+      "denominator": 300,
+      "share": 0.03666666666666667,
+      "observed_at": "2026-11-23T12:00:00.000000Z"
+     },
+     {
+      "week": "2026-10-26",
+      "count": 46,
+      "denominator": 300,
+      "share": 0.15333333333333332,
+      "observed_at": "2026-11-23T12:00:00.000000Z"
+     },
+     {
+      "week": "2026-11-02",
+      "count": 33,
+      "denominator": 300,
+      "share": 0.11,
+      "observed_at": "2026-11-23T12:00:00.000000Z"
+     },
+     {
+      "week": "2026-11-09",
+      "count": 42,
+      "denominator": 300,
+      "share": 0.14,
+      "observed_at": "2026-11-23T12:00:00.000000Z"
+     },
+     {
+      "week": "2026-11-16",
+      "count": 43,
+      "denominator": 300,
+      "share": 0.14333333333333334,
+      "observed_at": "2026-11-23T12:00:00.000000Z"
+     }
+    ],
+    "title": "editing · crispr · base",
+    "papers": [
+     {
+      "paper_id": "cp_8f914b16cf6159a0",
+      "title": "efficiency editor crispr knock-in base prime",
+      "doi": null,
+      "earliest_public_date": "2026-11-18",
+      "confidence": 0.8524
+     },
+     {
+      "paper_id": "cp_8c6592f63554b046",
+      "title": "off-target base cas9 knock-in editing prime",
+      "doi": null,
+      "earliest_public_date": "2026-11-19",
+      "confidence": 0.8509
+     },
+     {
+      "paper_id": "cp_d15ec8e663dfeecb",
+      "title": "rna guide editor efficiency cas9 off-target",
+      "doi": null,
+      "earliest_public_date": "2026-11-20",
+      "confidence": 0.833
+     },
+     {
+      "paper_id": "cp_eebe4fcdf0e7beca",
+      "title": "guide off-target crispr base editing prime",
+      "doi": null,
+      "earliest_public_date": "2026-11-21",
+      "confidence": 0.8237
+     },
+     {
+      "paper_id": "cp_1bbf7524f8326e3a",
+      "title": "rna editor base crispr knock-in off-target",
+      "doi": null,
+      "earliest_public_date": "2026-11-22",
+      "confidence": 0.8033
+     }
+    ],
+    "as_of": "2026-12-15T09:00:00+00:00"
+   },
+   "events_version": "topic-events-1",
+   "papers": [
+    {
+     "paper_id": "cp_8f914b16cf6159a0",
+     "title": "efficiency editor crispr knock-in base prime",
+     "doi": null,
+     "earliest_public_date": "2026-11-18",
+     "confidence": 0.8524
+    },
+    {
+     "paper_id": "cp_8c6592f63554b046",
+     "title": "off-target base cas9 knock-in editing prime",
+     "doi": null,
+     "earliest_public_date": "2026-11-19",
+     "confidence": 0.8509
+    },
+    {
+     "paper_id": "cp_d15ec8e663dfeecb",
+     "title": "rna guide editor efficiency cas9 off-target",
+     "doi": null,
+     "earliest_public_date": "2026-11-20",
+     "confidence": 0.833
+    },
+    {
+     "paper_id": "cp_eebe4fcdf0e7beca",
+     "title": "guide off-target crispr base editing prime",
+     "doi": null,
+     "earliest_public_date": "2026-11-21",
+     "confidence": 0.8237
+    },
+    {
+     "paper_id": "cp_1bbf7524f8326e3a",
+     "title": "rna editor base crispr knock-in off-target",
+     "doi": null,
+     "earliest_public_date": "2026-11-22",
+     "confidence": 0.8033
+    }
+   ],
+   "findings": []
+  },
+  {
+   "event_id": "ev_retraction_demo",
+   "type": "publication_revision",
+   "kind": "retraction",
+   "radar_id": "lab",
+   "run_id": "run_2",
+   "date": "2026-12-15",
+   "paper_id": "cp_53e6484bf51542cc",
+   "title": "serology vaccine strain influenza neutralizing drift",
+   "evidence": {
+    "run_id": "run_2",
+    "previous_run_id": "run_1",
+    "retracted": {
+     "before": false,
+     "now": true
+    },
+    "notice": {
+     "type": "retraction",
+     "notice_doi": "10.5555/retraction-demo",
+     "asserted_by": "retraction-watch",
+     "via": "crossref"
+    }
+   },
+   "events_version": "1",
+   "papers": [
+    {
+     "paper_id": "cp_53e6484bf51542cc",
+     "title": "serology vaccine strain influenza neutralizing drift",
+     "doi": null,
+     "earliest_public_date": "2026-09-01"
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

@@ -76,6 +76,7 @@ class Digest:
     explanation_version: Optional[str]
     app_url: Optional[str] = None        # link back to the run in the app, when CAROUSEL_PUBLIC_URL is set
     changes: Tuple[str, ...] = ()        # revisions to papers the radar watches (Research Delta), one line each
+    topic_changes: Tuple[str, ...] = ()  # topic growth, new connections, landscape shifts (Phase 3), one line each
     new_publications: int = 0            # new_publication events in this run
 
     @property
@@ -162,6 +163,22 @@ def change_line(e: Mapping[str, Any]) -> str:
     return text
 
 
+def topic_line(e: Mapping[str, Any]) -> str:
+    """One topic event as a sentence, with its main number and how many papers it rests on."""
+    ev = e.get("evidence") or {}
+    n = len(ev.get("papers") or [])
+    if e.get("type") == "topic_acceleration":
+        return (f"Growing: {e.get('title')} (x{ev.get('rate_ratio', 0):.1f} its usual share in {ev.get('source')}, "
+                f"through {ev.get('evaluated_through')}; {n} papers)")
+    if e.get("type") == "new_methodological_connection":
+        return f"New method in a topic: {e.get('title')} ({ev.get('recent_papers_with_term')} recent papers)"
+    rel = {"split": "split", "merge": "merged", "new": "new topic", "retired": "no longer a topic"}.get(e.get("kind") or "", e.get("kind"))
+    return f"Topic map changed ({rel}): {e.get('title')} ({n} papers)"
+
+
+TOPIC_TYPES = ("topic_acceleration", "new_methodological_connection", "research_landscape_shift")
+
+
 def _url(paper: Mapping[str, Any]) -> Optional[str]:
     if paper.get("doi"):
         return f"https://doi.org/{paper['doi']}"
@@ -197,6 +214,7 @@ def digest_from_run(run: Mapping[str, Any], items: Sequence[Mapping[str, Any]], 
                   coverage=cov, feedback=_feedback_line(stats), explanation_version=run.get("explanation_version"),
                   app_url=link,
                   changes=tuple(change_line(e) for e in events if e.get("type") == "publication_revision"),
+                  topic_changes=tuple(topic_line(e) for e in events if e.get("type") in TOPIC_TYPES),
                   new_publications=sum(1 for e in events if e.get("type") == "new_publication"))
 
 
@@ -242,6 +260,8 @@ def to_markdown(d: Digest) -> str:
     lines = [f"# {_md(d.title)}", ""] + [_md(x) for x in d.intro] + [""]
     if d.changes:
         lines += ["## Changes to papers you've seen", ""] + [f"- {_md(c)}" for c in d.changes] + [""]
+    if d.topic_changes:
+        lines += ["## Changes in your topics", ""] + [f"- {_md(c)}" for c in d.topic_changes] + [""]
     for it in d.items:
         title = f"[{_md(it.title)}]({it.url})" if it.url else _md(it.title)
         lines.append(f"## {it.rank}. {title}")
@@ -308,6 +328,8 @@ def _text(d: Digest) -> str:
     lines = [d.title, "=" * len(d.title), ""] + d.intro + [""]
     if d.changes:
         lines += ["Changes to papers you've seen:"] + [f"- {c}" for c in d.changes] + [""]
+    if d.topic_changes:
+        lines += ["Changes in your topics:"] + [f"- {c}" for c in d.topic_changes] + [""]
     for it in d.items:
         lines.append(f"{it.rank}. {it.title}")
         for x in (it.meta, " · ".join(it.labels), f"Why: {it.why}." if it.why else "", it.url or ""):
@@ -330,6 +352,9 @@ def _html(d: Digest) -> str:
     if d.changes:
         out.append('<h2 style="font-size:17px">Changes to papers you\'ve seen</h2><ul style="font-family:sans-serif;font-size:14px">'
                    + "".join(f"<li>{e(c)}</li>" for c in d.changes) + "</ul>")
+    if d.topic_changes:
+        out.append('<h2 style="font-size:17px">Changes in your topics</h2><ul style="font-family:sans-serif;font-size:14px">'
+                   + "".join(f"<li>{e(c)}</li>" for c in d.topic_changes) + "</ul>")
     for it in d.items:
         title = f'<a href="{e(it.url)}" style="color:#1f4e79">{e(it.title)}</a>' if it.url else e(it.title)
         out.append(f'<h2 style="font-size:17px;margin:20px 0 4px">{it.rank}. {title}</h2>')

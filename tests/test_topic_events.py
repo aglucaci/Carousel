@@ -28,7 +28,7 @@ from test_topics import GROUPS
 
 UTC = dt.timezone.utc
 EMB = HashingEmbedder()
-AS_OF = dt.datetime(2026, 12, 22, 9, tzinfo=UTC)  # a Tuesday, long after the observed weeks
+AS_OF = dt.datetime(2026, 12, 15, 9, tzinfo=UTC)  # a Tuesday, once the last observed week (to 22 Nov) has settled
 RADAR = RadarConfig.model_validate({
     "radar_id": "lab", "radar_name": "Lab", "queries": ["evolution"], "sources": ["pubmed"],
     "methods_profile": ["cryo-em"], "filters": {"date_range": "last_90_days"}})
@@ -42,9 +42,9 @@ def build(d: Path):
     for g in ("flu", "crispr", "coral"):
         words = GROUPS[g].split()
         for i in range(14):
-            recent = g == "crispr" and i >= 9  # five crispr papers 25-29 Nov (in the trend's and the connection's
-            # windows as of AS_OF), three of them using cryo-EM
-            date = (dt.date(2026, 11, 25) + dt.timedelta(days=i - 9)) if recent else (dt.date(2026, 9, 1) + dt.timedelta(days=3 * i))
+            recent = g == "crispr" and i >= 9  # five crispr papers 18-22 Nov (in the trend's tested weeks and the
+            # connection's 28 days as of AS_OF), three of them using cryo-EM
+            date = (dt.date(2026, 11, 18) + dt.timedelta(days=i - 9)) if recent else (dt.date(2026, 9, 1) + dt.timedelta(days=3 * i))
             extra = " cryo-em structure" if recent and i < 12 else ""
             rec = SourceRecord(source="pubmed", source_id=f"{g}{i}", title=" ".join(rng.sample(words, 6)),
                                abstract=" ".join(rng.choice(words) for _ in range(30)) + extra,
@@ -93,7 +93,11 @@ class TopicEventTests(unittest.TestCase):
         if np is not None:
             [acc] = [e for e in out["events"] if e["type"] == "topic_acceleration"]
             ev = acc["evidence"]
-            self.assertEqual((ev["source"], ev["evaluated_through"], ev["papers_in_window"]), ("pubmed", "2026-11-29", 5))
+            self.assertEqual((ev["source"], ev["evaluated_through"], ev["papers_in_window"]), ("pubmed", "2026-11-22", 5))
+            self.assertEqual(ev["recent_window"], ["2026-10-26", "2026-11-22"])  # the four weeks the model tested
+            self.assertEqual([w["week"] for w in ev["weekly"]][-4:], ["2026-10-26", "2026-11-02", "2026-11-09", "2026-11-16"])
+            dup = next(c for c in ev["checks"] if c["check"] == "duplicate_surge")
+            self.assertEqual((dup["records"], dup["works"]), (5, 5))  # the check saw the same papers the event cites
             self.assertGreater(ev["rate_ratio"], 1.5)
             self.assertTrue(all(c["status"] != "fired" for c in ev["checks"]))
             self.assertEqual(acc["title"], next(t.label for t in self.model.topics if t.topic_id == self.crispr))
@@ -123,6 +127,15 @@ class TopicEventTests(unittest.TestCase):
         self.assertEqual(shift["evidence"]["from_version"], self.model.classifier_version)
         self.assertEqual(len(shift["evidence"]["papers"]), 10)  # the new topic's papers (capped)
         self.assertTrue(all(p["paper_id"] in {o[2] for o in obs} for p in shift["evidence"]["papers"]))
+
+    def test_digest_lines(self) -> None:
+        from carousel.notifications.digest import topic_line
+
+        lines = [topic_line(e) for e in derive_topic_events(self.st, RADAR, AS_OF, "run_1")["events"]]
+        self.assertTrue(any(line.startswith("New method in a topic: cryo-em") for line in lines))
+        if np is not None:
+            self.assertTrue(any(line.startswith("Growing: ") and "in pubmed, through 2026-11-22; 5 papers)" in line
+                                for line in lines))
 
     def test_reproducible_from_stored_data(self) -> None:
         first = derive_topic_events(self.st, RADAR, AS_OF, "run_1")["events"]
@@ -163,6 +176,11 @@ if ApiTestCase is not None:
             conn = next(e for e in got if e["type"] == "new_methodological_connection")
             self.assertEqual((conn["kind"], conn["run_id"]), ("cryo-em", None))
             self.assertTrue(conn["evidence"]["papers"] and conn["paper_id"])
+            detail = self.get(f"/events/{conn['event_id']}").json()
+            self.assertEqual(detail["title"], conn["title"])
+            self.assertEqual([p["paper_id"] for p in detail["papers"]], [p["paper_id"] for p in conn["evidence"]["papers"]])
+            self.assertTrue(all(p["title"] for p in detail["papers"]))
+            self.assertEqual(self.get("/events/ev_nope").status_code, 404)
 
 
 if __name__ == "__main__":
