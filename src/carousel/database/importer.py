@@ -268,7 +268,7 @@ def _import_store(st: PaperStore, engine: Engine) -> Dict[str, int]:
 
         # ---- Research Delta events (derived from stored runs; keyed by the engine's event_id) ----
         events = [{"event_key": e["event_id"], "type": e["type"], "kind": e["kind"], "radar_id": e["radar_id"],
-                   "run_id": e["run_id"], "paper_id": st.resolve(e["paper_id"]), "date": dt.date.fromisoformat(e["date"]),
+                   "run_id": e["run_id"] or None, "paper_id": st.resolve(e["paper_id"]), "date": dt.date.fromisoformat(e["date"]),
                    "evidence": e["evidence"], "events_version": e["events_version"]} for e in st.events()]
         _upsert(conn, T["research_events"], events, ["event_key"], ["paper_id", "evidence"])
         counts["research_events"] = len(events)

@@ -288,9 +288,11 @@ class DigestDelivery(_Out):
 
 class EventOut(_Out):
     event_id: str
-    type: Literal["new_publication", "publication_revision"]
+    type: Literal["new_publication", "publication_revision", "topic_acceleration", "new_methodological_connection",
+                  "research_landscape_shift"]
     kind: Optional[str] = Field(None, description="Revisions: retraction, correction, expression_of_concern, "
-                                                  "new_version, or another update type")
+                                                  "new_version, or another update type; connections: the method term; "
+                                                  "landscape shifts: split, merge, new, or retired")
     radar_id: str
     run_id: Optional[str] = None
     date: dt.date = Field(description="The day the run that found it started")
