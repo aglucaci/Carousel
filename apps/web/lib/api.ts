@@ -6,6 +6,8 @@ import { useCallback, useEffect, useState } from "react";
 export type Coverage = {
   source: string;
   status: string;
+  /** "verification": looked up the DOIs other sources found (Crossref), rather than searching. */
+  role?: string;
   note?: string;
   error?: string;
   total_available?: number | null;

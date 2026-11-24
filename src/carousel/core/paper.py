@@ -145,6 +145,54 @@ class PaperDates(_Strict):
 DATE_FIELDS: Tuple[str, ...] = tuple(PaperDates.model_fields)
 
 
+RETRACTING_UPDATES = frozenset({"retraction", "removal", "withdrawal"})
+"""Update types that take a paper out of the record (any one sets ``is_retracted``)."""
+
+CORRECTING_UPDATES = frozenset({"correction", "corrigendum", "erratum", "partial_retraction", "addendum", "clarification"})
+
+
+def update_type(value: str) -> str:
+    """Normalize an update type: ``Expression of Concern`` / ``expression-of-concern`` -> ``expression_of_concern``."""
+    return "_".join(value.strip().lower().replace("-", " ").split())
+
+
+class UpdateNotice(_Strict):
+    """A correction, retraction, expression of concern, ... that updates this paper (Crossref ``updated-by``)."""
+
+    type: str = Field(min_length=1, description="retraction | correction | expression_of_concern | erratum | ...")
+    notice_doi: Optional[str] = Field(default=None, description="DOI of the notice itself")
+    date: Optional[PartialDate] = None
+    asserted_by: Optional[str] = Field(default=None, description="Who reported it to the source: publisher | retraction-watch")
+    label: Optional[str] = None
+    via: Optional[str] = Field(default=None, description="The source that carried it (set on canonical papers)")
+
+    @field_validator("type", mode="before")
+    @classmethod
+    def _type(cls, v: Any) -> str:
+        return update_type(str(v))
+
+    @field_validator("notice_doi", mode="before")
+    @classmethod
+    def _doi(cls, v: Any) -> Optional[str]:
+        return normalize("doi", str(v)) if v else None
+
+
+class Relation(_Strict):
+    """A link to another work that a source asserts, e.g. this article ``has-preprint`` 10.1101/... ."""
+
+    type: str = Field(min_length=1, description="has-preprint | is-preprint-of | ... (Crossref relation types)")
+    scheme: str = Field(min_length=1, description="Identifier scheme of the related work: doi, arxiv, ...")
+    value: str = Field(min_length=1)
+    asserted_by: Optional[str] = Field(default=None, description="subject | object (Crossref: which side deposited it)")
+    via: Optional[str] = Field(default=None, description="The source that carried it (set on canonical papers)")
+
+    @model_validator(mode="after")
+    def _normalize(self) -> "Relation":
+        if self.scheme in SCHEMES:
+            object.__setattr__(self, "value", normalize(self.scheme, self.value))
+        return self
+
+
 # -------------------------
 # Source record
 # -------------------------
@@ -170,6 +218,8 @@ class SourceRecord(_Strict):
     url: Optional[str] = None
     version: Optional[str] = Field(default=None, description="Source version label, e.g. a preprint 'v2'")
     dates: PaperDates = Field(default_factory=PaperDates)
+    updates: List[UpdateNotice] = Field(default_factory=list, description="Corrections, retractions, ... of this paper")
+    relations: List[Relation] = Field(default_factory=list, description="Links to other works (preprint of, ...)")
     first_seen: Optional[UTCDateTime] = None
     last_verified: Optional[UTCDateTime] = None
     raw: Optional[Dict[str, Any]] = Field(default=None, description="Untouched source payload, for audit")
@@ -187,6 +237,9 @@ class SourceRecord(_Strict):
     def content_sha256(self) -> str:
         """Hash of what the source says, excluding observation times and the raw payload."""
         content = self.model_dump(mode="json", exclude={"first_seen", "last_verified", "raw"})
+        for key in ("updates", "relations"):  # added later; leaving them out when empty keeps older hashes stable
+            if not content[key]:
+                del content[key]
         blob = json.dumps(content, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
@@ -270,6 +323,8 @@ class CanonicalPaper(_Strict):
     version: Optional[str] = None
     dates: PaperDates
     is_retracted: bool = False
+    updates: List[UpdateNotice] = Field(default_factory=list, description="From every source, each with its `via`")
+    relations: List[Relation] = Field(default_factory=list, description="From every source, each with its `via`")
     first_seen: UTCDateTime
     last_verified: UTCDateTime
     provenance: Dict[str, FieldProvenance] = Field(default_factory=dict)
@@ -312,6 +367,14 @@ class CanonicalPaper(_Strict):
             r = min(retracting, key=lambda r: rank("is_retracted", r))
             provenance["is_retracted"] = FieldProvenance(source=r.source, source_id=r.source_id, observed_at=r.last_verified)
 
+        updates: Dict[Tuple[str, Optional[str], Optional[str]], UpdateNotice] = {}
+        relations: Dict[Tuple[str, str, str], Relation] = {}
+        for r in records:  # sorted by source key, so the first source to report one is kept
+            for u in r.updates:
+                updates.setdefault((u.type, u.notice_doi, u.asserted_by), u.model_copy(update={"via": r.source.value}))
+            for rel in r.relations:
+                relations.setdefault((rel.type, rel.scheme, rel.value), rel.model_copy(update={"via": r.source.value}))
+
         conflicts = []
         for scheme in SCHEMES:
             seen = {f"{r.source.value}:{r.source_id}": getattr(r.identifiers, scheme) for r in records}
@@ -324,6 +387,8 @@ class CanonicalPaper(_Strict):
             identifiers=Identifiers.model_validate(values.pop("identifiers")),
             dates=PaperDates.model_validate(values.pop("dates")),
             is_retracted=bool(retracting),
+            updates=sorted(updates.values(), key=lambda u: (u.date or "", u.type, u.notice_doi or "")),
+            relations=sorted(relations.values(), key=lambda x: (x.type, x.scheme, x.value)),
             first_seen=min(r.first_seen for r in records),  # type: ignore[type-var]
             last_verified=max(r.last_verified for r in records),  # type: ignore[type-var]
             provenance=provenance,

@@ -4,6 +4,7 @@
 #
 # Optional settings go in a .env file next to this one (never commit it):
 #   OPENALEX_API_KEY, NCBI_API_KEY   source API keys (OpenAlex is skipped without one)
+#   CROSSREF_MAILTO                  an email for Crossref's faster "polite" pool (optional; never stored)
 #   CAROUSEL_API_TOKEN               require a bearer token for API writes (the web app adds it)
 #   CAROUSEL_EXTRAS                  server,semantic  for real embeddings (larger image)
 #   POSTGRES_PASSWORD                defaults to "carousel"; ports are bound to localhost only
@@ -80,6 +81,7 @@ services:
       <<: *carousel-env
       OPENALEX_API_KEY: ${OPENALEX_API_KEY:-}
       NCBI_API_KEY: ${NCBI_API_KEY:-}
+      CROSSREF_MAILTO: ${CROSSREF_MAILTO:-}
     volumes:
       - engine:/data
     depends_on:

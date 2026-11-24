@@ -72,7 +72,7 @@ def propose_radar(s: Session, *, topic: str, research_question: str = "", descri
     the returned config once the user approves it. Deterministic (no model calls).
     Raises ``ValueError`` (user-facing) if the inputs don't make a valid config.
     """
-    from carousel.connectors import CONNECTORS, SearchQuery
+    from carousel.connectors import CONNECTORS, VERIFIERS, SearchQuery
     from carousel.connectors.openalex import OpenAlexConnector, build_search
     from carousel.connectors.pubmed import build_term
 
@@ -88,12 +88,15 @@ def propose_radar(s: Session, *, topic: str, research_question: str = "", descri
             "radar_id": rid, "radar_name": topic, "description": description.strip(),
             "research_question": research_question.strip(), "queries": [t for t in (terms or []) if t.strip()] or [topic],
             "exclude": list(exclude or []), "methods_profile": list(methods or []), "seed_papers": list(seed_papers or []),
-            "publication_types": list(publication_types or []), "sources": list(sources or ["pubmed", "openalex"]),
+            "publication_types": list(publication_types or []),
+            "sources": list(sources or ["pubmed", "openalex", "crossref"]),
             "mode": mode, "filters": {"date_range": f"last_{int(window_days)}_days"},
         })
     except Exception as exc:  # pydantic's message is already user-facing
         raise ValueError(str(exc)) from None
 
+    if all(src.value in VERIFIERS for src in cfg.sources):
+        raise ValueError("choose at least one source to search: Crossref only checks the papers the searches find")
     as_of = as_of or dt.datetime.now(dt.timezone.utc).date()
     start = as_of - dt.timedelta(days=cfg.filters.days - 1)
     q = SearchQuery(terms=list(cfg.queries), exclude=list(cfg.exclude), start=start, end=as_of)
@@ -108,6 +111,11 @@ def propose_radar(s: Session, *, topic: str, research_question: str = "", descri
                 "No OPENALEX_API_KEY on this server: each scan reads only the first page (up to 100 works)."]
             strategy.append({"source": name, "status": "ready", "query": build_search(q),
                              "filters": OpenAlexConnector(api_key="")._filter(q), "notes": notes})
+        elif name in VERIFIERS:
+            strategy.append({"source": name, "status": "ready", "query": None,
+                             "filters": "looks up the DOIs of the papers the searches find",
+                             "notes": ["Checks each DOI for corrections, retractions (including Retraction Watch), and "
+                                       "preprint links. Retracted papers are flagged and not recommended. It does not search."]})
         else:
             strategy.append({"source": name, "status": "ready" if name in CONNECTORS else "not_available",
                              "query": None, "filters": None,
@@ -356,6 +364,8 @@ def paper_detail(s: Session, paper_id: str) -> Dict[str, Any]:
         "authors": [{"name": n, "orcid": o} for n, o in authors],
         "sources": [{"provider": a, "provider_id": b, "first_seen": c, "last_checked": d} for a, b, c, d in sources],
         "provenance": (p.canonical or {}).get("provenance", {}),
+        "updates": (p.canonical or {}).get("updates", []),
+        "relations": (p.canonical or {}).get("relations", []),
     }
 
 

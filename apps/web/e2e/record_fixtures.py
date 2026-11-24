@@ -1,11 +1,12 @@
 """Re-record the HTTP fixtures the end-to-end test replays. Needs the network.
 
-    python apps/web/e2e/record_fixtures.py
+    python apps/web/e2e/record_fixtures.py [pubmed] [openalex] [crossref]   # default: all three
 
 It builds the radar exactly as the app's proposal step does for
-``scenario.json``, scans PubMed and OpenAlex once (without API keys, as the
-test does), and writes ``fixtures/http/{pubmed,openalex}.json``. No secrets
-are recorded.
+``scenario.json``, scans once (without API keys, as the test does), and writes
+``fixtures/http/<source>.json`` for the sources named. Sources not named are
+replayed from their existing fixtures, so re-recording Crossref alone keeps
+the same papers. No secrets are recorded.
 """
 
 from __future__ import annotations
@@ -17,7 +18,8 @@ import tempfile
 from pathlib import Path
 
 from carousel.api.services import propose_radar
-from carousel.connectors import HttpClient, OpenAlexConnector, PubMedConnector, RecordingTransport
+from carousel.connectors import (CrossrefConnector, HttpClient, OpenAlexConnector, PubMedConnector, RecordingTransport,
+                                 ReplayTransport)
 from carousel.connectors.base import UrllibTransport
 from carousel.core.config import RadarConfig
 from carousel.radar import Radar
@@ -32,16 +34,21 @@ class _NoRadars:
         return None
 
 
-def main() -> int:
+def main(record=("pubmed", "openalex", "crossref")) -> int:
     sc = json.loads((HERE / "scenario.json").read_text())
     as_of = dt.date.fromisoformat(sc["as_of"])
     prop = propose_radar(_NoRadars(), topic=sc["topic"], window_days=sc["window_days"], as_of=as_of)  # type: ignore[arg-type]
     cfg = RadarConfig.model_validate(prop["config"])
     out = HERE / "fixtures" / "http"
-    rec = {name: RecordingTransport(UrllibTransport(), out / f"{name}.json") for name in ("pubmed", "openalex")}
+    rec = {name: RecordingTransport(UrllibTransport(), out / f"{name}.json") for name in record}
+
+    def transport(name: str):
+        return rec[name] if name in rec else ReplayTransport(out / f"{name}.json")
+
     conns = {
-        "pubmed": PubMedConnector(HttpClient(rec["pubmed"], min_interval=0.4), api_key=""),
-        "openalex": OpenAlexConnector(HttpClient(rec["openalex"], min_interval=1.1), api_key=""),
+        "pubmed": PubMedConnector(HttpClient(transport("pubmed"), min_interval=0.4), api_key=""),
+        "openalex": OpenAlexConnector(HttpClient(transport("openalex"), min_interval=1.1), api_key=""),
+        "crossref": CrossrefConnector(HttpClient(transport("crossref"), min_interval=0.5), mailto=""),
     }
     with tempfile.TemporaryDirectory() as d:
         res = Radar(cfg, store=Path(d) / "store.db").scan(
@@ -53,4 +60,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(tuple(sys.argv[1:]) or ("pubmed", "openalex", "crossref")))

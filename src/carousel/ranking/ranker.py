@@ -29,7 +29,9 @@ Signals (each in [0, 1]):
 
 Momentum, discovery, and evidence are reported inactive with a reason, and
 the remaining weights are rescaled. Integrity problems are flags (retracted
-papers are already excluded upstream), never score terms.
+papers are already excluded upstream; ``corrected`` and
+``expression_of_concern`` come from update notices, e.g. Crossref), never
+score terms.
 
 Selection: ``S = Σ w_k · signal_k`` (novelty times its gate) with the
 radar's weights times the mode's multipliers (:data:`MODES`), then maximal
@@ -47,7 +49,7 @@ import dataclasses
 import datetime as dt
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
-from carousel.core.paper import CanonicalPaper
+from carousel.core.paper import CORRECTING_UPDATES, CanonicalPaper
 from carousel.core.text import search_tokens
 from carousel.feedback import Feedback
 from carousel.ingestion.dedup import is_notice, is_preprint
@@ -379,6 +381,11 @@ def rank(
             flags.append("correction_or_notice")
         if c.paper.is_retracted:
             flags.append("retracted")
+        update_types = {u.type for u in c.paper.updates}
+        if update_types & CORRECTING_UPDATES:
+            flags.append("corrected")
+        if "expression_of_concern" in update_types:
+            flags.append("expression_of_concern")
         s = sum(weights[k] * (comp[k] or 0.0) * (gate[pid] if k == "novelty" else 1.0) for k in weights)
         scored[pid] = (s, comp, flags)
 
