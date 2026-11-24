@@ -35,7 +35,7 @@ FLAG_LABELS = {
     "published_version": "Since published",
 }
 ARRIVAL_LABELS = {"newly_published": "Newly published", "newly_observed": "Newly observed"}
-SOURCE_NAMES = {"pubmed": "PubMed", "openalex": "OpenAlex", "europepmc": "Europe PMC", "crossref": "Crossref"}
+SOURCE_NAMES = {"pubmed": "PubMed", "openalex": "OpenAlex", "europepmc": "Europe PMC", "crossref": "Crossref", "arxiv": "arXiv"}
 
 
 @dataclasses.dataclass(frozen=True)
