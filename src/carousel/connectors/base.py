@@ -213,8 +213,9 @@ class ExtendingTransport(Transport):
         self.new: List[str] = []
 
     def send(self, request: Request) -> Response:
-        if self.replay is not None and self.replay._queue.get(request.key()):
-            return self.replay.send(request)
+        recorded = self.replay._queue.get(request.key()) if self.replay is not None else None
+        if recorded and recorded[0]["status"] < 400:  # a recorded failure (429, 5xx) is asked again
+            return self.replay.send(request)  # type: ignore[union-attr]
         self.new.append(request.key())
         return self.live.send(request)
 
@@ -383,6 +384,7 @@ class SearchQuery(_Strict):
 
     terms: List[str] = Field(min_length=1, description="Any of these (OR)")
     exclude: List[str] = Field(default_factory=list, description="None of these (NOT)")
+    require: List[str] = Field(default_factory=list, description="And at least one of these (AND); used by topic counts")
     start: dt.date
     end: dt.date
     max_results: int = Field(default=200, ge=1, le=MAX_RESULTS_CAP)
@@ -390,7 +392,7 @@ class SearchQuery(_Strict):
         default=None, description="Source-native query sent verbatim instead of building one from terms (radar source_queries)"
     )
 
-    @field_validator("terms", "exclude")
+    @field_validator("terms", "exclude", "require")
     @classmethod
     def _clean(cls, v: List[str]) -> List[str]:
         out = [" ".join(t.split()) for t in v]
@@ -446,6 +448,20 @@ class SearchResult(_Strict):
     coverage: QueryCoverage
 
 
+class CountResult(_Strict):
+    """How many records a source holds for a query in a window (a count request: no records are fetched)."""
+
+    source: str
+    native_query: str
+    date_field: str
+    start: dt.date
+    end: dt.date
+    count: int
+    requests: int
+    cost: float
+    cost_unit: str
+
+
 class Connector(abc.ABC):
     """One literature source."""
 
@@ -478,6 +494,20 @@ class Connector(abc.ABC):
             retrieved_at=dt.datetime.now(dt.timezone.utc),
             **kw,
         )
+
+    def count(self, query: SearchQuery) -> CountResult:
+        """The source's total for ``query`` without fetching records (sources that can count override this)."""
+        raise ConnectorError(f"{self.name} cannot count")
+
+    def _count_result(self, query: SearchQuery, before: ClientStats, native: str, date_field: str, n: Any) -> CountResult:
+        try:
+            value = int(n)
+        except (TypeError, ValueError):
+            raise ConnectorError(f"{self.name} returned no count") from None
+        s = self.client.stats
+        return CountResult(source=self.name, native_query=native, date_field=date_field, start=query.start,
+                           end=query.end, count=value, requests=s.requests - before.requests,
+                           cost=round(s.cost - before.cost, 6), cost_unit=self.cost_unit)
 
     def _snapshot_stats(self) -> ClientStats:
         return dataclasses.replace(self.client.stats, rate_limit=dict(self.client.stats.rate_limit))

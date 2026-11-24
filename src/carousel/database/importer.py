@@ -296,6 +296,19 @@ def _import_store(st: PaperStore, engine: Engine) -> Dict[str, int]:
         maps = [dict(r) for r in db.execute("SELECT * FROM topic_mappings") if r["to_version"] in versions]
         _upsert(conn, T["topic_mappings"], maps, ["to_version", "relation", "from_topic", "to_topic"])
         counts["topic_models"], counts["topics"], counts["paper_topics"] = len(tm), len(tps), len(pts)
+        obs = []
+        for r in db.execute("SELECT * FROM topic_observations"):
+            if r["radar_id"] not in known_radars:
+                continue
+            obs.append({"radar_id": r["radar_id"], "classifier_version": r["classifier_version"], "topic_key": r["topic_id"],
+                        "topic_id": topic_ids.get((r["classifier_version"], r["topic_id"])), "source": r["source"],
+                        "window_start": dt.date.fromisoformat(r["period_start"]),
+                        "window_end": dt.date.fromisoformat(r["period_end"]), "count": r["count"], "status": r["status"],
+                        "query": r["query"], "cost": r["cost"], "error": r["error"], "observed_at": _ts(r["observed_at"]),
+                        "coverage": {}})
+        _upsert(conn, T["topic_observations"], obs,
+                ["radar_id", "classifier_version", "topic_key", "source", "window_start", "observed_at"])  # append-only
+        counts["topic_observations"] = len(obs)
 
         # ---- feedback history ----
         fb = [{"radar_id": r["radar_id"], "paper_id": st.resolve(r["paper_id"]), "action": r["action"], "change": r["change"],

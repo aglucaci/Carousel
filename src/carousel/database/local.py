@@ -59,7 +59,7 @@ if TYPE_CHECKING:
     from carousel.intelligence.topics import TopicModel
     from carousel.summarization.schema import Extraction
 
-STORE_SCHEMA_VERSION = 10
+STORE_SCHEMA_VERSION = 11
 
 _DDL = """
 CREATE TABLE IF NOT EXISTS meta (
@@ -313,6 +313,22 @@ CREATE TABLE IF NOT EXISTS topic_mappings (          -- how a refit's topics rel
     shared_members      INTEGER NOT NULL,
     centroid_similarity REAL
 );
+CREATE TABLE IF NOT EXISTS topic_observations (      -- append-only weekly counts from the sources (task 25)
+    radar_id           TEXT NOT NULL,
+    classifier_version TEXT NOT NULL,             -- the topic model whose key terms built the query
+    topic_id           TEXT NOT NULL,             -- a topic's lineage ID, or __field__ for the denominator
+    source             TEXT NOT NULL,
+    period_start       TEXT NOT NULL,             -- ISO week, Monday
+    period_end         TEXT NOT NULL,             -- Sunday
+    count              INTEGER,                   -- NULL when the request failed
+    status             TEXT NOT NULL,             -- ok | error
+    query              TEXT,                      -- exactly as sent
+    cost               REAL NOT NULL,
+    error              TEXT,
+    observed_at        TEXT NOT NULL,
+    PRIMARY KEY (radar_id, classifier_version, topic_id, source, period_start, observed_at)
+);
+CREATE INDEX IF NOT EXISTS topic_observations_radar ON topic_observations(radar_id, source, period_start);
 CREATE TABLE IF NOT EXISTS merge_log (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
     at        TEXT NOT NULL,
@@ -1172,6 +1188,26 @@ class PaperStore:
                 for r in self.db.execute("SELECT * FROM paper_topics WHERE classifier_version = ? ORDER BY paper_id",
                                          (classifier_version,))}
 
+    # ---- topic observations (append-only) ----
+
+    def save_topic_observations(self, radar_id: str, classifier_version: str, week: Tuple[dt.date, dt.date],
+                                rows: Sequence[Dict[str, Any]], observed_at: str) -> None:
+        """Append one week's counts; an observation is never updated (re-observing adds rows)."""
+        with self.db:
+            self.db.executemany(
+                "INSERT INTO topic_observations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [(radar_id, classifier_version, r["topic_id"], r["source"], week[0].isoformat(), week[1].isoformat(),
+                  r["count"], r["status"], r["query"], r["cost"], r["error"], observed_at) for r in rows])
+
+    def topic_observations(self, radar_id: str, classifier_version: Optional[str] = None,
+                           source: Optional[str] = None) -> List[Dict[str, Any]]:
+        sql, args = "SELECT * FROM topic_observations WHERE radar_id = ?", [radar_id]
+        if classifier_version:
+            sql, args = sql + " AND classifier_version = ?", args + [classifier_version]
+        if source:
+            sql, args = sql + " AND source = ?", args + [source]
+        return [dict(r) for r in self.db.execute(sql + " ORDER BY period_start, source, topic_id, observed_at", args)]
+
     # ---- reads ----
 
     def resolve(self, paper_id: str) -> str:
@@ -1308,6 +1344,7 @@ class PaperStore:
             "events": q("SELECT COUNT(*) FROM research_events"),
             "extractions": q("SELECT COUNT(*) FROM paper_extractions"),
             "topic_models": q("SELECT COUNT(*) FROM topic_models"),
+            "topic_observations": q("SELECT COUNT(*) FROM topic_observations"),
             "runs": q("SELECT COUNT(*) FROM recommendation_runs"),
             "embeddings": dict(self.db.execute(
                 "SELECT model_version, COUNT(*) FROM embeddings GROUP BY model_version ORDER BY model_version").fetchall()),

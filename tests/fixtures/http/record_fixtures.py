@@ -1,6 +1,6 @@
 """Re-record the connector fixtures from the live APIs.
 
-    python tests/fixtures/http/record_fixtures.py [pubmed] [openalex] [crossref] [europepmc] [europepmc-scan] [versions] [arxiv]   # default: all
+    python tests/fixtures/http/record_fixtures.py [pubmed] [openalex] [crossref] [europepmc] [europepmc-scan] [versions] [arxiv] [observations]   # default: all
 
 crossref records two files: a lookup of known DOIs (a retracted paper and its
 notice, a plain paper, a paper with a preprint and that preprint, and an
@@ -12,6 +12,9 @@ later) to the API, so the existing responses stay put.
 
 arxiv records ``arxiv_search.json`` (a paged search) and ``arxiv_extras.json``
 (records by ID, one with a journal DOI, and Crossref's record of that DOI).
+
+observations records ``observations.json``: weekly count requests (field and two
+topics) from PubMed, Europe PMC, OpenAlex, and arXiv over four weeks.
 
 versions records ``versions.json``: preprint/article pairs that Europe PMC and
 Crossref link, fetched together and one side at a time.
@@ -57,6 +60,23 @@ ARXIV_QUERY = SearchQuery(terms=["immune escape", "antigenic drift", "viral evol
 ARXIV_RECORDS = ["1404.4197",   # v2; published as 10.1371/journal.ppat.1005526 (arxiv:doi)
                  "2610.01111"]  # v1; also in openalex_search.json under arXiv's DOI 10.48550/arxiv.2610.01111
 ARXIV_JOURNAL_DOI = "10.1371/journal.ppat.1005526"
+
+# Topic observations: a radar field, two topics' key terms, and four complete weeks before OBS_TODAY.
+OBS_RADAR = {"radar_id": "escape", "radar_name": "Escape radar", "queries": ["immune escape", "antigenic drift"],
+             "exclude": ["case report"], "sources": ["pubmed", "europepmc", "openalex", "arxiv"],
+             "filters": {"date_range": "last_28_days"}}
+OBS_TOPICS = {"tp_sars": ["sars cov", "spike", "omicron", "neutralizing"],
+              "tp_flu": ["influenza", "hemagglutinin", "h3n2", "vaccine"]}
+OBS_TODAY = dt.date(2026, 11, 23)
+OBS_WEEKS = 4
+
+
+def obs_model():
+    from types import SimpleNamespace
+
+    return SimpleNamespace(classifier_version="topics-1:fixture",
+                           topics=[SimpleNamespace(topic_id=k, key_terms=v) for k, v in OBS_TOPICS.items()])
+
 
 QUERY = SearchQuery(
     terms=["immune escape", "antigenic drift"],
@@ -166,8 +186,28 @@ def main(sources) -> None:
         print("  records", [(r.source_id, r.version, [x.value for x in r.relations]) for r in ax.fetch(ARXIV_RECORDS)])
         print("  journal", [r.source_id for r in cr.fetch([ARXIV_JOURNAL_DOI])], rec.save())
 
+    if "observations" in sources:
+        from carousel.core.config import RadarConfig
+        from carousel.database import PaperStore
+        from carousel.intelligence.observations import observe
+
+        path = HERE / "observations.json"  # requests already recorded are replayed; delete the file to re-record all
+        rec = RecordingTransport(ExtendingTransport(UrllibTransport(timeout=90), path), path)
+        conns = {
+            "pubmed": PubMedConnector(HttpClient(rec, min_interval=0.4), api_key=""),
+            "europepmc": EuropePMCConnector(HttpClient(rec, min_interval=0.3)),
+            "openalex": OpenAlexConnector(HttpClient(rec, min_interval=1.1), api_key=""),
+            "arxiv": ArxivConnector(HttpClient(rec, min_interval=5.0)),  # arXiv answers 429 to bursts of retries
+        }
+        with tempfile.TemporaryDirectory() as d, PaperStore(Path(d) / "s.db") as st:
+            stats = observe(st, RadarConfig.model_validate(OBS_RADAR), obs_model(), conns,
+                            at=dt.datetime(2026, 11, 23, 12, tzinfo=dt.timezone.utc), weeks=OBS_WEEKS, today=OBS_TODAY)
+            print("observations", stats, rec.save())
+            for r in st.topic_observations("escape"):
+                print("  ", r["source"], r["period_start"], r["topic_id"], r["count"], r["status"], r["error"] or "")
+
 
 if __name__ == "__main__":
     import sys
 
-    main(sys.argv[1:] or ["pubmed", "openalex", "crossref", "europepmc", "versions", "arxiv"])
+    main(sys.argv[1:] or ["pubmed", "openalex", "crossref", "europepmc", "versions", "arxiv", "observations"])

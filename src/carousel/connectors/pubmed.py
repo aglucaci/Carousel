@@ -180,11 +180,13 @@ def build_term(query: SearchQuery) -> str:
     Terms are left unquoted so PubMed's automatic term mapping (MeSH) still
     applies; exclusions are conservative exact phrases in title/abstract.
     """
+    require = " AND (" + " OR ".join(f"({t})" for t in query.require) + ")" if query.require else ""
     if query.native:
-        return query.native
+        return f"({query.native}){require}" if require else query.native
     term = " OR ".join(f"({t})" for t in query.terms)
     if len(query.terms) > 1:
         term = f"({term})"
+    term += require
     if query.exclude:
         term += " NOT (" + " OR ".join(f'"{t}"[Title/Abstract]' for t in query.exclude) + ")"
     return term
@@ -219,6 +221,14 @@ class PubMedConnector(Connector):
             req = Request.build(EUTILS + endpoint, {**params, "tool": self.tool},
                                 secret_params={"api_key": self.api_key}, method="POST")
         return req
+
+    def count(self, query: SearchQuery) -> "CountResult":
+        before = self._snapshot_stats()
+        term = build_term(query)
+        params = {"db": "pubmed", "term": term, "retmode": "json", "rettype": "count", "datetype": self.date_field,
+                  "mindate": query.start.strftime("%Y/%m/%d"), "maxdate": query.end.strftime("%Y/%m/%d")}
+        data = self.client.get(self._request("esearch.fcgi", params)).json().get("esearchresult") or {}
+        return self._count_result(query, before, term, f"{self.date_field} (PubMed date)", data.get("count"))
 
     def search(self, query: SearchQuery) -> SearchResult:
         before = self._snapshot_stats()

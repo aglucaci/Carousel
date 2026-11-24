@@ -326,3 +326,13 @@ class TopicModelOut(_Out):
     topics: List[TopicOut]
     mapping: List[Dict[str, Any]] = Field(description="How these topics relate to the previous version's: same, split, "
                                                       "merge, new, retired")
+
+
+class TopicSeriesOut(_Out):
+    radar_id: str
+    classifier_version: str
+    as_of: dt.datetime = Field(description="Counts are what was known at this time: no later observation is used")
+    sources: List[str]
+    field: Dict[str, List[Dict[str, Any]]] = Field(description="Per source: the radar field's weekly count (denominator)")
+    topics: List[Dict[str, Any]] = Field(description="Per topic and source: weekly count, denominator, share, and when "
+                                                     "that count was observed")

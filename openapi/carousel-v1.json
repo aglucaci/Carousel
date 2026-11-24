@@ -2103,6 +2103,62 @@
         "title": "TopicOut",
         "type": "object"
       },
+      "TopicSeriesOut": {
+        "properties": {
+          "as_of": {
+            "description": "Counts are what was known at this time: no later observation is used",
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "classifier_version": {
+            "title": "Classifier Version",
+            "type": "string"
+          },
+          "field": {
+            "additionalProperties": {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "description": "Per source: the radar field's weekly count (denominator)",
+            "title": "Field",
+            "type": "object"
+          },
+          "radar_id": {
+            "title": "Radar Id",
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "topics": {
+            "description": "Per topic and source: weekly count, denominator, share, and when that count was observed",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Topics",
+            "type": "array"
+          }
+        },
+        "required": [
+          "radar_id",
+          "classifier_version",
+          "as_of",
+          "sources",
+          "field",
+          "topics"
+        ],
+        "title": "TopicSeriesOut",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -3353,6 +3409,82 @@
           }
         },
         "summary": "Topics",
+        "tags": [
+          "research delta"
+        ]
+      }
+    },
+    "/api/v1/radars/{radar_id}/topics/series": {
+      "get": {
+        "description": "Weekly topic counts with the field denominator, as known at ``as_of`` (default now; never later data).",
+        "operationId": "topic_series_api_v1_radars__radar_id__topics_series_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "radar_id",
+            "required": true,
+            "schema": {
+              "title": "Radar Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "as_of",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "As Of"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicSeriesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Topic Series",
         "tags": [
           "research delta"
         ]
