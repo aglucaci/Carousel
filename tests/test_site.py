@@ -114,7 +114,7 @@ class SnapshotOfRunTests(SiteTestCase):
         env = snapshot.build_envelope(run, radar_id="escape", source="workflow",
                                       fallback_time=dt.datetime(2000, 1, 1, tzinfo=dt.timezone.utc), provenance={})
         self.assertEqual(env["captured_at_utc"], "2026-10-15T08:00:00Z")  # from the run, not the fallback
-        self.assertEqual(env["ranking_version"], "0.2.0")
+        self.assertEqual(env["ranking_version"], "0.3.0")
         self.assertEqual(env["window_days"], 14)
         self.assertEqual(env["window_utc"], {"start": "2026-10-01", "end": "2026-10-14"})
         self.assertEqual(env["n_items"], len(run["items"]))
@@ -124,7 +124,7 @@ class SnapshotOfRunTests(SiteTestCase):
         self.assertTrue(written)
         index = snapshot.reindex(root, "escape")
         row = json.loads(index.read_text().splitlines()[0])
-        self.assertEqual((row["run_id"], row["ranking_version"]), (run["run_id"], "0.2.0"))
+        self.assertEqual((row["run_id"], row["ranking_version"]), (run["run_id"], "0.3.0"))
 
 
 class LabRadarTests(unittest.TestCase):

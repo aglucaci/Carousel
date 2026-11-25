@@ -59,7 +59,7 @@ test("define a topic, get a ranked list, save and dismiss, rescan without losing
   await expect(drawer.getByText("From the stored run")).toBeVisible();
   // Phase 2: the explanation stored with the run, with its version.
   await expect(drawer.getByTestId("explanation")).toContainText("Matches the radar's terms");
-  await expect(drawer.getByText("Explanation version 2,")).toBeVisible();
+  await expect(drawer.getByText("Explanation version 3,")).toBeVisible();
   // Phase 2: grounded extraction, run locally during the scan; it says what it read.
   await expect(drawer.getByTestId("extraction")).toContainText("rule-based extraction (rules-1, schema 1, ran locally)");
   await expect(drawer.getByTestId("extraction")).toContainText("Every claim quotes its passage verbatim");

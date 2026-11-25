@@ -129,7 +129,7 @@ class ScanTests(unittest.TestCase):
     def test_citation_expansion_and_graph_term(self) -> None:
         res = citation_scan(ReplayTransport(FIXTURES / "citations.json"), self.dir / "s.db")
         run = res.run
-        self.assertEqual((run["status"], run["ranking_version"], run["candidates_version"]), ("ok", "0.2.0", "0.2.0"))
+        self.assertEqual((run["status"], run["ranking_version"], run["candidates_version"]), ("ok", "0.3.0", "0.3.0"))
         cov = [c for c in run["coverage"] if c.get("role") == "citations"][0]
         self.assertEqual(cov["anchors"]["seed"], 2)
         self.assertEqual(cov["anchors"]["seeds_not_found"], ["10.9999/carousel-not-registered"])

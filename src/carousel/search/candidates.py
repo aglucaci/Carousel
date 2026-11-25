@@ -17,6 +17,9 @@ ranker will score:
 5. **Citations** (``CANDIDATES_VERSION`` 0.2.0): papers in the window that
    cite one of the radar's seed, saved, or relevant papers
    (:mod:`carousel.search.citations`) are candidates too.
+6. **Methods** (0.3.0): with a shared topic map, papers already in the store
+   for the window (often from other radars' scans) that name one of the
+   radar's methods, so Method Transfer can consider them.
 
 The union is returned with every feature computed for every candidate
 (BM25 score, similarity, ranks, matched terms, how it was retrieved), ordered
@@ -40,13 +43,13 @@ if TYPE_CHECKING:  # pragma: no cover
     from carousel.database.local import PaperStore
 
 RRF_K = 60
-CANDIDATES_VERSION = "0.2.0"
+CANDIDATES_VERSION = "0.3.0"
 
 
 @dataclasses.dataclass(frozen=True)
 class Candidate:
     paper: CanonicalPaper
-    retrieved_by: Tuple[str, ...]          # subset of ("lexical", "semantic", "source_query", "citation")
+    retrieved_by: Tuple[str, ...]          # subset of ("lexical", "semantic", "source_query", "citation", "method")
     bm25: float
     lexical_rank: Optional[int]
     similarity: Optional[float]
@@ -136,6 +139,7 @@ def generate_candidates(
     exclude_retracted: bool = True,
     source_hits: Iterable[str] = (),
     citation_hits: Iterable[str] = (),
+    method_hits: Iterable[str] = (),
     store: Optional["PaperStore"] = None,
     embedder: Optional[Embedder] = None,
     lexical_k: int = 200,
@@ -184,11 +188,13 @@ def generate_candidates(
     eligible_ids = {p.paper_id for p in eligible}
     from_source = set(source_hits) & eligible_ids
     from_citations = set(citation_hits) & eligible_ids
+    from_methods = set(method_hits) & eligible_ids
 
     candidates: List[Candidate] = []
-    for pid in sorted(lexical | semantic | from_source | from_citations):
+    for pid in sorted(lexical | semantic | from_source | from_citations | from_methods):
         by = tuple(name for name, hit in (("lexical", pid in lexical), ("semantic", pid in semantic),
-                                          ("source_query", pid in from_source), ("citation", pid in from_citations)) if hit)
+                                          ("source_query", pid in from_source), ("citation", pid in from_citations),
+                                          ("method", pid in from_methods)) if hit)
         fused = sum(1.0 / (RRF_K + r) for r in (lex_rank.get(pid), sem_rank.get(pid)) if r is not None)
         candidates.append(Candidate(
             paper=papers[pid],
@@ -211,6 +217,7 @@ def generate_candidates(
         "semantic_hits": len(semantic),
         "source_query_hits": len(from_source),
         **({"citation_hits": len(from_citations)} if from_citations else {}),
+        **({"method_hits": len(from_methods)} if from_methods else {}),
         "candidates": len(candidates),
         "lexical_k": lexical_k,
         "semantic_k": semantic_k,

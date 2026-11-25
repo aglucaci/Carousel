@@ -243,6 +243,7 @@ export type Explanation = {
     earliest_public_date?: string | null;
     paper?: PaperSummary;
     graph?: GraphFeature;
+    transfer?: TransferFeature;
     [key: string]: unknown;
   };
   flags: string[];
@@ -253,6 +254,19 @@ export type Explanation = {
   inactive_signals: Record<string, string>;
   source_coverage: Coverage[];
   executed_at: string;
+};
+
+export type TransferFeature = {
+  status: string;
+  method?: string;
+  field?: string;
+  field_topic?: string;
+  distance?: number;
+  citation_proximity?: number | null;
+  quote?: string;
+  passage_id?: string;
+  section?: string;
+  question?: string;
 };
 
 export type GraphLink = { paper_id: string; title?: string | null; anchor: "seed" | "feedback" };
