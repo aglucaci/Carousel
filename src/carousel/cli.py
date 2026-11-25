@@ -15,6 +15,9 @@ carousel command-line interface.
     carousel topics observe RADAR_ID --config RADAR.yml [--weeks N] [--budget N]   # weekly counts per topic
     carousel topics trends RADAR_ID [--source S] [--as-of ISO]   # needs the [trends] extra
     carousel topics events RADAR_ID --config RADAR.yml [--as-of ISO]   # derive and store topic events
+    carousel topicmap fit|list [--store S] [--k K]          # the topic map shared across radars
+    carousel topicmap crosswalk RADAR_ID [--store S]         # a radar's topics on the shared map
+    carousel topicmap distance A B [--radar RADAR_ID] [--store S]   # field distance of papers or topics
     carousel eval delta BENCHMARK.yml [--out PREFIX] [--replay FIXTURE.json]   # Study C (needs [trends])
     carousel review link STORE.db PREPRINT_ID PUBLISHED_ID [--note TEXT]   # versions of one work, kept apart
     carousel review unlink STORE.db ID_A ID_B [--note TEXT]          # not versions of one work
@@ -490,6 +493,81 @@ def cmd_topics(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_topicmap(args: argparse.Namespace) -> int:
+    import datetime as dt
+
+    from carousel.database import StoreError
+    from carousel.intelligence.shared_topics import SHARED_MAP, crosswalk, field_distance, fit_shared
+    from carousel.radar import make_embedder
+
+    try:
+        store = _open_store(args.store)
+    except (FileNotFoundError, StoreError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    with store:
+        if args.action == "fit":
+            emb, notes = make_embedder(args.embedder)
+            if emb is None:
+                print("FAIL the topic map needs embeddings (choose --embedder hashing or semantic)", file=sys.stderr)
+                return 1
+            try:
+                now = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+                model, changed = fit_shared(store, emb, now, k=args.k)
+            except ValueError as exc:
+                print(f"FAIL {exc}", file=sys.stderr)
+                return 1
+            for n in notes:
+                print(f"note: {n}")
+            if not changed:
+                print(f"unchanged: {model.classifier_version} already fits these papers with these settings")
+                return 0
+            print(f"fitted {model.classifier_version}: {len(model.topics)} shared topics from {len(model.members)} papers "
+                  f"({', '.join(f'{r}: {n}' for r, n in sorted(model.params['corpus_radars'].items()))})")
+            for m in model.mapping:
+                print(f"  {m['relation']:<8} {m['from_topic'] or '':<14} -> {m['to_topic'] or ''}")
+        model = store.active_topic_model(SHARED_MAP)
+        if model is None:
+            print("no shared topic map yet: carousel topicmap fit")
+            return 0 if args.action == "list" else 1
+        if args.action == "list":
+            counts: dict = {}
+            for v in store.paper_topics(model.classifier_version).values():
+                counts[v["topic_id"]] = counts.get(v["topic_id"], 0) + 1
+            print(f"{model.classifier_version} ({model.embedder}, fitted {model.fitted_at}, k={model.params['k']})")
+            for t in model.topics:
+                print(f"  {t.topic_id}  {counts.get(t.topic_id, 0):>5} papers  {t.label}")
+            print(f"  {'unassigned':<13}  {counts.get(None, 0):>5} papers")
+        elif args.action == "crosswalk":
+            if not args.a:
+                print("FAIL name a radar: carousel topicmap crosswalk RADAR_ID", file=sys.stderr)
+                return 1
+            try:
+                cw = crosswalk(store, args.a, model)
+            except LookupError as exc:
+                print(f"FAIL {exc}", file=sys.stderr)
+                return 1
+            print(f"{cw['classifier_version']} on {cw['shared_version']}")
+            for r in cw["topics"]:
+                print(f"  {r['radar_topic']}  {r['label']}  ->  {r['primary_label'] or '-'} ({r['relation']}; "
+                      f"{r['placed']} of {r['members']} papers placed)")
+        elif args.action == "distance":
+            if not (args.a and args.b):
+                print("FAIL name two papers or topics: carousel topicmap distance A B", file=sys.stderr)
+                return 1
+            try:
+                d = field_distance(store, args.a, args.b, radar_id=args.radar, shared=model)
+            except LookupError as exc:
+                print(f"FAIL {exc}", file=sys.stderr)
+                return 1
+            if d["distance"] is None:
+                print(f"FAIL no position on the shared map for {args.a if d['a']['shared_topic'] is None else args.b}",
+                      file=sys.stderr)
+                return 1
+            print(f"{d['distance']:.3f}  {d['a']['label']} ({d['a']['basis']})  <->  {d['b']['label']} ({d['b']['basis']})")
+    return 0
+
+
 def cmd_eval(args: argparse.Namespace) -> int:
     from carousel.connectors import CONNECTORS, HttpClient, ReplayTransport
     from carousel.evaluation.delta import evaluate_benchmark, load_benchmark, report_markdown, write_report
@@ -831,6 +909,17 @@ def build_parser() -> argparse.ArgumentParser:
     tp.add_argument("--source", help="trends: one source only (default: every observed source)")
     tp.add_argument("--as-of", help="trends: use only observations made by this time (ISO; default now)")
     tp.set_defaults(func=cmd_topics)
+
+    tm = sub.add_parser("topicmap", help="The topic map shared across radars: fit, list, a radar's crosswalk, field distance")
+    tm.add_argument("action", choices=("fit", "list", "crosswalk", "distance"))
+    tm.add_argument("a", nargs="?", metavar="A", help="crosswalk: the radar; distance: a paper or topic ID")
+    tm.add_argument("b", nargs="?", metavar="B", help="distance: the other paper or topic ID")
+    tm.add_argument("--radar", help="distance: read A and B as this radar's topic IDs where they are")
+    tm.add_argument("--store", default="carousel.db")
+    tm.add_argument("--k", type=int, help="fit: number of shared topics (default: chosen by silhouette)")
+    tm.add_argument("--embedder", choices=("auto", "semantic", "hashing"), default="auto",
+                    help="fit: embeddings to cluster (default: semantic when installed)")
+    tm.set_defaults(func=cmd_topicmap)
 
     ev = sub.add_parser("eval", help="Evaluation harnesses (Study C: carousel eval delta)")
     evs = ev.add_subparsers(dest="study", required=True, metavar="STUDY")

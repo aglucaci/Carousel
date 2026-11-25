@@ -279,7 +279,7 @@ class NoTopicStructure(ValueError):
 
 
 def fit(radar_id: str, corpus: Sequence[Tuple[str, Vector, str]], embedder: str, fitted_at: str,
-        previous: Optional[TopicModel] = None, k: Optional[int] = None) -> TopicModel:
+        previous: Optional[TopicModel] = None, k: Optional[int] = None, k_max: int = K_MAX) -> TopicModel:
     """Fit a topic model on ``corpus`` = [(paper_id, normalized vector, text)], mapped to ``previous`` if given."""
     if len(corpus) < MIN_FIT_PAPERS:
         raise ValueError(f"a topic model needs at least {MIN_FIT_PAPERS} papers with embeddings (got {len(corpus)})")
@@ -287,14 +287,14 @@ def fit(radar_id: str, corpus: Sequence[Tuple[str, Vector, str]], embedder: str,
     ids = [c[0] for c in corpus]
     vectors = [_normalize(c[1]) for c in corpus]
     if k is None:
-        k, labels, scores = choose_k(vectors)
+        k, labels, scores = choose_k(vectors, k_max)
         best = max(scores.values(), default=-1.0)
         if best < MIN_SILHOUETTE:
             raise NoTopicStructure(f"these {len(ids)} papers don't separate into topics (best silhouette {best:.3f} "
                                    f"< {MIN_SILHOUETTE}); with the hashing embedder, semantic embeddings usually help")
     else:
         labels, scores = kmeans(vectors, k), {}
-    params = {"k": k, "seed": SEED, "n_init": N_INIT, "min_topic_size": MIN_TOPIC_SIZE, "k_max": K_MAX, "max_iter": MAX_ITER,
+    params = {"k": k, "seed": SEED, "n_init": N_INIT, "min_topic_size": MIN_TOPIC_SIZE, "k_max": k_max, "max_iter": MAX_ITER,
               "threshold_percentile": THRESHOLD_PERCENTILE, "silhouette": scores}
     version = _version(radar_id, embedder, {kk: v for kk, v in params.items() if kk != "silhouette"}, ids)
 
