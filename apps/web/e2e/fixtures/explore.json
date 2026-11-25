@@ -1,0 +1,352 @@
+{
+ "radars": [
+  {
+   "radar_id": "escape",
+   "title": "Escape radar",
+   "description": "",
+   "state": "active",
+   "n_runs": 1,
+   "created_at": "2026-10-15T06:00:00Z",
+   "updated_at": "2026-10-15T06:00:00Z"
+  }
+ ],
+ "graph": {
+  "radar_id": "escape",
+  "run_id": "run_f142654476c04283",
+  "as_of": "2026-10-16T00:00:00.000000Z",
+  "graph_version": "explore-1",
+  "classifier_version": "topics-1:test",
+  "nodes": [
+   {
+    "paper_id": "cp_ae7186621fd03a05",
+    "title": "Invasive Ductal Carcinoma of the Breast: Molecular Evolution, Immune Escape, and Therapeutic Implications",
+    "doi": "10.64388/irev10i4-1723639",
+    "date": "2026-10-02",
+    "roles": [
+     "recommended"
+    ],
+    "rank": 2,
+    "topic_id": "tp_a",
+    "topic_label": "antibody escape",
+    "citation_data": true,
+    "links": 0
+   },
+   {
+    "paper_id": "cp_7634d7bcf7862e85",
+    "title": "A Review of Interdisciplinary Research from Parasitic Immune Escape to Autoimmune Diseases and Tumor Diseases",
+    "doi": "10.54254/2753-8818/2026.hz37574",
+    "date": "2026-10-08",
+    "roles": [
+     "recommended"
+    ],
+    "rank": 4,
+    "topic_id": "tp_a",
+    "topic_label": "antibody escape",
+    "citation_data": true,
+    "links": 0
+   },
+   {
+    "paper_id": "cp_80cd9a9dcf61c036",
+    "title": "Epithelial–mesenchymal transition in immune escape and immunotherapy resistance of lung cancer",
+    "doi": "10.1038/s41698-026-01732-3",
+    "date": "2026-10-10",
+    "roles": [
+     "recommended"
+    ],
+    "rank": 6,
+    "topic_id": "tp_a",
+    "topic_label": "antibody escape",
+    "citation_data": true,
+    "links": 0
+   },
+   {
+    "paper_id": "cp_87da758e4d2f3f4d",
+    "title": "Compartmental epidemiological models with infection-driven immune escape",
+    "doi": "10.48550/arxiv.2610.01111",
+    "date": "2026-10-01",
+    "roles": [
+     "recommended"
+    ],
+    "rank": 1,
+    "topic_id": "tp_b",
+    "topic_label": "tumour immunity",
+    "citation_data": true,
+    "links": 0
+   },
+   {
+    "paper_id": "cp_1a112f89d6e7044c",
+    "title": "Early functional maturation of anti-Spike antibodies predicts efficient SARS-CoV-2 RNA clearance",
+    "doi": "10.3389/fimmu.2026.1948045",
+    "date": "2026-10-02",
+    "roles": [
+     "saved",
+     "recommended"
+    ],
+    "rank": 3,
+    "topic_id": "tp_b",
+    "topic_label": "tumour immunity",
+    "citation_data": true,
+    "links": 2
+   },
+   {
+    "paper_id": "cp_95548f5ec8a8ceca",
+    "title": "Mitigation of imprinted antibody responses against COVID-19 in highly vaccinated older adults",
+    "doi": "10.1016/j.jinf.2026.106883",
+    "date": "2026-10-01",
+    "roles": [
+     "recommended"
+    ],
+    "rank": 5,
+    "topic_id": "tp_b",
+    "topic_label": "tumour immunity",
+    "citation_data": true,
+    "links": 2
+   },
+   {
+    "paper_id": "cp_f15700a89085f98a",
+    "title": "Mechanical Forces as Regulators of Tumor Immunity: Mechanotransduction, Immune Escape, and Therapeutic Opportunities",
+    "doi": "10.1016/j.fmre.2026.10.001",
+    "date": "2026-10-01",
+    "roles": [
+     "recommended"
+    ],
+    "rank": 7,
+    "topic_id": null,
+    "topic_label": null,
+    "citation_data": true,
+    "links": 0
+   },
+   {
+    "paper_id": "cp_959e1d2f3fd49b83",
+    "title": "Neutralization titers reveal the structure of polyclonal antibody responses",
+    "doi": "10.1073/pnas.2612096123",
+    "date": "2026-10-07",
+    "roles": [
+     "recommended"
+    ],
+    "rank": 8,
+    "topic_id": null,
+    "topic_label": null,
+    "citation_data": true,
+    "links": 5
+   },
+   {
+    "paper_id": "cp_8b37bc2a37bebf45",
+    "title": "Targeting of conserved spike epitopes enables broad antibody neutralisation of diverse bat sarbecoviruses",
+    "doi": "10.1371/journal.pbio.3003882",
+    "date": "2026-10-01",
+    "roles": [
+     "recommended"
+    ],
+    "rank": 9,
+    "topic_id": null,
+    "topic_label": null,
+    "citation_data": true,
+    "links": 6
+   },
+   {
+    "paper_id": "cp_061031e283392e5f",
+    "title": "Enriching Public Pathogen Genomic Records With Patient Metadata: Quantitative Study and Exploratory Case Analysis",
+    "doi": "10.2196/92529",
+    "date": "2026-10-06",
+    "roles": [
+     "recommended"
+    ],
+    "rank": 10,
+    "topic_id": null,
+    "topic_label": null,
+    "citation_data": true,
+    "links": 1
+   },
+   {
+    "paper_id": "cp_8af0ec906dc0c63f",
+    "title": "Omicron escapes the majority of existing SARS-CoV-2 neutralizing antibodies",
+    "doi": "10.1038/s41586-021-04385-3",
+    "date": "2021-12-23",
+    "roles": [
+     "seed"
+    ],
+    "rank": null,
+    "topic_id": null,
+    "topic_label": null,
+    "citation_data": true,
+    "links": 7
+   },
+   {
+    "paper_id": "cp_d37faf7858fd0722",
+    "title": "Complete Mapping of Mutations to the SARS-CoV-2 Spike Receptor-Binding Domain that Escape Antibody Recognition",
+    "doi": "10.1016/j.chom.2020.11.007",
+    "date": "2020-11-19",
+    "roles": [
+     "seed"
+    ],
+    "rank": null,
+    "topic_id": null,
+    "topic_label": null,
+    "citation_data": true,
+    "links": 7
+   }
+  ],
+  "links": [
+   {
+    "kind": "citation",
+    "source": "cp_061031e283392e5f",
+    "target": "cp_d37faf7858fd0722",
+    "observed_at": "2026-10-15T06:00:00.000000Z",
+    "shared": null
+   },
+   {
+    "kind": "citation",
+    "source": "cp_1a112f89d6e7044c",
+    "target": "cp_d37faf7858fd0722",
+    "observed_at": "2026-10-15T06:00:00.000000Z",
+    "shared": null
+   },
+   {
+    "kind": "citation",
+    "source": "cp_8af0ec906dc0c63f",
+    "target": "cp_d37faf7858fd0722",
+    "observed_at": "2026-10-15T06:00:00.000000Z",
+    "shared": null
+   },
+   {
+    "kind": "citation",
+    "source": "cp_8b37bc2a37bebf45",
+    "target": "cp_8af0ec906dc0c63f",
+    "observed_at": "2026-10-15T06:00:00.000000Z",
+    "shared": null
+   },
+   {
+    "kind": "citation",
+    "source": "cp_95548f5ec8a8ceca",
+    "target": "cp_8af0ec906dc0c63f",
+    "observed_at": "2026-10-15T06:00:00.000000Z",
+    "shared": null
+   },
+   {
+    "kind": "citation",
+    "source": "cp_959e1d2f3fd49b83",
+    "target": "cp_8af0ec906dc0c63f",
+    "observed_at": "2026-10-15T06:00:00.000000Z",
+    "shared": null
+   },
+   {
+    "kind": "citation",
+    "source": "cp_959e1d2f3fd49b83",
+    "target": "cp_d37faf7858fd0722",
+    "observed_at": "2026-10-15T06:00:00.000000Z",
+    "shared": null
+   },
+   {
+    "kind": "shared_references",
+    "source": "cp_8af0ec906dc0c63f",
+    "target": "cp_d37faf7858fd0722",
+    "observed_at": null,
+    "shared": 17
+   },
+   {
+    "kind": "shared_references",
+    "source": "cp_959e1d2f3fd49b83",
+    "target": "cp_d37faf7858fd0722",
+    "observed_at": null,
+    "shared": 2
+   },
+   {
+    "kind": "shared_references",
+    "source": "cp_8b37bc2a37bebf45",
+    "target": "cp_d37faf7858fd0722",
+    "observed_at": null,
+    "shared": 8
+   },
+   {
+    "kind": "shared_references",
+    "source": "cp_8af0ec906dc0c63f",
+    "target": "cp_959e1d2f3fd49b83",
+    "observed_at": null,
+    "shared": 2
+   },
+   {
+    "kind": "shared_references",
+    "source": "cp_8af0ec906dc0c63f",
+    "target": "cp_8b37bc2a37bebf45",
+    "observed_at": null,
+    "shared": 6
+   },
+   {
+    "kind": "shared_references",
+    "source": "cp_8b37bc2a37bebf45",
+    "target": "cp_959e1d2f3fd49b83",
+    "observed_at": null,
+    "shared": 2
+   },
+   {
+    "kind": "shared_references",
+    "source": "cp_8b37bc2a37bebf45",
+    "target": "cp_95548f5ec8a8ceca",
+    "observed_at": null,
+    "shared": 2
+   },
+   {
+    "kind": "shared_references",
+    "source": "cp_1a112f89d6e7044c",
+    "target": "cp_8b37bc2a37bebf45",
+    "observed_at": null,
+    "shared": 2
+   }
+  ],
+  "topics": [
+   {
+    "topic_id": "tp_a",
+    "label": "antibody escape",
+    "papers": 3
+   },
+   {
+    "topic_id": "tp_b",
+    "label": "tumour immunity",
+    "papers": 3
+   },
+   {
+    "topic_id": null,
+    "label": null,
+    "papers": 6
+   }
+  ],
+  "stats": {
+   "nodes": 12,
+   "citation_links": 7,
+   "shared_reference_links": 8,
+   "without_citation_data": 0,
+   "min_shared": 2
+  }
+ },
+ "stored_citations": [
+  [
+   "cp_061031e283392e5f",
+   "cp_d37faf7858fd0722"
+  ],
+  [
+   "cp_1a112f89d6e7044c",
+   "cp_d37faf7858fd0722"
+  ],
+  [
+   "cp_8af0ec906dc0c63f",
+   "cp_d37faf7858fd0722"
+  ],
+  [
+   "cp_8b37bc2a37bebf45",
+   "cp_8af0ec906dc0c63f"
+  ],
+  [
+   "cp_95548f5ec8a8ceca",
+   "cp_8af0ec906dc0c63f"
+  ],
+  [
+   "cp_959e1d2f3fd49b83",
+   "cp_8af0ec906dc0c63f"
+  ],
+  [
+   "cp_959e1d2f3fd49b83",
+   "cp_d37faf7858fd0722"
+  ]
+ ]
+}

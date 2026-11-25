@@ -875,3 +875,56 @@ def topic_series(s: Session, radar_id: str, as_of: Optional[dt.datetime] = None,
         "topics": [{"topic_id": t["topic_id"], "label": t["label"],
                     "series": {src: series(known, src, t["topic_id"]) for src in sources}} for t in model["topics"]],
     }
+
+
+def radar_graph(s: Session, radar_id: str, run_id: Optional[str] = None, as_of: Optional[dt.datetime] = None) -> Dict[str, Any]:
+    """Explore: a run's papers and the radar's anchors, linked by stored citations (as observed by ``as_of``)."""
+    from carousel.core.identifiers import try_normalize
+    from carousel.search.explore import build_subgraph
+
+    as_of = as_of or dt.datetime.now(dt.timezone.utc)
+    _radar(s, radar_id)
+    q = select(m.RecommendationRun).where(m.RecommendationRun.radar_id == radar_id, m.RecommendationRun.executed_at <= as_of)
+    q = q.where(m.RecommendationRun.id == run_id) if run_id else q.order_by(m.RecommendationRun.executed_at.desc())
+    run = s.scalars(q).first()
+    roles: Dict[str, set] = {}
+    ranks: Dict[str, int] = {}
+    if run is not None:
+        for rank, pid in s.execute(select(m.RecommendationItem.rank, m.RecommendationItem.paper_id)
+                                   .where(m.RecommendationItem.run_id == run.id)):
+            roles.setdefault(pid, set()).add("recommended")
+            ranks[pid] = rank
+    try:
+        seeds = [d for d in (try_normalize("doi", x) for x in radar_config(s, radar_id).seed_papers) if d]
+    except NotFound:
+        seeds = []
+    for pid in s.scalars(select(m.PaperIdentifier.paper_id).where(m.PaperIdentifier.identifier_type == "doi",
+                                                                   m.PaperIdentifier.value.in_(seeds))):
+        roles.setdefault(pid, set()).add("seed")
+    fb = current_feedback(s, radar_id)
+    for action, role in (("save", "saved"), ("relevant", "relevant")):
+        for pid in fb.get(action, []):
+            roles.setdefault(pid, set()).add(role)
+    ids = sorted(roles)
+    idents = _identifiers(s, ids)
+    papers = {p.id: p for p in s.scalars(select(m.Paper).where(m.Paper.id.in_(ids)))}
+    model = s.scalars(select(m.TopicModel).where(m.TopicModel.radar_id == radar_id, m.TopicModel.active.is_(True))).first()
+    topics: Dict[str, str] = {}
+    assigned: Dict[str, str] = {}
+    if model is not None:
+        by_id = {t.id: t for t in s.scalars(select(m.Topic).where(m.Topic.classifier_version == model.classifier_version))}
+        topics = {t.topic_key: t.label for t in by_id.values() if t.topic_key}
+        for pid, tid in s.execute(select(m.PaperTopic.paper_id, m.PaperTopic.topic_id)
+                                  .where(m.PaperTopic.paper_id.in_(ids), m.PaperTopic.topic_id.in_(list(by_id)))):
+            assigned[pid] = by_id[tid].topic_key  # type: ignore[assignment]
+    nodes = [{"paper_id": pid, "title": papers[pid].title, "doi": idents.get(pid, {}).get("doi"),
+              "work": idents.get(pid, {}).get("openalex"), "roles": sorted(roles[pid]), "rank": ranks.get(pid),
+              "date": papers[pid].earliest_public_date.isoformat() if papers[pid].earliest_public_date else None,
+              "topic_id": assigned.get(pid)} for pid in ids if pid in papers]
+    works = [n["work"] for n in nodes if n["work"]]
+    edges = [{"citing": e.citing, "cited": e.cited,
+              "observed_at": e.observed_at.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")}
+             for e in s.scalars(select(m.CitationEdge).where(m.CitationEdge.observed_at <= as_of,
+                                                             (m.CitationEdge.citing.in_(works)) | (m.CitationEdge.cited.in_(works))))]
+    return build_subgraph(nodes, edges, topics, radar_id=radar_id, run_id=run.id if run else None, as_of=as_of,
+                          classifier_version=model.classifier_version if model else None)

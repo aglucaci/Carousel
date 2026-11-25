@@ -384,6 +384,37 @@ export async function api<T>(path: string, init?: { method?: string; body?: unkn
   return body as T;
 }
 
+export type ExploreNode = {
+  paper_id: string;
+  title?: string | null;
+  doi?: string | null;
+  date?: string | null;
+  roles: string[];
+  rank?: number | null;
+  topic_id?: string | null;
+  topic_label?: string | null;
+  citation_data: boolean;
+  links: number;
+};
+export type ExploreLink = {
+  kind: "citation" | "shared_references";
+  source: string;
+  target: string;
+  observed_at?: string | null;
+  shared?: number | null;
+};
+export type ExploreGraph = {
+  radar_id: string;
+  run_id?: string | null;
+  as_of: string;
+  graph_version: string;
+  classifier_version?: string | null;
+  nodes: ExploreNode[];
+  links: ExploreLink[];
+  topics: { topic_id: string | null; label: string | null; papers: number }[];
+  stats: Record<string, number>;
+};
+
 export const client = {
   radars: () => api<Radar[]>("/radars"),
   radar: (id: string) => api<Radar>(`/radars/${encodeURIComponent(id)}`),
@@ -393,6 +424,7 @@ export const client = {
   updateRadar: (id: string, patch: RadarPatch) =>
     api<Radar>(`/radars/${encodeURIComponent(id)}`, { method: "PATCH", body: patch }),
   events: (id: string) => api<ResearchEvent[]>(`/radars/${encodeURIComponent(id)}/events`),
+  graph: (id: string) => api<ExploreGraph>(`/radars/${encodeURIComponent(id)}/graph`),
   event: (id: string) => api<ResearchEvent>(`/events/${encodeURIComponent(id)}`),
   trends: (id: string, asOf?: string) =>
     api<TopicTrends>(`/radars/${encodeURIComponent(id)}/topics/trends${asOf ? `?as_of=${encodeURIComponent(asOf)}` : ""}`),
