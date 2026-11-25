@@ -195,6 +195,10 @@ export function coverageLine(c: { source: string; status: string; role?: string;
     return `${name}: ${c.retrieved ?? 0} of ${(c.total_available ?? 0).toLocaleString()} DOIs verified${
       c.truncation_reason ? ` (stopped: ${c.truncation_reason})` : ""
     }`;
+  if (c.role === "citations")
+    return `${name} citations: ${c.retrieved ?? 0}${c.total_available != null ? ` of ${c.total_available.toLocaleString()}` : ""} papers citing your seed or saved papers${
+      c.truncation_reason === "no_api_key" ? " (first page only: no API key)" : c.truncation_reason ? ` (${c.truncation_reason})` : ""
+    }`;
   const of = c.total_available != null ? ` of ${c.total_available.toLocaleString()}` : "";
   const why =
     c.truncation_reason === "no_api_key"

@@ -151,7 +151,7 @@ class AcceptanceFlowTests(ApiTestCase):
         self.assertTrue(paper["identifiers"])
         self.assertTrue(paper["sources"])
         why = self.get(f"/papers/{top['paper_id']}/explanation", radar_id="escape").json()
-        self.assertEqual((why["run_id"], why["rank"], why["ranking_version"]), (run1, 1, "0.1.0"))
+        self.assertEqual((why["run_id"], why["rank"], why["ranking_version"]), (run1, 1, "0.2.0"))
         self.assertIn("retrieved_by", why["details"])
         self.assertAlmostEqual(sum(why["weights"].values()), 1.0, places=5)
 

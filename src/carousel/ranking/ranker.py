@@ -1,4 +1,4 @@
-"""Stages B-E of the recommendation engine (CAROUSEL_PLAN.md §4), ``ranking_version`` 0.1.0.
+"""Stages B-E of the recommendation engine (CAROUSEL_PLAN.md §4), ``ranking_version`` 0.2.0.
 
 Input: a :class:`~carousel.search.candidates.CandidateSet` and the radar.
 Output: a :class:`Ranking` whose every item carries the features that put it
@@ -12,6 +12,10 @@ Signals (each in [0, 1]):
     papers and saved/relevant papers and away from irrelevant ones
     (:func:`rocchio`). ``BM25_norm`` is BM25
     divided by the run's maximum. Without embeddings, ``R = BM25_norm``.
+    With citation data for the radar's anchors (seeds, saved and relevant
+    papers; :mod:`carousel.search.citations`), the graph term joins it:
+    ``R = (R₀ + γ·g) / (1 + γ)``, where ``g`` is 1 for a direct citation link to
+    an anchor and up to 0.5 for shared references. Without that data ``R = R₀``.
 ``novelty``
     ``N = 1 − mean cosine similarity to the k nearest papers in H_t``, where
     ``H_t`` holds only papers CAROUSEL observed **strictly before** the
@@ -26,6 +30,10 @@ Signals (each in [0, 1]):
     Share of the radar's method terms (``methods_profile``, or the
     ``signal_profile.methods`` terms) found in the title/abstract, saturating
     at three matches.
+
+Version history: ``0.1.0`` relevance, novelty, method match, MMR, modes;
+``0.2.0`` adds the graph term (task 32) and is otherwise identical: a radar
+without anchors with citation data ranks exactly as under 0.1.0.
 
 Momentum, discovery, and evidence are reported inactive with a reason, and
 the remaining weights are rescaled. Integrity problems are flags (retracted
@@ -61,7 +69,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from carousel.core.config import RadarConfig
     from carousel.database.local import PaperStore
 
-RANKING_VERSION = "0.1.0"
+RANKING_VERSION = "0.2.0"
 
 MODES: Dict[str, Dict[str, Any]] = {
     "focused": {"lambda": 0.85, "multipliers": {"relevance": 1.5, "novelty": 0.5, "method_match": 1.0}},
@@ -72,6 +80,7 @@ MODES: Dict[str, Dict[str, Any]] = {
 
 ALPHA = 0.6  # relevance: embedding similarity
 BETA = 0.4   # relevance: BM25
+GAMMA = 0.25  # relevance: citation graph term, when active
 K_NOVELTY = 5
 MIN_HISTORY = 3
 MIN_GROUP_FOR_PERCENTILE = 5
@@ -82,7 +91,7 @@ MIN_SELECTION_GATE = 0.25
 
 INACTIVE_REASONS = {
     "momentum": "needs run history and trend models (Phase 3)",
-    "discovery": "needs the citation graph and Method Transfer (Phase 4)",
+    "discovery": "needs Method Transfer (Phase 4, task 35)",
     "evidence": "needs evidence-grounded extraction (Phase 2)",
 }
 
@@ -244,12 +253,16 @@ def rank(
     top_n: int = 25,
     mode: Optional[str] = None,
     feedback: Optional[Feedback] = None,
+    graph: Optional[Dict[str, Dict[str, Any]]] = None,
 ) -> Ranking:
     """Score and select. ``history`` defaults to every paper in ``store``.
 
     Papers with feedback (saved, dismissed, judged) and seed papers are not
     recommended; ``save``/``relevant`` and seeds pull the profile toward
     them and ``irrelevant`` pushes it away.
+
+    ``graph`` (from :func:`carousel.search.citations.graph_features`) adds the
+    graph term to relevance; ``None`` leaves relevance as in 0.1.0.
     """
     mode = mode or radar.mode.value
     if mode not in MODES:
@@ -305,6 +318,11 @@ def rank(
                 "negative": [pid for pid in feedback.negative if pid in vectors]}
 
     # ---- relevance ----
+    def with_graph(r0: float, pid: str, key: str) -> float:
+        if graph is None:
+            return r0
+        return (r0 + GAMMA * float((graph.get(pid) or {}).get(key) or 0.0)) / (1.0 + GAMMA)
+
     max_bm25 = max((c.bm25 for c in cands), default=0.0)
     use_sim = e_u is not None or any(c.similarity is not None for c in cands)
     relevance: Dict[str, float] = {}
@@ -318,11 +336,11 @@ def rank(
             sim = c.similarity
         sim_of[c.paper_id] = sim
         bm = c.bm25 / max_bm25 if max_bm25 > 0 else 0.0
-        relevance[c.paper_id] = ALPHA * _clip01(sim or 0.0) + BETA * bm if use_sim else bm
+        relevance[c.paper_id] = with_graph(ALPHA * _clip01(sim or 0.0) + BETA * bm if use_sim else bm, c.paper_id, "value")
         if relevance_base is not None and e_base is not None:
             sb = cosine(vectors[c.paper_id], e_base) if c.paper_id in vectors else None
             sim_base[c.paper_id] = sb
-            relevance_base[c.paper_id] = ALPHA * _clip01(sb or 0.0) + BETA * bm
+            relevance_base[c.paper_id] = with_graph(ALPHA * _clip01(sb or 0.0) + BETA * bm, c.paper_id, "value_seeds")
 
     def nearest_feedback(pid: str, ids: Sequence[str]) -> Optional[Dict[str, Any]]:
         """The feedback paper most like ``pid``, with the feedback given on it."""
@@ -490,6 +508,7 @@ def rank(
                 "bm25": _r(c.bm25),
                 "bm25_norm": _r(c.bm25 / max_bm25 if max_bm25 > 0 else 0.0),
                 "matched_terms": list(c.matched_terms),
+                **({"graph": graph.get(pid, {"status": "not_computed", "value": 0.0})} if graph is not None else {}),
                 "novelty_raw": _r(nov_raw.get(pid)),
                 "novelty_gate": _r(gate[pid]),
                 "novelty": nov_detail.get(pid, {}),
@@ -511,6 +530,7 @@ def rank(
             flags=tuple(flags),
         ))
 
+    base_formula = f"{ALPHA}*sim + {BETA}*bm25_norm" if use_sim else "bm25_norm"
     stats = {
         "candidates": len(cands),
         "scored": len(scored),
@@ -519,7 +539,8 @@ def rank(
         "history_size": len(hist_items),
         "profile": profile_info,
         "feedback_effect": feedback_effect,
-        "relevance_formula": f"{ALPHA}*sim + {BETA}*bm25_norm" if use_sim else "bm25_norm",
+        "relevance_formula": (f"({base_formula} + {GAMMA}*graph) / {1 + GAMMA}" if graph is not None else base_formula),
+        "graph": _graph_stats(graph) if graph is not None else None,
         "candidate_stats": candidates.stats,
     }
     return Ranking(
@@ -527,6 +548,16 @@ def rank(
         inactive_signals=dict(sorted(inactive.items())), model_version=embedder.model_version if embedder and vectors else None,
         items=items, stats=stats,
     )
+
+
+def _graph_stats(graph: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+    vals = list(graph.values())
+    by_status: Dict[str, int] = {}
+    for v in vals:
+        by_status[v.get("status", "?")] = by_status.get(v.get("status", "?"), 0) + 1
+    return {"gamma": GAMMA, "papers": len(vals), "by_status": dict(sorted(by_status.items())),
+            "direct_links": sum(1 for v in vals if v.get("cites") or v.get("cited_by")),
+            "coupled": sum(1 for v in vals if not (v.get("cites") or v.get("cited_by")) and (v.get("shared_references") or 0) > 0)}
 
 
 class _neg:

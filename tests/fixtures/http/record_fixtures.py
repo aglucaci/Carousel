@@ -1,6 +1,6 @@
 """Re-record the connector fixtures from the live APIs.
 
-    python tests/fixtures/http/record_fixtures.py [pubmed] [openalex] [crossref] [europepmc] [europepmc-scan] [versions] [arxiv] [observations] [benchmark]   # default: all
+    python tests/fixtures/http/record_fixtures.py [pubmed] [openalex] [crossref] [europepmc] [europepmc-scan] [versions] [arxiv] [observations] [benchmark] [citations]   # default: all
 
 crossref records two files: a lookup of known DOIs (a retracted paper and its
 notice, a plain paper, a paper with a preprint and that preprint, and an
@@ -18,6 +18,10 @@ topics) from PubMed, Europe PMC, OpenAlex, and arXiv over four weeks.
 
 benchmark records ``benchmark_delta.json``: the weekly PubMed counts the Study C
 starter benchmark (benchmarks/delta/starter.yml) replays, and its report.
+
+citations records ``citations.json``: an OpenAlex-only scan of a radar with seed papers (two real, one
+unregistered DOI): the search, the seeds by DOI, their reference lists, works in the window citing them, and the
+candidates' reference lists.
 
 versions records ``versions.json``: preprint/article pairs that Europe PMC and
 Crossref link, fetched together and one side at a time.
@@ -64,6 +68,26 @@ ARXIV_RECORDS = ["1404.4197",   # v2; published as 10.1371/journal.ppat.1005526 
                  "2610.01111"]  # v1; also in openalex_search.json under arXiv's DOI 10.48550/arxiv.2610.01111
 ARXIV_JOURNAL_DOI = "10.1371/journal.ppat.1005526"
 
+# Citation graph (task 32): seeds cited widely enough that works in QUERY's window cite them.
+CITATION_SEEDS = ["10.1038/s41586-021-04385-3",   # Cao et al. 2022, Omicron escapes most neutralizing antibodies
+                  "10.1016/j.chom.2020.11.007",   # Greaney et al. 2021, escape mutations to RBD antibodies
+                  "10.9999/carousel-not-registered"]
+CITATION_RADAR = {"radar_id": "escape", "radar_name": "Escape radar", "sources": ["openalex"],
+                  "queries": ["immune escape", "antigenic drift"], "exclude": ["case report"],
+                  "filters": {"date_range": "last_14_days"}, "seed_papers": CITATION_SEEDS}
+
+
+def citation_scan(transport, store):
+    """The scan citations.json holds (tests replay exactly this)."""
+    from carousel import Radar
+    from carousel.core.config import RadarConfig
+
+    oa = OpenAlexConnector(HttpClient(transport, min_interval=1.1), api_key="")
+    return Radar(RadarConfig.model_validate(CITATION_RADAR)).scan(
+        as_of=QUERY.end, observed_at=dt.datetime(2026, 10, 15, 6, tzinfo=dt.timezone.utc), store=store,
+        connectors={"openalex": oa}, embedder="hashing", max_results=QUERY.max_results)
+
+
 # Topic observations: a radar field, two topics' key terms, and four complete weeks before OBS_TODAY.
 OBS_RADAR = {"radar_id": "escape", "radar_name": "Escape radar", "queries": ["immune escape", "antigenic drift"],
              "exclude": ["case report"], "sources": ["pubmed", "europepmc", "openalex", "arxiv"],
@@ -103,6 +127,14 @@ def main(sources) -> None:
         res = oa.search(QUERY)
         print("openalex", res.coverage.total_available, len(res.records), res.coverage.rate_limit, rec.save())
 
+
+    if "citations" in sources:
+        rec = RecordingTransport(UrllibTransport(), HERE / "citations.json")
+        with tempfile.TemporaryDirectory() as d:
+            res = citation_scan(rec, Path(d) / "s.db")
+        cov = [c for c in res.run["coverage"] if c.get("role") == "citations"][0]
+        print("citations", {k: cov.get(k) for k in ("retrieved", "total_available", "references_read", "new_edges",
+                                                     "requests", "cost", "anchors")}, rec.save())
 
     if "crossref" in sources:
         rec = RecordingTransport(UrllibTransport(), HERE / "crossref_lookup.json")
@@ -222,4 +254,5 @@ def main(sources) -> None:
 if __name__ == "__main__":
     import sys
 
-    main(sys.argv[1:] or ["pubmed", "openalex", "crossref", "europepmc", "versions", "arxiv", "observations", "benchmark"])
+    main(sys.argv[1:] or ["pubmed", "openalex", "crossref", "europepmc", "versions", "arxiv", "observations", "benchmark",
+                          "citations"])

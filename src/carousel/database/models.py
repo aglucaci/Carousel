@@ -599,3 +599,30 @@ class SnapshotItem(Base):
     score: Mapped[Optional[float]] = mapped_column(Float)
     paper_id: Mapped[Optional[str]] = mapped_column(ForeignKey("papers.id"), index=True)  # linked when known
     raw: Mapped[Dict[str, Any]] = mapped_column()
+
+# -------------------------
+# Citation graph (plan task 32)
+# -------------------------
+
+class CitationEdge(Base):
+    """One citation (OpenAlex work IDs) as first observed: append-only, never updated (carousel.search.citations)."""
+
+    __tablename__ = "citation_edges"
+    __table_args__ = (UniqueConstraint("citing", "cited", "source"),)
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    citing: Mapped[str] = mapped_column(Text)
+    cited: Mapped[str] = mapped_column(Text, index=True)
+    source: Mapped[str] = mapped_column(String(16))
+    observed_at: Mapped[dt.datetime] = mapped_column(TS)
+
+
+class ReferenceList(Base):
+    """When a work's whole reference list was read, and how long it was: append-only."""
+
+    __tablename__ = "reference_lists"
+    __table_args__ = (UniqueConstraint("work_id", "source", "observed_at"),)
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    work_id: Mapped[str] = mapped_column(Text, index=True)
+    source: Mapped[str] = mapped_column(String(16))
+    n_refs: Mapped[int] = mapped_column(Integer)
+    observed_at: Mapped[dt.datetime] = mapped_column(TS)

@@ -7,7 +7,8 @@ help.openalex.org/access/example-costs):
 request                    credits     used for
 =========================  ==========  =====================================
 search (``search*``)       10          :meth:`OpenAlexConnector.search`
-list + filter              1           :meth:`OpenAlexConnector.fetch`
+list + filter              1           :meth:`OpenAlexConnector.fetch`, :meth:`~OpenAlexConnector.references`,
+                                       :meth:`~OpenAlexConnector.citing`
 =========================  ==========  =====================================
 
 The free daily allowance is US$1 with an API key (US$0.10 without), so every
@@ -32,8 +33,10 @@ Rules this connector keeps:
 
 from __future__ import annotations
 
+import dataclasses
+import datetime as dt
 import os
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from pydantic import ValidationError
 
@@ -64,6 +67,34 @@ SELECT = ",".join((
     "id", "doi", "ids", "display_name", "publication_date", "type", "language", "is_retracted",
     "abstract_inverted_index", "authorships", "primary_location", "locations", "updated_date",
 ))
+
+
+REF_SELECT = "id,doi,referenced_works"
+DOI_BATCH = 50
+"""DOIs per ``doi:`` filter (OpenAlex allows up to 100 OR'd values; DOIs are long, so URLs stay short)."""
+CITES_BATCH = 50
+
+
+@dataclasses.dataclass(frozen=True)
+class CitationResult:
+    """Works and their reference lists (OpenAlex work IDs), from :meth:`OpenAlexConnector.references` or
+    :meth:`OpenAlexConnector.citing`. ``references`` holds a work only when its reference list was returned."""
+
+    records: List[SourceRecord]
+    references: Dict[str, List[str]]
+    requests: int
+    cost: float
+    total_available: Optional[int] = None
+    truncated: bool = False
+    truncation_reason: Optional[str] = None
+    errors: Tuple[str, ...] = ()
+
+
+def _refs(work: Dict[str, Any]) -> Optional[Tuple[str, List[str]]]:
+    wid = try_normalize("openalex", work.get("id"))
+    if wid is None or "referenced_works" not in work:
+        return None
+    return wid, sorted({r for r in (try_normalize("openalex", x) for x in work.get("referenced_works") or []) if r})
 
 
 def reconstruct_abstract(inverted: Optional[Dict[str, List[int]]]) -> Optional[str]:
@@ -251,3 +282,77 @@ class OpenAlexConnector(Connector):
             data = self.client.get(self._request(params), cost=LIST_CREDITS).json()
             out.extend(r for r in (parse_work(w) for w in data.get("results") or []) if r is not None)
         return out
+
+    # ---- citation graph (plan task 32): list + filter requests only, 1 credit per page ----
+
+    def references(self, ids: Sequence[str] = (), dois: Sequence[str] = ()) -> CitationResult:
+        """Look works up by OpenAlex ID or DOI and return their records and reference lists."""
+        before = self._snapshot_stats()
+        wids = sorted({w for w in (try_normalize("openalex", i) for i in ids) if w})
+        norm = sorted({d for d in (try_normalize("doi", x) for x in dois) if d})
+        batches = [("ids.openalex", wids[i: i + PER_PAGE_MAX]) for i in range(0, len(wids), PER_PAGE_MAX)]
+        batches += [("doi", norm[i: i + DOI_BATCH]) for i in range(0, len(norm), DOI_BATCH)]
+        records: List[SourceRecord] = []
+        refs: Dict[str, List[str]] = {}
+        for field, batch in batches:
+            params = {"filter": f"{field}:" + "|".join(batch), "select": SELECT + ",referenced_works",
+                      "per_page": len(batch)}
+            data = self.client.get(self._request(params), cost=LIST_CREDITS).json()
+            for w in data.get("results") or []:
+                rec, r = parse_work(w), _refs(w)
+                if rec is not None:
+                    records.append(rec)
+                if r is not None:
+                    refs[r[0]] = r[1]
+        s = self.client.stats
+        return CitationResult(records=records, references=refs, requests=s.requests - before.requests,
+                              cost=round(s.cost - before.cost, 6))
+
+    def citing(self, work_ids: Sequence[str], start: "dt.date", end: "dt.date", max_results: int = 100) -> CitationResult:
+        """Works published in [start, end] that cite any of ``work_ids`` (scholarly types), with their reference
+        lists. Bounded like a search: by the window and ``max_results``; paging past one page needs an API key."""
+        before = self._snapshot_stats()
+        wids = sorted({w for w in (try_normalize("openalex", i) for i in work_ids) if w})
+        records: List[SourceRecord] = []
+        refs: Dict[str, List[str]] = {}
+        total: Optional[int] = None
+        reason: Optional[str] = None
+        errors: List[str] = []
+        q = SearchQuery(terms=["citing"], start=start, end=end, max_results=max_results)
+        for i in range(0, len(wids), CITES_BATCH):
+            cursor: Optional[str] = "*"
+            pages = 0
+            while cursor and len(records) < max_results:
+                if pages >= 1 and not self.api_key:
+                    reason = "no_api_key"
+                    break
+                params = {"filter": "cites:" + "|".join(wids[i: i + CITES_BATCH]) + "," + self._filter(q),
+                          "select": SELECT + ",referenced_works", "per_page": min(PER_PAGE_MAX, max_results - len(records)),
+                          "cursor": cursor}
+                try:
+                    data = self.client.get(self._request(params), cost=LIST_CREDITS).json()
+                except ConnectorError as exc:
+                    if not records and not errors and pages == 0 and i == 0:
+                        raise
+                    errors.append(str(exc))
+                    reason = "budget" if isinstance(exc, BudgetExceeded) else "error"
+                    break
+                pages += 1
+                meta = data.get("meta") or {}
+                total = (total or 0) + (meta.get("count") or 0) if pages == 1 else total
+                results = data.get("results") or []
+                for w in results:
+                    rec, r = parse_work(w), _refs(w)
+                    if rec is not None and r is not None and r[0] not in refs:
+                        records.append(rec)
+                        refs[r[0]] = r[1]
+                cursor = meta.get("next_cursor")
+                if not results:
+                    break
+            if reason in ("budget", "error") or len(records) >= max_results:
+                break
+        truncated = reason is not None or (total is not None and len(records) < total)
+        s = self.client.stats
+        return CitationResult(records=records[:max_results], references=refs, requests=s.requests - before.requests,
+                              cost=round(s.cost - before.cost, 6), total_available=total, truncated=truncated,
+                              truncation_reason=(reason or "max_results") if truncated else None, errors=tuple(errors))

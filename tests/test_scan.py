@@ -69,7 +69,7 @@ class RescanTests(ScanTestCase):
         self.assertEqual(by_source["biorxiv"]["status"], "no_connector")
         self.assertEqual((by_source["pubmed"]["retrieved"], by_source["pubmed"]["total_available"]), (5, 221))
         self.assertEqual(by_source["openalex"]["cost"], 10.0)
-        self.assertEqual(res.run["ranking_version"], "0.1.0")
+        self.assertEqual(res.run["ranking_version"], "0.2.0")
         self.assertEqual(res.run["model_version"], "carousel/hashing-v1-d256")
         self.assertIn("using the non-semantic hashing embedder", res.run["notes"])
         top = res.items[0]

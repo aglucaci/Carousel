@@ -51,7 +51,7 @@ changed in my field, why does it matter, and what should I read next?"**
 | **Connectors** | [`src/carousel/connectors/`](src/carousel/connectors/) | PubMed and OpenAlex searches that return source records plus a coverage report (matches available, retrieved, truncated and why, requests, OpenAlex credits). Bounded windows only, with a per-run OpenAlex credit budget and an on-disk cache. OpenAlex searches scholarly work types only |
 | **Duplicate detection** | [`src/carousel/ingestion/dedup.py`](src/carousel/ingestion/dedup.py), `carousel review` | Exact identifiers first (DOI, PMID, PMCID, OpenAlex, arXiv), then cautious title/author/year matching that merges automatically only when every check passes. Uncertain pairs, preprint/published versions, and identifier clashes go to a review queue; every merge is logged and can be split again |
 | **Candidate retrieval** | [`src/carousel/search/`](src/carousel/search/) | BM25 over titles and abstracts, semantic similarity to the radar's profile, and source-query hits, after recorded hard filters (retracted, date window, type, excluded terms). Embeddings are cached per paper and model version. Real semantic search needs `pip install "carousel-research[semantic]"` |
-| **Ranker** | [`src/carousel/ranking/`](src/carousel/ranking/) | `ranking_version` 0.1.0: relevance, novelty against only earlier-observed papers (guarded against temporal leakage), and method match; weighted by mode (focused / balanced / exploratory), then diversified with MMR. Every item carries its features and flags |
+| **Ranker** | [`src/carousel/ranking/`](src/carousel/ranking/) | `ranking_version` 0.2.0: relevance (with a citation-graph term for radars with seed papers), novelty against only earlier-observed papers (guarded against temporal leakage), and method match; weighted by mode (focused / balanced / exploratory), then diversified with MMR. Every item carries its features and flags |
 | **Postgres schema (Phase 1B)** | [`src/carousel/database/models.py`](src/carousel/database/models.py), [`migrations/`](src/carousel/database/migrations/) | The spec's production tables on PostgreSQL + pgvector (papers with full-text search, identifiers, sources, authors, embeddings, runs and items, feedback, collections, topics, events), managed with Alembic. `carousel db import-store` and `import-snapshots` copy the engine's history in and verify counts. Needs `pip install "carousel-research[server]"` |
 | **Web app (Phase 1B)** | [`apps/web/`](apps/web/) | Next.js: **For You** (ranked papers per radar, new since the last run), **Radars** (describe a topic, review and approve the exact searches it proposes, scan, and see each run's history and source coverage), the **"Why this paper?"** drawer (from the stored run only), save and dismiss, and the **Library** of saved papers. A Playwright test runs the spec's acceptance flow end to end in CI |
 | **Preprint ↔ publication links (Phase 2)** | [`src/carousel/ingestion/versions.py`](src/carousel/ingestion/versions.py), `carousel review link` / `unlink` | A preprint and the article it became stay **two separate papers that point at each other**, never merged. Links come from Crossref (`has-preprint` / `is-preprint-of`) and Europe PMC ("Preprint in" / "Preprint of"), with each link's evidence kept; for recommended papers a scan looks up the other version when it isn't stored yet (once a month at most per missing work). Recommendations are flagged "Has preprint" or "Since published", and the drawer lists the other version. A reviewer can link or unlink a pair, and a source never overrides a reviewer's "not the same work" |
@@ -319,7 +319,7 @@ rating, and every recommendation records the features that put it where it is.
 
 | Stage | What it does |
 | --- | --- |
-| **Candidates** | Lexical retrieval (your terminology), semantic retrieval (embeddings), and later citation expansion from seed papers plus exploratory retrieval from neighboring fields. Results are merged, deduplicated, and hard-filtered |
+| **Candidates** | Lexical retrieval (your terminology), semantic retrieval (embeddings), citation expansion from seed papers (OpenAlex: papers in the window that cite a seed or a paper you saved), and later exploratory retrieval from neighboring fields. Results are merged, deduplicated, and hard-filtered |
 | **Relevance** | Similarity to the radar's interest profile (description, queries, seed papers, and your feedback), combined with lexical match |
 | **Novelty** | Distance from papers observed *before* this one, normalized within field and publication type. Novelty is not the same as relevance |
 | **Method match** | Overlap with the radar's **methods profile** (sequencing, omics, computational methods, data types). This later powers **Method Transfer**: useful methods from other fields |
@@ -336,8 +336,14 @@ Two other rules apply to every ranking:
 > validity.
 
 **Current state:** the daily dashboard uses this pipeline as `ranking_version`
-0.1.0 (relevance, novelty, and method match; momentum, discovery, and evidence
-are reported as not yet scored). Runs before 2026-11 used the ETHER-era score,
+0.2.0 (relevance, novelty, and method match; momentum, discovery, and evidence
+are reported as not yet scored). For a radar with `seed_papers` and OpenAlex
+among its sources, relevance also counts citation links: a paper that cites a
+seed (or a paper you saved or marked relevant), or is cited by one, gets the
+full graph term, and one that shares references with them gets part of it.
+Citations are stored with when they were first seen, so a past ranking is
+recomputed from only the links known then. A radar without seed papers ranks
+exactly as under 0.1.0. Runs before 2026-11 used the ETHER-era score,
 `0.0.1-ether`, and are kept in the run history under that version.
 
 ## Run history and Research Delta
@@ -407,7 +413,7 @@ done-when checks for each task, is in [`CAROUSEL_PLAN.md`](CAROUSEL_PLAN.md).
 | **1. Functional MVP** | **Engine:** canonical paper records, OpenAlex + PubMed, careful dedup, lexical + semantic candidates, relevance/novelty/methods ranking with modes, `carousel scan` and a Python `Radar` API. **App:** FastAPI + Postgres/pgvector, Next.js (For You, Radars, Library, "Why this paper?"), save/dismiss, Docker Compose | Done for local use: the engine, Postgres, the REST API, the web app, and Docker Compose |
 | **2. Continuous intelligence** | Scheduled ingestion, Europe PMC + Crossref (retractions, corrections, preprint links), arXiv, versioned explanations, feedback learning, email/RSS digests, evidence-grounded summaries | Done: scheduled scans with pause/resume, newly published vs newly observed labels, Crossref corrections/retractions, Europe PMC (licensed full texts, annotations), arXiv, preprint-publication linking, versioned explanations, the feedback-adjusted profile, digests, the first Research Delta events, and grounded extraction |
 | **3. Research Delta** | Topic clusters and observations, statistical trend detection (negative binomial, multiple-testing control), the **What's New** change log, **Trends** with baselines and uncertainty | In progress: versioned topics per radar (task 24), weekly topic counts with denominators (task 25), the trend model (task 26), artifact checks (task 27), topic events (task 28), What's New v2 (task 29), the Trends page (task 30), and the Study C harness (task 31: `carousel eval delta`) are done. On the draft starter benchmark (5 episodes, recorded PubMed counts): precision 100%, recall 1/3, JN.1 flagged 50 days before its expert date; H5N1 in dairy cattle and mpox clade I are missed (see `benchmarks/delta/starter.yml`); annotations await review (open decision 7) |
-| **4. Advanced discovery** | Method Transfer, literature graphs, Zotero, public API docs, collaborative radars, benchmark dataset, software paper | Planned |
+| **4. Advanced discovery** | Method Transfer, literature graphs, Zotero, public API docs, collaborative radars, benchmark dataset, software paper | In progress: the citation graph (task 32) is done; Explore is next |
 
 Deliberately out of scope at first: autonomous research agents, automatic
 systematic reviews, contradiction detection, a full corpus mirror, AI quality

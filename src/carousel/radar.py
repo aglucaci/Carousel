@@ -35,6 +35,7 @@ from carousel import feedback as fb
 from carousel.ranking import rank
 from carousel.ranking.explain import EXPLANATION_VERSION, explain
 from carousel.search import Embedder, HashingEmbedder, candidates_for_radar
+from carousel.search.citations import gather_citations, graph_features, read_candidate_references
 from carousel.search.candidates import CANDIDATES_VERSION
 
 DEFAULT_STORE = "carousel.db"
@@ -263,7 +264,8 @@ class ScanResults:
         for c in r["coverage"]:
             if c["status"] == "ok":
                 trunc = f" (truncated: {c['truncation_reason']})" if c.get("truncated") else ""
-                lines.append(f"  {c['source']:<9} {c['retrieved']} of {c['total_available']} retrieved{trunc}")
+                what = "citing the radar's seed or saved papers" if c.get("role") == "citations" else "retrieved"
+                lines.append(f"  {c['source']:<9} {c['retrieved']} of {c['total_available']} {what}{trunc}")
             else:
                 lines.append(f"  {c['source']:<9} {c['status']}: {c.get('error') or c.get('note', '')}")
         lines.append(f"  observed {r['n_observed']} records -> {r['n_candidates']} candidates -> {len(self.items)} recommended")
@@ -424,17 +426,29 @@ class Radar:
                 notes.append(f"{len(feedback.unresolved)} feedback reference(s) not in the store yet: "
                              + ", ".join(feedback.unresolved[:5]))
 
+            # ---- citation graph (task 32): radars with seed papers and OpenAlex; saved and relevant papers join the seeds ----
+            oa = conns.get("openalex") if "openalex" in {s.value for s in cfg.sources} else None
+            citations: Optional[Dict[str, Any]] = None
+            if oa is not None and hasattr(oa, "citing") and cfg.seed_papers:
+                citations = gather_citations(st, oa, cfg, feedback, (start, as_of), started, max_citing=max_results)
+                coverage.append(citations["coverage"])
+            cite_hits = citations["hits"] if citations else set()
+
             # ---- candidates and ranking ----
             window_start = dt.datetime.combine(start, dt.time(), tzinfo=dt.timezone.utc)
             pool = {p.paper_id: p for p in st.papers(seen_since=window_start)}
-            for pid in hits:
+            for pid in hits | cite_hits:
                 if pid not in pool:
                     p = st.get(pid)
                     if p is not None:
                         pool[pid] = p
             cands = candidates_for_radar(cfg, [pool[k] for k in sorted(pool)], as_of=as_of, store=st,
-                                         embedder=emb, source_hits=hits)
-            ranking = rank(cands, cfg, store=st, embedder=emb, top_n=top_n, feedback=feedback)
+                                         embedder=emb, source_hits=hits, citation_hits=cite_hits)
+            graph = None
+            if citations is not None and citations["anchors"]:
+                read_candidate_references(st, oa, cands.ids(), started, citations["coverage"])
+                graph = graph_features(st, citations["anchors"], cands.ids(), started)
+            ranking = rank(cands, cfg, store=st, embedder=emb, top_n=top_n, feedback=feedback, graph=graph)
 
             # ---- enrich what was recommended: licensed full texts and annotations (Europe PMC) ----
             epmc = conns.get("europepmc")

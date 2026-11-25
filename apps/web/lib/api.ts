@@ -242,6 +242,7 @@ export type Explanation = {
     first_seen?: string;
     earliest_public_date?: string | null;
     paper?: PaperSummary;
+    graph?: GraphFeature;
     [key: string]: unknown;
   };
   flags: string[];
@@ -252,6 +253,16 @@ export type Explanation = {
   inactive_signals: Record<string, string>;
   source_coverage: Coverage[];
   executed_at: string;
+};
+
+export type GraphLink = { paper_id: string; title?: string | null; anchor: "seed" | "feedback" };
+export type GraphFeature = {
+  status: string;
+  work?: string;
+  cites?: GraphLink[];
+  cited_by?: GraphLink[];
+  shared_references?: number;
+  value: number;
 };
 
 export type PaperUpdate = { type: string; notice_doi?: string | null; date?: string | null; asserted_by?: string | null; label?: string | null; via?: string | null };

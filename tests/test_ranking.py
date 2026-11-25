@@ -198,7 +198,7 @@ class DeterminismTests(unittest.TestCase):
 class SignalAndModeTests(unittest.TestCase):
     def test_output_shape_and_versions(self) -> None:
         r = Fixture().rank(radar())
-        self.assertEqual(r.ranking_version, "0.1.0")
+        self.assertEqual(r.ranking_version, "0.2.0")
         self.assertEqual(r.active_signals, ("relevance", "novelty", "method_match"))
         self.assertEqual(set(r.inactive_signals), {"momentum", "discovery", "evidence"})
         self.assertAlmostEqual(sum(r.weights.values()), 1.0)
