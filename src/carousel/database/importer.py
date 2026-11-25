@@ -310,6 +310,16 @@ def _import_store(st: PaperStore, engine: Engine) -> Dict[str, int]:
                 ["radar_id", "classifier_version", "topic_key", "source", "window_start", "observed_at"])  # append-only
         counts["topic_observations"] = len(obs)
 
+        # ---- citation graph (append-only) ----
+        edges = [{"citing": r["citing"], "cited": r["cited"], "source": r["source"], "observed_at": _ts(r["observed_at"])}
+                 for r in db.execute("SELECT * FROM citation_edges")]
+        _upsert(conn, T["citation_edges"], edges, ["citing", "cited", "source"], chunk=2000)
+        counts["citation_edges"] = len(edges)
+        refs = [{"work_id": r["work_id"], "source": r["source"], "n_refs": r["n_refs"], "observed_at": _ts(r["observed_at"])}
+                for r in db.execute("SELECT * FROM reference_lists")]
+        _upsert(conn, T["reference_lists"], refs, ["work_id", "source", "observed_at"], chunk=2000)
+        counts["reference_lists"] = len(refs)
+
         # ---- feedback history ----
         fb = [{"radar_id": r["radar_id"], "paper_id": st.resolve(r["paper_id"]), "action": r["action"], "change": r["change"],
                "ref": r["ref"], "origin": "file", "at": _ts(r["at"])} for r in db.execute("SELECT * FROM feedback_events ORDER BY id")]

@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useRef, useState } from "react";
-import { client, useApi, type Explanation, type PaperExtraction, type PaperVersion } from "@/lib/api";
+import { client, useApi, type Explanation, type GraphFeature, type GraphLink, type PaperExtraction, type PaperVersion } from "@/lib/api";
 import { PaperMeta, PaperTitle } from "./PaperCard";
 import { Badge, Button, FLAGS, Flag, Loading, coverageLine, fmtDate, fmtDateTime, sourceName } from "./ui";
 
@@ -18,10 +18,28 @@ const CHANNELS: Record<string, string> = {
   lexical: "keyword match (BM25)",
   semantic: "meaning match (embeddings)",
   source_query: "a source's own search",
+  citation: "cites your seed or saved papers (OpenAlex)",
 };
 
 function channel(c: string) {
   return CHANNELS[c] ?? c;
+}
+
+function GraphLine({ g }: { g: GraphFeature }) {
+  const who = (l: GraphLink) => `“${l.title ?? l.paper_id}” (${l.anchor === "seed" ? "seed paper" : "you saved or marked it relevant"})`;
+  if (g.status !== "ok") {
+    return <p className="mt-1 text-muted">Citation links: no data for this paper ({g.status === "no_openalex_id" ? "not in OpenAlex" : "its references were not read"}).</p>;
+  }
+  const parts = [
+    ...(g.cites ?? []).map((l) => `cites ${who(l)}`),
+    ...(g.cited_by ?? []).map((l) => `is cited by ${who(l)}`),
+  ];
+  if (!parts.length && g.shared_references) parts.push(`shares ${g.shared_references} reference${g.shared_references === 1 ? "" : "s"} with your seed and saved papers`);
+  return (
+    <p className="mt-1" data-testid="graph-line">
+      Citation links: {parts.length ? parts.join("; ") : "none to your seed or saved papers"} (graph term <strong>{num(g.value)}</strong>).
+    </p>
+  );
 }
 
 function num(v?: number | null, digits = 2) {
@@ -180,6 +198,7 @@ function Body({ e }: { e: Explanation }) {
           Meaning similarity to the radar&apos;s interest profile <strong>{num(d.similarity)}</strong>; keyword score{" "}
           <strong>{num(d.bm25_norm)}</strong> of this run&apos;s best.
         </p>
+        {d.graph && <GraphLine g={d.graph} />}
       </Section>
 
       <Section title="Novelty">

@@ -61,12 +61,12 @@ class PostgresTestCase(unittest.TestCase):
 
 class MigrationTests(PostgresTestCase):
     def test_up_down_up_and_no_drift(self) -> None:
-        self.assertEqual(postgres.current(URL), "0010")
+        self.assertEqual(postgres.current(URL), "0011")
         postgres.downgrade(URL)
         self.assertIsNone(postgres.current(URL))
         self.assertEqual(inspect(postgres.engine(URL)).get_table_names(), ["alembic_version"])
         postgres.upgrade(URL)
-        self.assertEqual(postgres.current(URL), "0010")
+        self.assertEqual(postgres.current(URL), "0011")
 
         from alembic.autogenerate import compare_metadata
         from alembic.runtime.migration import MigrationContext
@@ -166,7 +166,7 @@ class StoreImportTests(PostgresTestCase):
             orcid = c.execute(select(m.Author).where(m.Author.orcid == "0000-0002-1825-0097")).scalar_one()
             self.assertEqual((orcid.name, orcid.identity), ("Sara Lindqvist", "orcid"))
             run = c.execute(select(m.RecommendationRun).order_by(m.RecommendationRun.executed_at)).scalars().first()
-            self.assertEqual((run.radar_id, run.ranking_version), ("escape", "0.1.0"))
+            self.assertEqual((run.radar_id, run.ranking_version), ("escape", "0.2.0"))
             self.assertIsNotNone(run.radar_version_id)
             item = c.execute(select(m.RecommendationItem).where(m.RecommendationItem.run_id == run.id,
                                                                 m.RecommendationItem.rank == 1)).scalar_one()
@@ -244,7 +244,7 @@ class CliTests(PostgresTestCase):
 
     def test_db_commands(self) -> None:
         code, out, _ = self.run_cli("db", "current", "--url", URL)
-        self.assertEqual((code, out.strip()), (0, "0010"))
+        self.assertEqual((code, out.strip()), (0, "0011"))
         root = SnapshotImportTests.make_snapshots(self)
         code, out, err = self.run_cli("db", "import-snapshots", str(root), "--url", URL)
         self.assertEqual(code, 0, err)

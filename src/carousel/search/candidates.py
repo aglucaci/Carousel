@@ -14,6 +14,9 @@ ranker will score:
    ``semantic_k``. Embeddings come from the store's cache.
 4. **Source queries**: papers the connectors returned for this radar are
    candidates by definition.
+5. **Citations** (``CANDIDATES_VERSION`` 0.2.0): papers in the window that
+   cite one of the radar's seed, saved, or relevant papers
+   (:mod:`carousel.search.citations`) are candidates too.
 
 The union is returned with every feature computed for every candidate
 (BM25 score, similarity, ranks, matched terms, how it was retrieved), ordered
@@ -37,13 +40,13 @@ if TYPE_CHECKING:  # pragma: no cover
     from carousel.database.local import PaperStore
 
 RRF_K = 60
-CANDIDATES_VERSION = "0.1.0"
+CANDIDATES_VERSION = "0.2.0"
 
 
 @dataclasses.dataclass(frozen=True)
 class Candidate:
     paper: CanonicalPaper
-    retrieved_by: Tuple[str, ...]          # subset of ("lexical", "semantic", "source_query")
+    retrieved_by: Tuple[str, ...]          # subset of ("lexical", "semantic", "source_query", "citation")
     bm25: float
     lexical_rank: Optional[int]
     similarity: Optional[float]
@@ -132,6 +135,7 @@ def generate_candidates(
     publication_types: Optional[Sequence[str]] = None,
     exclude_retracted: bool = True,
     source_hits: Iterable[str] = (),
+    citation_hits: Iterable[str] = (),
     store: Optional["PaperStore"] = None,
     embedder: Optional[Embedder] = None,
     lexical_k: int = 200,
@@ -179,11 +183,12 @@ def generate_candidates(
 
     eligible_ids = {p.paper_id for p in eligible}
     from_source = set(source_hits) & eligible_ids
+    from_citations = set(citation_hits) & eligible_ids
 
     candidates: List[Candidate] = []
-    for pid in sorted(lexical | semantic | from_source):
+    for pid in sorted(lexical | semantic | from_source | from_citations):
         by = tuple(name for name, hit in (("lexical", pid in lexical), ("semantic", pid in semantic),
-                                          ("source_query", pid in from_source)) if hit)
+                                          ("source_query", pid in from_source), ("citation", pid in from_citations)) if hit)
         fused = sum(1.0 / (RRF_K + r) for r in (lex_rank.get(pid), sem_rank.get(pid)) if r is not None)
         candidates.append(Candidate(
             paper=papers[pid],
@@ -205,6 +210,7 @@ def generate_candidates(
         "lexical_hits": len(lexical),
         "semantic_hits": len(semantic),
         "source_query_hits": len(from_source),
+        **({"citation_hits": len(from_citations)} if from_citations else {}),
         "candidates": len(candidates),
         "lexical_k": lexical_k,
         "semantic_k": semantic_k,

@@ -48,7 +48,7 @@ import json
 import math
 import sqlite3
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Iterator, List, Mapping, Optional, Sequence, Tuple, Union
 
 from carousel.core.identifiers import normalize
 from carousel.core.paper import CanonicalPaper, SourceRecord, paper_id_for
@@ -59,7 +59,7 @@ if TYPE_CHECKING:
     from carousel.intelligence.topics import TopicModel
     from carousel.summarization.schema import Extraction
 
-STORE_SCHEMA_VERSION = 11
+STORE_SCHEMA_VERSION = 12
 
 _DDL = """
 CREATE TABLE IF NOT EXISTS meta (
@@ -329,6 +329,21 @@ CREATE TABLE IF NOT EXISTS topic_observations (      -- append-only weekly count
     PRIMARY KEY (radar_id, classifier_version, topic_id, source, period_start, observed_at)
 );
 CREATE INDEX IF NOT EXISTS topic_observations_radar ON topic_observations(radar_id, source, period_start);
+CREATE TABLE IF NOT EXISTS citation_edges (          -- append-only: a citation as first observed (task 32)
+    citing      TEXT NOT NULL,                  -- OpenAlex work ID
+    cited       TEXT NOT NULL,
+    source      TEXT NOT NULL,
+    observed_at TEXT NOT NULL,                  -- the first time it was seen; never updated
+    PRIMARY KEY (citing, cited, source)
+);
+CREATE INDEX IF NOT EXISTS citation_edges_cited ON citation_edges(cited);
+CREATE TABLE IF NOT EXISTS reference_lists (         -- append-only: when a work's whole reference list was read
+    work_id     TEXT NOT NULL,
+    source      TEXT NOT NULL,
+    n_refs      INTEGER NOT NULL,
+    observed_at TEXT NOT NULL,
+    PRIMARY KEY (work_id, source, observed_at)
+);
 CREATE TABLE IF NOT EXISTS merge_log (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
     at        TEXT NOT NULL,
@@ -1208,6 +1223,36 @@ class PaperStore:
             sql, args = sql + " AND source = ?", args + [source]
         return [dict(r) for r in self.db.execute(sql + " ORDER BY period_start, source, topic_id, observed_at", args)]
 
+    # ---- citation graph (append-only) ----
+
+    def save_citations(self, references: Mapping[str, Sequence[str]], observed_at: str, source: str = "openalex",
+                       edges: Sequence[Tuple[str, str]] = ()) -> int:
+        """Record whole reference lists (``{work: [cited works]}``) and any single ``edges``; an edge keeps the time it
+        was first observed. Returns how many edges were new."""
+        rows = [(w, c) for w, cited in references.items() for c in cited] + list(edges)
+        with self.db:
+            before = self.db.total_changes
+            self.db.executemany("INSERT OR IGNORE INTO citation_edges VALUES (?, ?, ?, ?)",
+                                [(a, b, source, observed_at) for a, b in rows])
+            new = self.db.total_changes - before
+            self.db.executemany("INSERT OR IGNORE INTO reference_lists VALUES (?, ?, ?, ?)",
+                                [(w, source, len(cited), observed_at) for w, cited in references.items()])
+        return new
+
+    def edges_as_of(self, at: str, works: Optional[Iterable[str]] = None) -> List[Dict[str, str]]:
+        """Citation edges observed at or before ``at`` (ISO time), optionally only those touching ``works``."""
+        rows = [dict(r) for r in self.db.execute(
+            "SELECT * FROM citation_edges WHERE observed_at <= ? ORDER BY citing, cited, source", (at,))]
+        if works is not None:
+            w = set(works)
+            rows = [r for r in rows if r["citing"] in w or r["cited"] in w]
+        return rows
+
+    def reference_lists_as_of(self, at: str) -> Dict[str, str]:
+        """{work: first time its reference list was read}, for reads at or before ``at``."""
+        return {r["work_id"]: r["first"] for r in self.db.execute(
+            "SELECT work_id, MIN(observed_at) AS first FROM reference_lists WHERE observed_at <= ? GROUP BY work_id", (at,))}
+
     # ---- reads ----
 
     def resolve(self, paper_id: str) -> str:
@@ -1345,6 +1390,7 @@ class PaperStore:
             "extractions": q("SELECT COUNT(*) FROM paper_extractions"),
             "topic_models": q("SELECT COUNT(*) FROM topic_models"),
             "topic_observations": q("SELECT COUNT(*) FROM topic_observations"),
+            "citation_edges": q("SELECT COUNT(*) FROM citation_edges"),
             "runs": q("SELECT COUNT(*) FROM recommendation_runs"),
             "embeddings": dict(self.db.execute(
                 "SELECT model_version, COUNT(*) FROM embeddings GROUP BY model_version ORDER BY model_version").fetchall()),

@@ -19,13 +19,17 @@ Version history:
     it), feedback (how much it moved this paper's relevance and rank, and the
     feedback paper it is most like), novelty, method match, signal terms,
     integrity flags, and linked preprint/published versions.
+``2``
+    Adds citation links (ranking 0.2.0): which of the radar's seed or saved
+    papers it cites or is cited by, or how many references it shares with
+    them, and that it was found through citations.
 """
 
 from __future__ import annotations
 
 from typing import Any, Dict, List, Mapping, Optional
 
-EXPLANATION_VERSION = "1"
+EXPLANATION_VERSION = "2"
 
 VERIFYING_SOURCES = frozenset({"crossref"})
 """Sources that check what the searches found but never search, so never "found" a paper."""
@@ -79,6 +83,18 @@ def explain(item: Mapping[str, Any], weights: Mapping[str, float], inactive: Map
         parts.append("Matches none of the radar's terms by keyword")
     if d.get("similarity") is not None:
         parts.append(f"meaning similarity to the radar's profile {_fmt(d.get('similarity'))}")
+    g = d.get("graph") or {}
+    links = [("cites", x) for x in g.get("cites") or []] + [("is cited by", x) for x in g.get("cited_by") or []]
+    if links:
+        named = [f"{verb} {'seed paper' if x.get('anchor') == 'seed' else 'saved paper'} “{x.get('title') or x.get('paper_id')}”"
+                 for verb, x in links]
+        parts.append(_list(named, 2) if len(named) > 2 else "; ".join(named))
+        summary.append("Linked by citation to " + ("a seed paper" if any(x.get("anchor") == "seed" for _, x in links)
+                                                   else "a paper you saved"))
+    elif g.get("status") == "ok" and g.get("shared_references"):
+        parts.append(f"shares {g['shared_references']} reference{'s' if g['shared_references'] != 1 else ''} with your seed and saved papers")
+    if "citation" in (d.get("retrieved_by") or []) and not links:
+        parts.append("found because it cites one of your seed or saved papers")
     if "source_query" in (d.get("retrieved_by") or []):
         srcs = [_SOURCE_NAMES.get(s, s) for s in (d.get("sources") or []) if s not in VERIFYING_SOURCES]
         parts.append(f"found by the search of {_list(srcs)}" if srcs else "found by a source's own search")

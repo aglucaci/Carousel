@@ -200,6 +200,8 @@ def _coverage(run: Dict[str, Any]) -> str:
     for c in run.get("coverage", []):
         if c.get("status") == "ok":
             got = f'{c.get("retrieved")} of {c.get("total_available") if c.get("total_available") is not None else "?"}'
+            if c.get("role") == "citations":
+                got += " citing seed or saved papers"
             note = f'truncated: {c["truncation_reason"]}' if c.get("truncated") else "complete"
             if c.get("cost_unit") == "credits":
                 note += f' · {c.get("cost", 0):g} credits'
