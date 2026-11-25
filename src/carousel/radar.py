@@ -516,6 +516,14 @@ class Radar:
                                             started)
             except Exception as exc:  # topics are an add-on: never fail the scan for them
                 topic_stats = {"status": "error", "reason": f"{type(exc).__name__}: {exc}"}
+            try:  # the shared topic map (task 34), when one has been fitted
+                from carousel.intelligence.shared_topics import assign_to_shared
+
+                shared = assign_to_shared(st, emb, [o[2] for o in observations] + [it["paper_id"] for it in items], started)
+                if shared is not None:
+                    topic_stats["shared_map"] = shared
+            except Exception as exc:
+                topic_stats["shared_map_error"] = f"{type(exc).__name__}: {exc}"
             try:  # topic events (task 28), from what is stored now
                 from carousel.intelligence.topic_events import derive_topic_events
 
