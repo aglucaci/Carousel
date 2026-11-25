@@ -344,6 +344,39 @@ class TopicSeriesOut(_Out):
                                                      "that count was observed")
 
 
+class GraphNodeOut(_Out):
+    paper_id: str
+    title: Optional[str] = None
+    doi: Optional[str] = None
+    date: Optional[str] = None
+    roles: List[str] = Field(description="Why it is in the graph: seed, saved, relevant, recommended (in the run)")
+    rank: Optional[int] = Field(None, description="Its rank in the run, if recommended")
+    topic_id: Optional[str] = None
+    topic_label: Optional[str] = None
+    citation_data: bool = Field(description="Whether its reference list has been read (OpenAlex)")
+    links: int
+
+
+class GraphLinkOut(_Out):
+    kind: str = Field(description="citation (source cites target) or shared_references (undirected)")
+    source: str
+    target: str
+    observed_at: Optional[str] = Field(None, description="citation: when the edge was first observed")
+    shared: Optional[int] = Field(None, description="shared_references: how many references the two papers share")
+
+
+class GraphOut(_Out):
+    radar_id: str
+    run_id: Optional[str] = None
+    as_of: str = Field(description="Only citation edges observed by this time are used")
+    graph_version: str
+    classifier_version: Optional[str] = None
+    nodes: List[GraphNodeOut]
+    links: List[GraphLinkOut]
+    topics: List[Dict[str, Any]] = Field(description="Topics with how many of the nodes are in each; label null: unassigned")
+    stats: Dict[str, Any]
+
+
 class TopicTrendsOut(_Out):
     radar_id: str
     classifier_version: str

@@ -203,6 +203,13 @@ def create_app(settings: Optional[Settings] = None, *, queue: Any = None) -> Fas
         """Weekly topic counts with the field denominator, as known at ``as_of`` (default now; never later data)."""
         return services.topic_series(s, radar_id, as_of, source)
 
+    @app.get(f"{API_PREFIX}/radars/{{radar_id}}/graph", response_model=schemas.GraphOut, tags=["explore"])
+    def radar_graph(radar_id: str, run_id: Optional[str] = None, as_of: Optional[dt.datetime] = None,
+                    s: Session = Depends(session)) -> Any:
+        """Explore: a run's papers (the latest by default) and the radar's seed and saved papers, linked by stored
+        citations and shared references as observed by ``as_of`` (default now), with each paper's topic."""
+        return services.radar_graph(s, radar_id, run_id, as_of)
+
     @app.get(f"{API_PREFIX}/radars/{{radar_id}}/events", response_model=List[schemas.EventOut], tags=["research delta"])
     def events(radar_id: str, run_id: Optional[str] = None, limit: int = Query(100, ge=1, le=500),
                s: Session = Depends(session)) -> Any:
