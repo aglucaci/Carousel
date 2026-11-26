@@ -1,18 +1,18 @@
 {
- "run_id": "run_05f0c8fec2f0b96f",
+ "run_id": "run_f44981e4904a54e7",
  "radar_id": "lab-default",
  "radar_name": "Evolution & Surveillance (lab default)",
  "config_hash": "4ade43793af4",
- "as_of": "2026-11-25",
- "started_at": "2026-11-25T22:09:52.586339Z",
- "finished_at": "2026-11-25T22:10:11.346333Z",
+ "as_of": "2026-11-26",
+ "started_at": "2026-11-26T22:08:28.401005Z",
+ "finished_at": "2026-11-26T22:08:47.920230Z",
  "status": "ok",
  "ranking_version": "0.2.0",
  "candidates_version": "0.2.0",
  "model_version": "sentence-transformers/all-MiniLM-L6-v2",
  "mode": "balanced",
- "n_observed": 250,
- "n_candidates": 248,
+ "n_observed": 266,
+ "n_candidates": 263,
  "n_items": 25,
  "coverage": [
   {
@@ -21,7 +21,7 @@
    "cost": 2.0,
    "cost_unit": "requests",
    "date_field": "publication date",
-   "end": "2026-11-25",
+   "end": "2026-11-26",
    "errors": [],
    "native_query": "((((\"dN/dS\" OR \"codon model\" OR HyPhy OR FEL OR MEME OR FUBAR OR BUSTED OR \"branch-site\") AND (selection OR evolution OR adaptive OR constraint)) OR ((\"episodic selection\" OR \"positive selection\" OR \"diversifying selection\") AND (virus OR pathogen))) AND (\"computational evolutionary biology\" OR \"molecular evolution\" OR phylogenomics OR phylodynamics OR HyPhy OR \"codon model\") NOT (case report OR randomized OR psychology)) OR ((((\"cancer evolution\" OR \"tumor evolution\" OR \"somatic evolution\" OR \"clonal evolution\") AND (genomics OR sequencing OR phylogen* OR \"single-cell\")) OR ((cancer OR tumor OR lymphoma OR leukemia) AND (\"positive selection\" OR \"clonal selection\" OR \"driver mutation\" OR \"dN/dS\" OR \"selection inference\")) OR ((\"mutational signature\" OR \"mutational signatures\") AND (cancer OR tumor) AND (evolution OR selection OR phylogeny))) AND (\"computational evolutionary biology\" OR \"molecular evolution\" OR phylogenomics OR phylodynamics OR HyPhy OR \"codon model\") NOT (case report OR randomized OR psychology)) OR ((((recombination OR \"mosaic genome\" OR breakpoint OR \"gene conversion\") AND (virus OR virome OR pathogen)) OR ((RDP OR GARD OR \"recombination detection\") AND (sequence OR alignment))) AND (\"computational evolutionary biology\" OR \"molecular evolution\" OR phylogenomics OR phylodynamics OR HyPhy OR \"codon model\") NOT (case report OR randomized OR psychology)) OR ((((phylodynamic* OR \"time-resolved phylogeny\" OR BEAST OR \"birth-death\" OR coalescent) AND (virus OR pathogen)) OR ((\"genomic epidemiology\" OR \"phylodynamic inference\") AND (outbreak OR transmission))) AND (\"computational evolutionary biology\" OR \"molecular evolution\" OR phylogenomics OR phylodynamics OR HyPhy OR \"codon model\") NOT (case report OR randomized OR psychology)) OR ((((virome OR \"viral metagenomics\" OR viromics) AND (\"built environment\" OR urban OR subway OR transit OR surface)) OR ((\"urban microbiome\" OR MetaSUB) AND (virus OR virome OR phage))) AND (\"computational evolutionary biology\" OR \"molecular evolution\" OR phylogenomics OR phylodynamics OR HyPhy OR \"codon model\") NOT (case report OR randomized OR psychology)) OR ((((\"wastewater surveillance\" OR WBE OR sewage) AND (virus OR virome OR pathogen OR SARS-CoV-2)) OR ((wastewater OR sewage) AND (\"viral metagenomics\" OR viromics) AND (variant OR lineage OR evolution))) AND (\"computational evolutionary biology\" OR \"molecular evolution\" OR phylogenomics OR phylodynamics OR HyPhy OR \"codon model\") NOT (case report OR randomized OR psychology)) OR ((((\"pandemic preparedness\" OR biosurveillance OR \"pathogen surveillance\") AND (genomics OR sequencing)) OR ((\"early warning\" OR \"sentinel surveillance\") AND (metagenomics OR sequencing))) AND (\"computational evolutionary biology\" OR \"molecular evolution\" OR phylogenomics OR phylodynamics OR HyPhy OR \"codon model\") NOT (case report OR randomized OR psychology)) OR ((((atlas OR database OR compendium OR \"reference catalog\" OR resource) AND (virome OR microbiome OR pathogen)) OR ((\"large-scale\" OR global) AND (virome OR microbiome) AND (metadata OR harmonization))) AND (\"computational evolutionary biology\" OR \"molecular evolution\" OR phylogenomics OR phylodynamics OR HyPhy OR \"codon model\") NOT (case report OR randomized OR psychology)) OR (((metagenomics AND (benchmark* OR pipeline OR \"best practices\" OR reproducible OR workflow)) OR ((Kraken2 OR MetaPhlAn OR Bracken OR Centrifuge OR Kaiju) AND (benchmark* OR evaluation))) AND (benchmark* OR workflow OR pipeline OR Snakemake OR Nextflow OR WDL) NOT (case report OR randomized OR psychology)) OR ((((\"machine learning\" OR \"deep learning\" OR transformer) AND (virus OR pathogen OR evolution OR phylogeny)) OR ((\"protein language model\" OR ESM) AND (mutation OR evolution OR fitness))) AND (\"machine learning\" OR \"deep learning\" OR transformer OR \"foundation model\" OR \"protein language model\" OR ESM) NOT (case report OR randomized OR psychology))",
    "pages": 1,
@@ -30,12 +30,12 @@
     "x-ratelimit-remaining": "1"
    },
    "requests": 2,
-   "retrieved": 150,
-   "retrieved_at": "2026-11-25T22:10:00.192456Z",
+   "retrieved": 166,
+   "retrieved_at": "2026-11-26T22:08:37.200411Z",
    "source": "pubmed",
-   "start": "2026-11-12",
+   "start": "2026-11-13",
    "status": "ok",
-   "total_available": 150,
+   "total_available": 166,
    "truncated": false,
    "truncation_reason": null
   },
@@ -45,9 +45,9 @@
    "cost": 10.0,
    "cost_unit": "credits",
    "date_field": "publication date",
-   "end": "2026-11-25",
+   "end": "2026-11-26",
    "errors": [],
-   "native_query": "search.title_and_abstract=(\"positive selection\" OR \"episodic selection\" OR \"codon model\" OR dN/dS OR HyPhy OR \"cancer evolution\" OR \"clonal evolution\" OR \"somatic evolution\" OR \"mutational signatures\" OR \"viral recombination\" OR \"recombination detection\" OR phylodynamics OR \"genomic epidemiology\" OR \"built environment virome\" OR \"urban microbiome\" OR MetaSUB OR \"wastewater surveillance\" OR \"viral metagenomics\" OR \"pandemic preparedness\" OR \"pathogen surveillance\" OR biosurveillance OR \"virome atlas\" OR \"metagenomics benchmark\" OR \"protein language model\" OR \"deep learning for virus evolution\") NOT (\"case report\") filter=from_publication_date:2026-11-12,to_publication_date:2026-11-25,type:article|preprint|review|letter",
+   "native_query": "search.title_and_abstract=(\"positive selection\" OR \"episodic selection\" OR \"codon model\" OR dN/dS OR HyPhy OR \"cancer evolution\" OR \"clonal evolution\" OR \"somatic evolution\" OR \"mutational signatures\" OR \"viral recombination\" OR \"recombination detection\" OR phylodynamics OR \"genomic epidemiology\" OR \"built environment virome\" OR \"urban microbiome\" OR MetaSUB OR \"wastewater surveillance\" OR \"viral metagenomics\" OR \"pandemic preparedness\" OR \"pathogen surveillance\" OR biosurveillance OR \"virome atlas\" OR \"metagenomics benchmark\" OR \"protein language model\" OR \"deep learning for virus evolution\") NOT (\"case report\") filter=from_publication_date:2026-11-13,to_publication_date:2026-11-26,type:article|preprint|review|letter",
    "pages": 1,
    "rate_limit": {
     "x-ratelimit-cost-usd": "0.001",
@@ -58,15 +58,15 @@
     "x-ratelimit-prepaid-remaining-usd": "0",
     "x-ratelimit-remaining": "990",
     "x-ratelimit-remaining-usd": "0.099",
-    "x-ratelimit-reset": "6599"
+    "x-ratelimit-reset": "6682"
    },
    "requests": 1,
    "retrieved": 100,
-   "retrieved_at": "2026-11-25T22:10:02.000088Z",
+   "retrieved_at": "2026-11-26T22:08:39.305552Z",
    "source": "openalex",
-   "start": "2026-11-12",
+   "start": "2026-11-13",
    "status": "ok",
-   "total_available": 249,
+   "total_available": 239,
    "truncated": true,
    "truncation_reason": "no_api_key"
   }
@@ -96,28 +96,28 @@
   "ranking_version": "0.2.0",
   "stats": {
    "candidate_stats": {
-    "candidates": 248,
+    "candidates": 263,
     "candidates_version": "0.2.0",
-    "eligible": 248,
-    "embedded": 28,
-    "embeddings_reused": 220,
+    "eligible": 264,
+    "embedded": 43,
+    "embeddings_reused": 221,
     "filtered": {
      "excluded_term:case report": 1,
-     "outside_date_window": 53
+     "outside_date_window": 77
     },
     "lexical_hits": 200,
     "lexical_k": 200,
     "model_version": "sentence-transformers/all-MiniLM-L6-v2",
-    "pool": 302,
+    "pool": 342,
     "semantic_hits": 200,
     "semantic_k": 200,
-    "source_query_hits": 243
+    "source_query_hits": 258
    },
-   "candidates": 248,
+   "candidates": 263,
    "excluded": {},
    "feedback_effect": null,
    "graph": null,
-   "history_size": 302,
+   "history_size": 342,
    "profile": {
     "feedback_negative": 0,
     "feedback_positive": 0,
@@ -126,7 +126,7 @@
     "seeds_used": []
    },
    "relevance_formula": "0.6*sim + 0.4*bm25_norm",
-   "scored": 248,
+   "scored": 263,
    "selected": 25
   },
   "versions": {
@@ -144,16 +144,16 @@
   },
   "window": {
    "days": 14,
-   "end": "2026-11-25",
-   "start": "2026-11-12"
+   "end": "2026-11-26",
+   "start": "2026-11-13"
   },
   "topics": {
    "status": "assigned",
    "classifier_version": "topics-1:c6a1755d79de",
-   "assigned": 18,
-   "unassigned": 0,
-   "already": 226,
-   "events": 7,
+   "assigned": 34,
+   "unassigned": 6,
+   "already": 219,
+   "events": 9,
    "events_withheld": 0
   }
  },
@@ -163,16 +163,16 @@
   {
    "rank": 1,
    "paper_id": "cp_446ff4ec24bf6cbb",
-   "score": 0.562553,
-   "mmr": 0.393787,
+   "score": 0.56103,
+   "mmr": 0.392721,
    "components": {
     "method_match": 0.333333,
     "novelty": 0.5,
-    "relevance": 0.656527
+    "relevance": 0.655024
    },
    "details": {
-    "bm25": 36.63432,
-    "bm25_norm": 0.765102,
+    "bm25": 36.420878,
+    "bm25_norm": 0.761345,
     "earliest_public_date": "2026-11-13",
     "explanation": {
      "reasons": [
@@ -219,7 +219,7 @@
      "history_size": 0,
      "nearest": []
     },
-    "novelty_gate": 0.978432,
+    "novelty_gate": 0.97378,
     "novelty_raw": null,
     "paper": {
      "arxiv": null,
@@ -268,32 +268,32 @@
   {
    "rank": 2,
    "paper_id": "cp_37768ac94eb3b54a",
-   "score": 0.53829,
-   "mmr": 0.292008,
+   "score": 0.521172,
+   "mmr": 0.280025,
    "components": {
     "method_match": 0.333333,
-    "novelty": 0.965517,
-    "relevance": 0.499385
+    "novelty": 0.872727,
+    "relevance": 0.502646
    },
    "details": {
-    "bm25": 43.517733,
-    "bm25_norm": 0.908861,
+    "bm25": 43.867596,
+    "bm25_norm": 0.917012,
     "earliest_public_date": "2026-11-13",
     "explanation": {
      "reasons": [
       {
        "kind": "relevance",
-       "share": 0.53,
-       "text": "Matches the radar's terms dN/dS (keyword score 0.91 of this run's best); meaning similarity to the radar's profile 0.23; found by the search of OpenAlex."
+       "share": 0.551,
+       "text": "Matches the radar's terms dN/dS (keyword score 0.92 of this run's best); meaning similarity to the radar's profile 0.23; found by the search of OpenAlex."
       },
       {
        "kind": "novelty",
-       "share": 0.381,
-       "text": "Novelty 0.97 against 284 papers seen before it (credited at 0.74 of its value, in proportion to relevance)."
+       "share": 0.358,
+       "text": "Novelty 0.87 against 284 papers seen before it (credited at 0.75 of its value, in proportion to relevance)."
       },
       {
        "kind": "method_match",
-       "share": 0.088,
+       "share": 0.091,
        "text": "Uses the radar's methods: dN/dS."
       },
       {
@@ -328,7 +328,7 @@
      ],
      "normalization": "percentile_within:article"
     },
-    "novelty_gate": 0.744241,
+    "novelty_gate": 0.747249,
     "novelty_raw": 0.568965,
     "paper": {
      "arxiv": null,
@@ -349,7 +349,6 @@
     "publication_kind": "article",
     "retrieved_by": [
      "lexical",
-     "semantic",
      "source_query"
     ],
     "signals_matched": {
@@ -371,23 +370,23 @@
   {
    "rank": 3,
    "paper_id": "cp_eadec2c8322d675d",
-   "score": 0.539635,
-   "mmr": 0.243108,
+   "score": 0.544001,
+   "mmr": 0.246165,
    "components": {
     "method_match": 0.333333,
     "novelty": 0.5,
-    "relevance": 0.627306
+    "relevance": 0.633298
    },
    "details": {
-    "bm25": 43.061782,
-    "bm25_norm": 0.899338,
+    "bm25": 43.738718,
+    "bm25_norm": 0.914317,
     "earliest_public_date": "2026-11-16",
     "explanation": {
      "reasons": [
       {
        "kind": "relevance",
-       "share": 0.664,
-       "text": "Matches the radar's terms positive selection, phylodynamics (keyword score 0.90 of this run's best); meaning similarity to the radar's profile 0.45; found by the search of OpenAlex, PubMed."
+       "share": 0.665,
+       "text": "Matches the radar's terms positive selection, phylodynamics (keyword score 0.91 of this run's best); meaning similarity to the radar's profile 0.45; found by the search of OpenAlex, PubMed."
       },
       {
        "kind": "novelty",
@@ -430,7 +429,7 @@
      "history_size": 0,
      "nearest": []
     },
-    "novelty_gate": 0.934884,
+    "novelty_gate": 0.941481,
     "novelty_raw": null,
     "paper": {
      "arxiv": null,
@@ -483,22 +482,22 @@
   {
    "rank": 4,
    "paper_id": "cp_a0cc806d24ab1ffc",
-   "score": 0.555972,
-   "mmr": 0.230289,
+   "score": 0.555631,
+   "mmr": 0.23005,
    "components": {
     "method_match": 0.333333,
     "novelty": 0.5,
     "relevance": 0.648136
    },
    "details": {
-    "bm25": 47.881635,
+    "bm25": 47.837562,
     "bm25_norm": 1.0,
     "earliest_public_date": "2026-10-12",
     "explanation": {
      "reasons": [
       {
        "kind": "relevance",
-       "share": 0.666,
+       "share": 0.667,
        "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile 0.41; found by the search of PubMed."
       },
       {
@@ -544,7 +543,7 @@
      "history_size": 0,
      "nearest": []
     },
-    "novelty_gate": 0.965926,
+    "novelty_gate": 0.963539,
     "novelty_raw": null,
     "paper": {
      "arxiv": null,
@@ -597,23 +596,23 @@
   {
    "rank": 5,
    "paper_id": "cp_6bd78effdd5cb181",
-   "score": 0.50308,
-   "mmr": 0.22026,
+   "score": 0.505707,
+   "mmr": 0.222099,
    "components": {
     "method_match": 0.666667,
     "novelty": 0.5,
-    "relevance": 0.519987
+    "relevance": 0.523688
    },
    "details": {
-    "bm25": 30.0863,
-    "bm25_norm": 0.628347,
+    "bm25": 30.50116,
+    "bm25_norm": 0.637599,
     "earliest_public_date": "2026-11-16",
     "explanation": {
      "reasons": [
       {
        "kind": "relevance",
-       "share": 0.591,
-       "text": "Matches the radar's terms positive selection, codon model, HyPhy (keyword score 0.63 of this run's best); meaning similarity to the radar's profile 0.45; found by the search of OpenAlex."
+       "share": 0.592,
+       "text": "Matches the radar's terms positive selection, codon model, HyPhy (keyword score 0.64 of this run's best); meaning similarity to the radar's profile 0.45; found by the search of OpenAlex."
       },
       {
        "kind": "novelty",
@@ -622,7 +621,7 @@
       },
       {
        "kind": "method_match",
-       "share": 0.189,
+       "share": 0.188,
        "text": "Uses the radar's methods: HyPhy, codon model."
       },
       {
@@ -653,7 +652,7 @@
      "history_size": 0,
      "nearest": []
     },
-    "novelty_gate": 0.774944,
+    "novelty_gate": 0.77853,
     "novelty_raw": null,
     "paper": {
      "arxiv": null,
@@ -698,17 +697,113 @@
   },
   {
    "rank": 6,
+   "paper_id": "cp_2c2819a7b22351f1",
+   "score": 0.414382,
+   "mmr": 0.220204,
+   "components": {
+    "method_match": 0.333333,
+    "novelty": 1.0,
+    "relevance": 0.368169
+   },
+   "details": {
+    "bm25": 22.432473,
+    "bm25_norm": 0.46893,
+    "earliest_public_date": "2026-11-24",
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "share": 0.508,
+       "text": "Matches the radar's terms cancer evolution (keyword score 0.47 of this run's best); meaning similarity to the radar's profile 0.30; found by the search of OpenAlex."
+      },
+      {
+       "kind": "novelty",
+       "share": 0.377,
+       "text": "Novelty 1.00 against 284 papers seen before it (credited at 0.55 of its value, in proportion to relevance)."
+      },
+      {
+       "kind": "method_match",
+       "share": 0.115,
+       "text": "Uses the radar's methods: single-cell."
+      },
+      {
+       "kind": "signal",
+       "share": null,
+       "text": "Mentions cancer evolution: cancer evolution."
+      }
+     ],
+     "summary": "Matches cancer evolution; unlike earlier papers; uses single-cell",
+     "version": "2"
+    },
+    "first_seen": "2026-11-25T22:09:52.586339+00:00",
+    "matched_terms": [
+     "cancer evolution"
+    ],
+    "methods_matched": [
+     "single-cell"
+    ],
+    "novelty": {
+     "history_size": 284,
+     "nearest": [
+      "cp_9c9f7a9fd5646d60",
+      "cp_6d4e6775a4ec1186",
+      "cp_1aa2dea67c131710",
+      "cp_943b7af9cc17b02c",
+      "cp_db52ba34694e4b25"
+     ],
+     "normalization": "percentile_within:preprint"
+    },
+    "novelty_gate": 0.547332,
+    "novelty_raw": 0.493871,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Clara Chaiban",
+      "Jonas Roth",
+      "Adithi R. Varadarajan",
+      "et al."
+     ],
+     "doi": "10.64898/2026.11.13.766382",
+     "earliest_public_date": "2026-11-24",
+     "openalex": "W7239422279",
+     "pmcid": null,
+     "pmid": null,
+     "title": "Monitoring cancer evolution under iatrogenic selection pressure by cellular liquid biopsy.",
+     "url": "https://doi.org/10.64898/2026.11.13.766382",
+     "venue": "bioRxiv (Cold Spring Harbor Laboratory)"
+    },
+    "publication_kind": "preprint",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "cancer_evolution": [
+      "cancer evolution"
+     ]
+    },
+    "similarity": 0.300996,
+    "sources": [
+     "openalex"
+    ],
+    "versions": []
+   },
+   "flags": []
+  },
+  {
+   "rank": 7,
    "paper_id": "cp_c6937ea9e5732818",
-   "score": 0.526285,
-   "mmr": 0.210166,
+   "score": 0.527235,
+   "mmr": 0.210831,
    "components": {
     "method_match": 0.0,
     "novelty": 0.5,
-    "relevance": 0.670999
+    "relevance": 0.672662
    },
    "details": {
-    "bm25": 35.396589,
-    "bm25_norm": 0.739252,
+    "bm25": 35.562813,
+    "bm25_norm": 0.743408,
     "earliest_public_date": "2026-10-21",
     "explanation": {
      "reasons": [
@@ -792,18 +887,18 @@
    ]
   },
   {
-   "rank": 7,
+   "rank": 8,
    "paper_id": "cp_277069dadb1616be",
-   "score": 0.516387,
-   "mmr": 0.192261,
+   "score": 0.514882,
+   "mmr": 0.191207,
    "components": {
     "method_match": 0.0,
     "novelty": 0.5,
-    "relevance": 0.658379
+    "relevance": 0.656901
    },
    "details": {
-    "bm25": 38.476606,
-    "bm25_norm": 0.803578,
+    "bm25": 38.264416,
+    "bm25_norm": 0.799882,
     "earliest_public_date": "2026-11-16",
     "explanation": {
      "reasons": [
@@ -840,7 +935,7 @@
      "history_size": 0,
      "nearest": []
     },
-    "novelty_gate": 0.981192,
+    "novelty_gate": 0.97657,
     "novelty_raw": null,
     "paper": {
      "arxiv": null,
@@ -884,110 +979,18 @@
    ]
   },
   {
-   "rank": 8,
-   "paper_id": "cp_9c9f7a9fd5646d60",
-   "score": 0.368494,
-   "mmr": 0.18006,
-   "components": {
-    "method_match": 0.333333,
-    "novelty": 0.5,
-    "relevance": 0.409106
-   },
-   "details": {
-    "bm25": 29.171821,
-    "bm25_norm": 0.609249,
-    "earliest_public_date": "2026-11-16",
-    "explanation": {
-     "reasons": [
-      {
-       "kind": "relevance",
-       "share": 0.634,
-       "text": "Matches the radar's terms clonal evolution (keyword score 0.61 of this run's best); meaning similarity to the radar's profile 0.28; found by the search of OpenAlex."
-      },
-      {
-       "kind": "novelty",
-       "share": 0.236,
-       "text": "Novelty not judged: too few earlier papers to compare with."
-      },
-      {
-       "kind": "method_match",
-       "share": 0.129,
-       "text": "Uses the radar's methods: single-cell."
-      },
-      {
-       "kind": "signal",
-       "share": null,
-       "text": "Mentions cancer evolution: clonal evolution, clonal selection."
-      }
-     ],
-     "summary": "Matches clonal evolution; uses single-cell",
-     "version": "2"
-    },
-    "first_seen": "2026-11-23T23:27:08.279100+00:00",
-    "matched_terms": [
-     "clonal evolution"
-    ],
-    "methods_matched": [
-     "single-cell"
-    ],
-    "novelty": {
-     "history_size": 0,
-     "nearest": []
-    },
-    "novelty_gate": 0.609697,
-    "novelty_raw": null,
-    "paper": {
-     "arxiv": null,
-     "authors": [
-      "Sihui Huang",
-      "Yang Jin",
-      "Panruo Jiang",
-      "et al."
-     ],
-     "doi": "10.3389/fimmu.2026.2014066",
-     "earliest_public_date": "2026-11-16",
-     "openalex": "W7233733055",
-     "pmcid": null,
-     "pmid": null,
-     "title": "Second primary malignancies after CAR T-cell therapy: causal attribution, clonal evolution, and risk-adapted surveillance",
-     "url": "https://doi.org/10.3389/fimmu.2026.2014066",
-     "venue": "Frontiers in Immunology"
-    },
-    "publication_kind": "article",
-    "retrieved_by": [
-     "lexical",
-     "semantic",
-     "source_query"
-    ],
-    "signals_matched": {
-     "cancer_evolution": [
-      "clonal evolution",
-      "clonal selection"
-     ]
-    },
-    "similarity": 0.275678,
-    "sources": [
-     "openalex"
-    ],
-    "versions": []
-   },
-   "flags": [
-    "novelty_insufficient_history"
-   ]
-  },
-  {
    "rank": 9,
    "paper_id": "cp_0f6dc687645dbb74",
-   "score": 0.424531,
-   "mmr": 0.166567,
+   "score": 0.425598,
+   "mmr": 0.174819,
    "components": {
     "method_match": 0.333333,
     "novelty": 0.5,
-    "relevance": 0.480552
+    "relevance": 0.482236
    },
    "details": {
-    "bm25": 34.327392,
-    "bm25_norm": 0.716922,
+    "bm25": 34.497233,
+    "bm25_norm": 0.721133,
     "earliest_public_date": "2026-11-16",
     "explanation": {
      "reasons": [
@@ -1031,7 +1034,7 @@
      "history_size": 0,
      "nearest": []
     },
-    "novelty_gate": 0.716174,
+    "novelty_gate": 0.716908,
     "novelty_raw": null,
     "paper": {
      "arxiv": null,
@@ -1078,22 +1081,22 @@
   {
    "rank": 10,
    "paper_id": "cp_0861513a7f1c4020",
-   "score": 0.492107,
-   "mmr": 0.160538,
+   "score": 0.494109,
+   "mmr": 0.161939,
    "components": {
     "method_match": 0.666667,
     "novelty": 0.5,
-    "relevance": 0.505997
+    "relevance": 0.508891
    },
    "details": {
-    "bm25": 22.841968,
-    "bm25_norm": 0.477051,
+    "bm25": 23.167092,
+    "bm25_norm": 0.484287,
     "earliest_public_date": "2026",
     "explanation": {
      "reasons": [
       {
        "kind": "relevance",
-       "share": 0.588,
+       "share": 0.589,
        "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile 0.53; found by the search of PubMed."
       },
       {
@@ -1103,7 +1106,7 @@
       },
       {
        "kind": "method_match",
-       "share": 0.194,
+       "share": 0.193,
        "text": "Uses the radar's methods: metagenomics, benchmark."
       },
       {
@@ -1125,7 +1128,7 @@
      "history_size": 0,
      "nearest": []
     },
-    "novelty_gate": 0.754094,
+    "novelty_gate": 0.756533,
     "novelty_raw": null,
     "paper": {
      "arxiv": null,
@@ -1168,318 +1171,33 @@
   },
   {
    "rank": 11,
-   "paper_id": "cp_8a4706e4a6f00bd0",
-   "score": 0.446305,
-   "mmr": 0.154621,
-   "components": {
-    "method_match": 0.333333,
-    "novelty": 0.5,
-    "relevance": 0.508314
-   },
-   "details": {
-    "bm25": 30.832842,
-    "bm25_norm": 0.643939,
-    "earliest_public_date": "2026-11-12",
-    "explanation": {
-     "reasons": [
-      {
-       "kind": "relevance",
-       "share": 0.651,
-       "text": "Matches the radar's terms phylodynamics (keyword score 0.64 of this run's best); meaning similarity to the radar's profile 0.42; found by the search of OpenAlex."
-      },
-      {
-       "kind": "novelty",
-       "share": 0.242,
-       "text": "Novelty not judged: too few earlier papers to compare with."
-      },
-      {
-       "kind": "method_match",
-       "share": 0.107,
-       "text": "Uses the radar's methods: phylodynamics."
-      },
-      {
-       "kind": "signal",
-       "share": null,
-       "text": "Mentions phylodynamics: phylodynamics, phylodynamic, transmission."
-      }
-     ],
-     "summary": "Matches phylodynamics; uses phylodynamics",
-     "version": "2"
-    },
-    "first_seen": "2026-11-23T23:27:08.279100+00:00",
-    "matched_terms": [
-     "phylodynamics"
-    ],
-    "methods_matched": [
-     "phylodynamics"
-    ],
-    "novelty": {
-     "history_size": 0,
-     "nearest": []
-    },
-    "novelty_gate": 0.757547,
-    "novelty_raw": null,
-    "paper": {
-     "arxiv": null,
-     "authors": [
-      "Abdoulie Kanteh",
-      "Bakary Sanyang",
-      "Haruna S. Jallow",
-      "et al."
-     ],
-     "doi": "10.1038/s41598-026-77138-9",
-     "earliest_public_date": "2026-11-12",
-     "openalex": "W7225858332",
-     "pmcid": null,
-     "pmid": null,
-     "title": "Phylodynamic analysis of the SARS-CoV-2 pandemic in the Gambia: a 2-year genomic surveillance investigation",
-     "url": "https://doi.org/10.1038/s41598-026-77138-9",
-     "venue": "Scientific Reports"
-    },
-    "publication_kind": "article",
-    "retrieved_by": [
-     "lexical",
-     "semantic",
-     "source_query"
-    ],
-    "signals_matched": {
-     "phylodynamics": [
-      "phylodynamics",
-      "phylodynamic",
-      "transmission"
-     ]
-    },
-    "similarity": 0.417897,
-    "sources": [
-     "openalex"
-    ],
-    "versions": []
-   },
-   "flags": [
-    "novelty_insufficient_history"
-   ]
-  },
-  {
-   "rank": 12,
-   "paper_id": "cp_c5a6d1b8001ecc3c",
-   "score": 0.507934,
-   "mmr": 0.153991,
-   "components": {
-    "method_match": 0.333333,
-    "novelty": 0.5,
-    "relevance": 0.586889
-   },
-   "details": {
-    "bm25": 28.467232,
-    "bm25_norm": 0.594533,
-    "earliest_public_date": "2026-11-13",
-    "explanation": {
-     "reasons": [
-      {
-       "kind": "relevance",
-       "share": 0.66,
-       "text": "Matches the radar's terms pathogen surveillance (keyword score 0.59 of this run's best); meaning similarity to the radar's profile 0.58; found by the search of OpenAlex."
-      },
-      {
-       "kind": "novelty",
-       "share": 0.246,
-       "text": "Novelty not judged: too few earlier papers to compare with."
-      },
-      {
-       "kind": "method_match",
-       "share": 0.094,
-       "text": "Uses the radar's methods: benchmark."
-      },
-      {
-       "kind": "signal",
-       "share": null,
-       "text": "Mentions biosurveillance: pathogen surveillance."
-      },
-      {
-       "kind": "signal",
-       "share": null,
-       "text": "Mentions metagenomics pipelines: benchmark."
-      },
-      {
-       "kind": "signal",
-       "share": null,
-       "text": "Mentions ml evolution: foundation model."
-      }
-     ],
-     "summary": "Matches pathogen surveillance; uses benchmark",
-     "version": "2"
-    },
-    "first_seen": "2026-11-23T23:27:08.279100+00:00",
-    "matched_terms": [
-     "pathogen surveillance"
-    ],
-    "methods_matched": [
-     "benchmark"
-    ],
-    "novelty": {
-     "history_size": 0,
-     "nearest": []
-    },
-    "novelty_gate": 0.874649,
-    "novelty_raw": null,
-    "paper": {
-     "arxiv": null,
-     "authors": [
-      "Michael Barber",
-      "Carl J. E. Suster",
-      "Jingyi Lei",
-      "et al."
-     ],
-     "doi": "10.64898/2026.11.11.765853",
-     "earliest_public_date": "2026-11-13",
-     "openalex": "W7226021904",
-     "pmcid": null,
-     "pmid": null,
-     "title": "MicroDUET: a dual-headed genomic foundation model for pathogen surveillance",
-     "url": "https://doi.org/10.64898/2026.11.11.765853",
-     "venue": "bioRxiv (Cold Spring Harbor Laboratory)"
-    },
-    "publication_kind": "preprint",
-    "retrieved_by": [
-     "lexical",
-     "semantic",
-     "source_query"
-    ],
-    "signals_matched": {
-     "biosurveillance": [
-      "pathogen surveillance"
-     ],
-     "metagenomics_pipelines": [
-      "benchmark"
-     ],
-     "ml_evolution": [
-      "foundation model"
-     ]
-    },
-    "similarity": 0.581793,
-    "sources": [
-     "openalex"
-    ],
-    "versions": []
-   },
-   "flags": [
-    "novelty_insufficient_history"
-   ]
-  },
-  {
-   "rank": 13,
-   "paper_id": "cp_1c50e01dba5053fd",
-   "score": 0.431673,
-   "mmr": 0.150337,
-   "components": {
-    "method_match": 0.0,
-    "novelty": 0.5,
-    "relevance": 0.550372
-   },
-   "details": {
-    "bm25": 26.661443,
-    "bm25_norm": 0.55682,
-    "earliest_public_date": "2026-11-19",
-    "explanation": {
-     "reasons": [
-      {
-       "kind": "relevance",
-       "share": 0.729,
-       "text": "Matches the radar's terms wastewater surveillance (keyword score 0.56 of this run's best); meaning similarity to the radar's profile 0.55; found by the search of OpenAlex."
-      },
-      {
-       "kind": "novelty",
-       "share": 0.271,
-       "text": "Novelty not judged: too few earlier papers to compare with."
-      },
-      {
-       "kind": "signal",
-       "share": null,
-       "text": "Mentions wastewater: wastewater, wastewater surveillance."
-      }
-     ],
-     "summary": "Matches wastewater surveillance",
-     "version": "2"
-    },
-    "first_seen": "2026-11-23T23:27:08.279100+00:00",
-    "matched_terms": [
-     "wastewater surveillance"
-    ],
-    "methods_matched": [],
-    "novelty": {
-     "history_size": 0,
-     "nearest": []
-    },
-    "novelty_gate": 0.820227,
-    "novelty_raw": null,
-    "paper": {
-     "arxiv": null,
-     "authors": [
-      "Jenna Webb",
-      "Megan E. Gerdes",
-      "Heather E. Reese",
-      "et al."
-     ],
-     "doi": "10.21203/rs.3.rs-11625409/v1",
-     "earliest_public_date": "2026-11-19",
-     "openalex": "W7236683247",
-     "pmcid": null,
-     "pmid": null,
-     "title": "Validation of Centers for Disease Control and Prevention National Wastewater Surveillance System’s Wastewater Viral Activity Level for Respiratory Viruses, 2025 –2026 Respiratory Season",
-     "url": "https://doi.org/10.21203/rs.3.rs-11625409/v1",
-     "venue": "Research Square"
-    },
-    "publication_kind": "preprint",
-    "retrieved_by": [
-     "lexical",
-     "semantic",
-     "source_query"
-    ],
-    "signals_matched": {
-     "wastewater": [
-      "wastewater",
-      "wastewater surveillance"
-     ]
-    },
-    "similarity": 0.546073,
-    "sources": [
-     "openalex"
-    ],
-    "versions": []
-   },
-   "flags": [
-    "novelty_insufficient_history"
-   ]
-  },
-  {
-   "rank": 14,
    "paper_id": "cp_5c4d69dd65973b22",
-   "score": 0.443872,
-   "mmr": 0.147958,
+   "score": 0.455106,
+   "mmr": 0.15717,
    "components": {
     "method_match": 0.333333,
     "novelty": 0.5,
-    "relevance": 0.505211
+    "relevance": 0.519884
    },
    "details": {
-    "bm25": 31.233487,
-    "bm25_norm": 0.652306,
+    "bm25": 32.959484,
+    "bm25_norm": 0.688988,
     "earliest_public_date": "2026-11-14",
     "explanation": {
      "reasons": [
       {
        "kind": "relevance",
-       "share": 0.65,
-       "text": "Matches the radar's terms HyPhy (keyword score 0.65 of this run's best); meaning similarity to the radar's profile 0.41; found by the search of OpenAlex, PubMed."
+       "share": 0.653,
+       "text": "Matches the radar's terms HyPhy (keyword score 0.69 of this run's best); meaning similarity to the radar's profile 0.41; found by the search of OpenAlex, PubMed."
       },
       {
        "kind": "novelty",
-       "share": 0.242,
+       "share": 0.243,
        "text": "Novelty not judged: too few earlier papers to compare with."
       },
       {
        "kind": "method_match",
-       "share": 0.107,
+       "share": 0.105,
        "text": "Uses the radar's methods: HyPhy."
       },
       {
@@ -1512,7 +1230,7 @@
      "history_size": 0,
      "nearest": []
     },
-    "novelty_gate": 0.752923,
+    "novelty_gate": 0.772875,
     "novelty_raw": null,
     "paper": {
      "arxiv": null,
@@ -1562,81 +1280,279 @@
    ]
   },
   {
-   "rank": 15,
-   "paper_id": "cp_5b9a39957b4c00e1",
-   "score": 0.404805,
-   "mmr": 0.130137,
+   "rank": 12,
+   "paper_id": "cp_142447f3431476d7",
+   "score": 0.423418,
+   "mmr": 0.155013,
    "components": {
-    "method_match": 0.666667,
-    "novelty": 0.310345,
-    "relevance": 0.439991
+    "method_match": 0.333333,
+    "novelty": 0.4,
+    "relevance": 0.506926
    },
    "details": {
-    "bm25": 25.635434,
-    "bm25_norm": 0.535392,
-    "earliest_public_date": "2026-11-12",
+    "bm25": 28.579522,
+    "bm25_norm": 0.597428,
+    "earliest_public_date": "2026-11-18",
     "explanation": {
      "reasons": [
       {
        "kind": "relevance",
-       "share": 0.621,
-       "text": "Matches the radar's terms protein language model (keyword score 0.54 of this run's best); meaning similarity to the radar's profile 0.38; found by the search of OpenAlex."
+       "share": 0.684,
+       "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile 0.45; found by the search of PubMed."
       },
       {
        "kind": "novelty",
-       "share": 0.144,
-       "text": "Novelty 0.31 against 261 papers seen before it (credited at 0.66 of its value, in proportion to relevance)."
+       "share": 0.203,
+       "text": "Novelty 0.40 against 302 papers seen before it (credited at 0.75 of its value, in proportion to relevance)."
       },
       {
        "kind": "method_match",
-       "share": 0.235,
-       "text": "Uses the radar's methods: metagenomics, protein language model."
+       "share": 0.112,
+       "text": "Uses the radar's methods: metagenomics."
       },
       {
        "kind": "signal",
        "share": null,
-       "text": "Mentions ml evolution: deep learning, protein language model, ESM."
+       "text": "Mentions metagenomics pipelines: workflow."
+      },
+      {
+       "kind": "signal",
+       "share": null,
+       "text": "Mentions urban virome: virome."
       }
      ],
-     "summary": "Matches protein language model; uses metagenomics, protein language model",
+     "summary": "Uses metagenomics",
      "version": "2"
     },
-    "first_seen": "2026-11-24T22:56:20.651132+00:00",
-    "matched_terms": [
-     "protein language model"
-    ],
+    "first_seen": "2026-11-26T22:08:28.401005+00:00",
+    "matched_terms": [],
     "methods_matched": [
-     "metagenomics",
-     "protein language model"
+     "metagenomics"
     ],
     "novelty": {
-     "history_size": 261,
+     "history_size": 302,
      "nearest": [
-      "cp_e382e88abcfb472a",
-      "cp_85350dfbc5d93cfd",
-      "cp_2d00d41af49cede0",
-      "cp_82b0b8f5ed4679a5",
-      "cp_41b54574491f551c"
+      "cp_4b0bebcdb82a5f38",
+      "cp_c5f63ade60e1ce6b",
+      "cp_de361acdc8f90bc4",
+      "cp_cbb487e66adbf2cd",
+      "cp_c6937ea9e5732818"
      ],
-     "normalization": "percentile_within:article"
+     "normalization": "percentile_within:review"
     },
-    "novelty_gate": 0.655726,
-    "novelty_raw": 0.435105,
+    "novelty_gate": 0.753612,
+    "novelty_raw": 0.493888,
     "paper": {
      "arxiv": null,
      "authors": [
-      "Line Sandvad Nielsen",
-      "Henrik Nielsen",
-      "Ole Winther"
+      "Qihua Wu",
+      "Xingyue Su",
+      "Hualiang Zhou",
+      "et al."
      ],
-     "doi": "10.34133/csbj.0294",
-     "earliest_public_date": "2026-11-12",
-     "openalex": "W7165527239",
+     "doi": "10.3390/v18111283",
+     "earliest_public_date": "2026-11-18",
+     "openalex": null,
+     "pmcid": null,
+     "pmid": "43093898",
+     "title": "Biological Risks and Integrated Surveillance of Ships' Ballast Water: Viruses, Bacterial Pathogens, Microalgae, and Ecological Implications.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/43093898/",
+     "venue": "Viruses"
+    },
+    "publication_kind": "review",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "metagenomics_pipelines": [
+      "workflow"
+     ],
+     "urban_virome": [
+      "virome"
+     ]
+    },
+    "similarity": 0.446591,
+    "sources": [
+     "pubmed"
+    ],
+    "versions": []
+   },
+   "flags": []
+  },
+  {
+   "rank": 13,
+   "paper_id": "cp_c5a6d1b8001ecc3c",
+   "score": 0.507013,
+   "mmr": 0.153346,
+   "components": {
+    "method_match": 0.333333,
+    "novelty": 0.5,
+    "relevance": 0.586108
+   },
+   "details": {
+    "bm25": 28.347619,
+    "bm25_norm": 0.592581,
+    "earliest_public_date": "2026-11-13",
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "share": 0.661,
+       "text": "Matches the radar's terms pathogen surveillance (keyword score 0.59 of this run's best); meaning similarity to the radar's profile 0.58; found by the search of OpenAlex."
+      },
+      {
+       "kind": "novelty",
+       "share": 0.246,
+       "text": "Novelty not judged: too few earlier papers to compare with."
+      },
+      {
+       "kind": "method_match",
+       "share": 0.094,
+       "text": "Uses the radar's methods: benchmark."
+      },
+      {
+       "kind": "signal",
+       "share": null,
+       "text": "Mentions biosurveillance: pathogen surveillance."
+      },
+      {
+       "kind": "signal",
+       "share": null,
+       "text": "Mentions metagenomics pipelines: benchmark."
+      },
+      {
+       "kind": "signal",
+       "share": null,
+       "text": "Mentions ml evolution: foundation model."
+      }
+     ],
+     "summary": "Matches pathogen surveillance; uses benchmark",
+     "version": "2"
+    },
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "pathogen surveillance"
+    ],
+    "methods_matched": [
+     "benchmark"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.871327,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Michael Barber",
+      "Carl J. E. Suster",
+      "Jingyi Lei",
+      "et al."
+     ],
+     "doi": "10.64898/2026.11.11.765853",
+     "earliest_public_date": "2026-11-13",
+     "openalex": "W7226021904",
      "pmcid": null,
      "pmid": null,
-     "title": "DeepCDS: Ab initio coding sequence prediction in prokaryotic short nucleotide sequences",
-     "url": "https://doi.org/10.34133/csbj.0294",
-     "venue": "Computational and Structural Biotechnology Journal"
+     "title": "MicroDUET: a dual-headed genomic foundation model for pathogen surveillance",
+     "url": "https://doi.org/10.64898/2026.11.11.765853",
+     "venue": "bioRxiv (Cold Spring Harbor Laboratory)"
+    },
+    "publication_kind": "preprint",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "biosurveillance": [
+      "pathogen surveillance"
+     ],
+     "metagenomics_pipelines": [
+      "benchmark"
+     ],
+     "ml_evolution": [
+      "foundation model"
+     ]
+    },
+    "similarity": 0.581793,
+    "sources": [
+     "openalex"
+    ],
+    "versions": []
+   },
+   "flags": [
+    "novelty_insufficient_history"
+   ]
+  },
+  {
+   "rank": 14,
+   "paper_id": "cp_9e7fab24c15ad714",
+   "score": 0.374579,
+   "mmr": 0.150449,
+   "components": {
+    "method_match": 0.0,
+    "novelty": 0.5,
+    "relevance": 0.477898
+   },
+   "details": {
+    "bm25": 20.645361,
+    "bm25_norm": 0.431572,
+    "earliest_public_date": "2026-11-18",
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "share": 0.729,
+       "text": "Matches the radar's terms wastewater surveillance (keyword score 0.43 of this run's best); meaning similarity to the radar's profile 0.51; found by the search of OpenAlex."
+      },
+      {
+       "kind": "novelty",
+       "share": 0.271,
+       "text": "Novelty not judged: too few earlier papers to compare with."
+      },
+      {
+       "kind": "signal",
+       "share": null,
+       "text": "Mentions biosurveillance: early warning."
+      },
+      {
+       "kind": "signal",
+       "share": null,
+       "text": "Mentions wastewater: wastewater, wastewater surveillance."
+      }
+     ],
+     "summary": "Matches wastewater surveillance",
+     "version": "2"
+    },
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "wastewater surveillance"
+    ],
+    "methods_matched": [],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.710458,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Abdullah Abdulwahab Alshehri",
+      "Faisal Farhan F Alharbi"
+     ],
+     "doi": "10.65327/geat2r80",
+     "earliest_public_date": "2026-11-18",
+     "openalex": "W7236862850",
+     "pmcid": null,
+     "pmid": null,
+     "title": "Public health surveillance innovations: A summary of creative data and analytical techniques",
+     "url": "https://africanjournalofbiomedicalresearch.com/index.php/AJBR/article/view/10117",
+     "venue": "African Journal of Biomedical Research"
     },
     "publication_kind": "article",
     "retrieved_by": [
@@ -1645,39 +1561,139 @@
      "source_query"
     ],
     "signals_matched": {
-     "ml_evolution": [
-      "deep learning",
-      "protein language model",
-      "ESM"
+     "biosurveillance": [
+      "early warning"
+     ],
+     "wastewater": [
+      "wastewater",
+      "wastewater surveillance"
      ]
     },
-    "similarity": 0.376391,
+    "similarity": 0.508782,
     "sources": [
      "openalex"
     ],
     "versions": []
    },
-   "flags": []
+   "flags": [
+    "novelty_insufficient_history"
+   ]
+  },
+  {
+   "rank": 15,
+   "paper_id": "cp_846746b4bbdd2378",
+   "score": 0.441592,
+   "mmr": 0.134094,
+   "components": {
+    "method_match": 0.333333,
+    "novelty": 0.5,
+    "relevance": 0.502642
+   },
+   "details": {
+    "bm25": 28.367371,
+    "bm25_norm": 0.592994,
+    "earliest_public_date": "2026-11-14",
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "share": 0.65,
+       "text": "Matches the radar's terms phylodynamics, genomic epidemiology (keyword score 0.59 of this run's best); meaning similarity to the radar's profile 0.44; found by the search of OpenAlex, PubMed."
+      },
+      {
+       "kind": "novelty",
+       "share": 0.242,
+       "text": "Novelty not judged: too few earlier papers to compare with."
+      },
+      {
+       "kind": "method_match",
+       "share": 0.108,
+       "text": "Uses the radar's methods: phylodynamics."
+      },
+      {
+       "kind": "signal",
+       "share": null,
+       "text": "Mentions phylodynamics: phylodynamics, phylodynamic, genomic epidemiology, transmission."
+      }
+     ],
+     "summary": "Matches phylodynamics, genomic epidemiology; uses phylodynamics",
+     "version": "2"
+    },
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "phylodynamics",
+     "genomic epidemiology"
+    ],
+    "methods_matched": [
+     "phylodynamics"
+    ],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.747243,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Lina Yi",
+      "Silin Xiang",
+      "Xuhe Huang",
+      "et al."
+     ],
+     "doi": "10.1080/22221751.2026.2756038",
+     "earliest_public_date": "2026-11-14",
+     "openalex": "W7166180066",
+     "pmcid": "PMC13772089",
+     "pmid": "43033420",
+     "title": "Genomic epidemiology of CHIKV during the largest outbreak in Mainland China - implication for CHIKV intervention.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/43033420/",
+     "venue": "Emerging microbes & infections"
+    },
+    "publication_kind": "article",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "phylodynamics": [
+      "phylodynamics",
+      "phylodynamic",
+      "genomic epidemiology",
+      "transmission"
+     ]
+    },
+    "similarity": 0.442407,
+    "sources": [
+     "openalex",
+     "pubmed"
+    ],
+    "versions": []
+   },
+   "flags": [
+    "novelty_insufficient_history"
+   ]
   },
   {
    "rank": 16,
    "paper_id": "cp_9aee5d82a57b91fb",
-   "score": 0.308738,
-   "mmr": 0.129771,
+   "score": 0.310527,
+   "mmr": 0.131023,
    "components": {
     "method_match": 0.666667,
     "novelty": 0.5,
-    "relevance": 0.272207
+    "relevance": 0.274672
    },
    "details": {
-    "bm25": 19.198967,
-    "bm25_norm": 0.400967,
+    "bm25": 19.476139,
+    "bm25_norm": 0.407131,
     "earliest_public_date": "2026-09-28",
     "explanation": {
      "reasons": [
       {
        "kind": "relevance",
-       "share": 0.504,
+       "share": 0.505,
        "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile 0.19; found by the search of PubMed."
       },
       {
@@ -1687,7 +1703,7 @@
       },
       {
        "kind": "method_match",
-       "share": 0.308,
+       "share": 0.307,
        "text": "Uses the radar's methods: metagenomics, benchmark."
       },
       {
@@ -1709,7 +1725,7 @@
      "history_size": 0,
      "nearest": []
     },
-    "novelty_gate": 0.405674,
+    "novelty_gate": 0.408336,
     "novelty_raw": null,
     "paper": {
      "arxiv": null,
@@ -1751,22 +1767,22 @@
   {
    "rank": 17,
    "paper_id": "cp_38a5a465bd1614ac",
-   "score": 0.461131,
-   "mmr": 0.127087,
+   "score": 0.461957,
+   "mmr": 0.127665,
    "components": {
     "method_match": 0.666667,
     "novelty": 0.5,
-    "relevance": 0.466504
+    "relevance": 0.46787
    },
    "details": {
-    "bm25": 17.817491,
-    "bm25_norm": 0.372115,
+    "bm25": 17.964487,
+    "bm25_norm": 0.375531,
     "earliest_public_date": "2026-11-23",
     "explanation": {
      "reasons": [
       {
        "kind": "relevance",
-       "share": 0.578,
+       "share": 0.579,
        "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile 0.53; found by the search of PubMed."
       },
       {
@@ -1776,7 +1792,7 @@
       },
       {
        "kind": "method_match",
-       "share": 0.207,
+       "share": 0.206,
        "text": "Uses the radar's methods: metagenomics, Nextflow."
       },
       {
@@ -1798,7 +1814,7 @@
      "history_size": 0,
      "nearest": []
     },
-    "novelty_gate": 0.695237,
+    "novelty_gate": 0.69555,
     "novelty_raw": null,
     "paper": {
      "arxiv": null,
@@ -1843,16 +1859,16 @@
   {
    "rank": 18,
    "paper_id": "cp_56e431fbcbefc687",
-   "score": 0.447889,
-   "mmr": 0.126952,
+   "score": 0.448563,
+   "mmr": 0.127424,
    "components": {
     "method_match": 0.0,
     "novelty": 0.5,
-    "relevance": 0.571046
+    "relevance": 0.572289
    },
    "details": {
-    "bm25": 37.03595,
-    "bm25_norm": 0.77349,
+    "bm25": 37.150553,
+    "bm25_norm": 0.776598,
     "earliest_public_date": "2026-11-20",
     "explanation": {
      "reasons": [
@@ -1887,7 +1903,7 @@
      "history_size": 0,
      "nearest": []
     },
-    "novelty_gate": 0.851038,
+    "novelty_gate": 0.850783,
     "novelty_raw": null,
     "paper": {
      "arxiv": null,
@@ -1933,302 +1949,129 @@
   },
   {
    "rank": 19,
-   "paper_id": "cp_452f84f281a0ee00",
-   "score": 0.445108,
-   "mmr": 0.123361,
+   "paper_id": "cp_69c60c1b75c066a7",
+   "score": 0.47047,
+   "mmr": 0.123232,
    "components": {
     "method_match": 0.333333,
     "novelty": 0.5,
-    "relevance": 0.506788
+    "relevance": 0.539486
    },
    "details": {
-    "bm25": 16.092396,
-    "bm25_norm": 0.336087,
-    "earliest_public_date": "2026-11-12",
+    "bm25": 30.022955,
+    "bm25_norm": 0.627602,
+    "earliest_public_date": "2026-11-24",
     "explanation": {
      "reasons": [
       {
        "kind": "relevance",
-       "share": 0.651,
-       "text": "Matches the radar's terms phylodynamics (keyword score 0.34 of this run's best); meaning similarity to the radar's profile 0.62; found by the search of PubMed."
+       "share": 0.655,
+       "text": "Matches the radar's terms viral recombination, recombination detection (keyword score 0.63 of this run's best); meaning similarity to the radar's profile 0.48; found by the search of OpenAlex."
       },
       {
        "kind": "novelty",
-       "share": 0.242,
-       "text": "Novelty not judged: too few earlier papers to compare with."
+       "share": 0.244,
+       "text": "Novelty 0.50 against 302 papers seen before it (credited at 0.80 of its value, in proportion to relevance)."
       },
       {
        "kind": "method_match",
-       "share": 0.107,
-       "text": "Uses the radar's methods: phylodynamics."
+       "share": 0.101,
+       "text": "Uses the radar's methods: recombination detection."
       },
       {
        "kind": "signal",
        "share": null,
-       "text": "Mentions ml evolution: machine learning."
+       "text": "Mentions atlases resources: reference catalog."
       },
       {
        "kind": "signal",
        "share": null,
-       "text": "Mentions phylodynamics: phylodynamics, phylodynamic."
+       "text": "Mentions recombination: recombination, reassortment."
       }
      ],
-     "summary": "Matches phylodynamics; uses phylodynamics",
+     "summary": "Matches viral recombination, recombination detection; uses recombination detection",
      "version": "2"
     },
-    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "first_seen": "2026-11-26T22:08:28.401005+00:00",
     "matched_terms": [
-     "phylodynamics"
+     "viral recombination",
+     "recombination detection"
     ],
     "methods_matched": [
-     "phylodynamics"
+     "recombination detection"
     ],
     "novelty": {
-     "history_size": 0,
-     "nearest": []
+     "history_size": 302,
+     "nearest": [
+      "cp_446ff4ec24bf6cbb",
+      "cp_d8ef860e42a03436",
+      "cp_c5a6d1b8001ecc3c",
+      "cp_277069dadb1616be",
+      "cp_846746b4bbdd2378"
+     ],
+     "normalization": "percentile_within:preprint"
     },
-    "novelty_gate": 0.755273,
-    "novelty_raw": null,
+    "novelty_gate": 0.802016,
+    "novelty_raw": 0.399639,
     "paper": {
      "arxiv": null,
      "authors": [
-      "Manolo F Perez",
-      "Anna Zhukova",
-      "Renny Doig",
+      "Sergei L. Kosakovsky Pond",
+      "Steven Weaver",
+      "Danielle Callan",
       "et al."
      ],
-     "doi": "10.1016/j.tim.2026.10.006",
-     "earliest_public_date": "2026-11-12",
-     "openalex": null,
+     "doi": "10.64898/2026.11.20.768181",
+     "earliest_public_date": "2026-11-24",
+     "openalex": "W7239837118",
      "pmcid": null,
-     "pmid": "43020769",
-     "title": "Machine learning methods to decipher the evolutionary dynamics of microbial pathogens.",
-     "url": "https://pubmed.ncbi.nlm.nih.gov/43020769/",
-     "venue": "Trends in microbiology"
+     "pmid": null,
+     "title": "Come together: Coordinate deconvolution of viral recombination, reassortment, and epistatic survival",
+     "url": "https://doi.org/10.64898/2026.11.20.768181",
+     "venue": "bioRxiv (Cold Spring Harbor Laboratory)"
     },
-    "publication_kind": "review",
+    "publication_kind": "preprint",
     "retrieved_by": [
      "lexical",
      "semantic",
      "source_query"
     ],
     "signals_matched": {
-     "ml_evolution": [
-      "machine learning"
+     "atlases_resources": [
+      "reference catalog"
      ],
-     "phylodynamics": [
-      "phylodynamics",
-      "phylodynamic"
+     "recombination": [
+      "recombination",
+      "reassortment"
      ]
     },
-    "similarity": 0.620588,
+    "similarity": 0.480742,
     "sources": [
-     "pubmed"
+     "openalex"
     ],
     "versions": []
    },
-   "flags": [
-    "novelty_insufficient_history"
-   ]
+   "flags": []
   },
   {
    "rank": 20,
-   "paper_id": "cp_f0c8f0e83a11485f",
-   "score": 0.362532,
-   "mmr": 0.121872,
-   "components": {
-    "method_match": 0.0,
-    "novelty": 0.5,
-    "relevance": 0.462218
-   },
-   "details": {
-    "bm25": 22.645067,
-    "bm25_norm": 0.472938,
-    "earliest_public_date": "2026-11-19",
-    "explanation": {
-     "reasons": [
-      {
-       "kind": "relevance",
-       "share": 0.729,
-       "text": "Matches the radar's terms positive selection (keyword score 0.47 of this run's best); meaning similarity to the radar's profile 0.46; found by the search of OpenAlex."
-      },
-      {
-       "kind": "novelty",
-       "share": 0.271,
-       "text": "Novelty not judged: too few earlier papers to compare with."
-      },
-      {
-       "kind": "signal",
-       "share": null,
-       "text": "Mentions selection codon models: positive selection."
-      }
-     ],
-     "summary": "Matches positive selection",
-     "version": "2"
-    },
-    "first_seen": "2026-11-23T23:27:08.279100+00:00",
-    "matched_terms": [
-     "positive selection"
-    ],
-    "methods_matched": [],
-    "novelty": {
-     "history_size": 0,
-     "nearest": []
-    },
-    "novelty_gate": 0.68885,
-    "novelty_raw": null,
-    "paper": {
-     "arxiv": null,
-     "authors": [],
-     "doi": "10.24072/pci.evolbiol.100858",
-     "earliest_public_date": "2026-11-19",
-     "openalex": "W7236806983",
-     "pmcid": null,
-     "pmid": null,
-     "title": "Recommendation of: Experimentally mimicking long term infections of Magallana gigas with the OsHV-1 virus reveals evolution through positive selection. Round#3",
-     "url": "https://doi.org/10.24072/pci.evolbiol.100858",
-     "venue": "Peer Community in Evolutionary Biology"
-    },
-    "publication_kind": "article",
-    "retrieved_by": [
-     "lexical",
-     "semantic",
-     "source_query"
-    ],
-    "signals_matched": {
-     "selection_codon_models": [
-      "positive selection"
-     ]
-    },
-    "similarity": 0.455071,
-    "sources": [
-     "openalex"
-    ],
-    "versions": []
-   },
-   "flags": [
-    "novelty_insufficient_history"
-   ]
-  },
-  {
-   "rank": 21,
-   "paper_id": "cp_289a793279ec7789",
-   "score": 0.468484,
-   "mmr": 0.121373,
-   "components": {
-    "method_match": 0.666667,
-    "novelty": 0.5,
-    "relevance": 0.475878
-   },
-   "details": {
-    "bm25": 15.466162,
-    "bm25_norm": 0.323008,
-    "earliest_public_date": "2026-11-18",
-    "explanation": {
-     "reasons": [
-      {
-       "kind": "relevance",
-       "share": 0.58,
-       "text": "Matches the radar's terms viral metagenomics (keyword score 0.32 of this run's best); meaning similarity to the radar's profile 0.58; found by the search of OpenAlex."
-      },
-      {
-       "kind": "novelty",
-       "share": 0.216,
-       "text": "Novelty not judged: too few earlier papers to compare with."
-      },
-      {
-       "kind": "method_match",
-       "share": 0.203,
-       "text": "Uses the radar's methods: viral metagenomics, metagenomics."
-      },
-      {
-       "kind": "signal",
-       "share": null,
-       "text": "Mentions phylodynamics: transmission."
-      },
-      {
-       "kind": "signal",
-       "share": null,
-       "text": "Mentions urban virome: viral metagenomics."
-      }
-     ],
-     "summary": "Matches viral metagenomics; uses viral metagenomics, metagenomics",
-     "version": "2"
-    },
-    "first_seen": "2026-11-23T23:27:08.279100+00:00",
-    "matched_terms": [
-     "viral metagenomics"
-    ],
-    "methods_matched": [
-     "viral metagenomics",
-     "metagenomics"
-    ],
-    "novelty": {
-     "history_size": 0,
-     "nearest": []
-    },
-    "novelty_gate": 0.709208,
-    "novelty_raw": null,
-    "paper": {
-     "arxiv": null,
-     "authors": [
-      "Julia S. Galeeva",
-      "Polina Kuzmichenko",
-      "Nikolay Popov",
-      "et al."
-     ],
-     "doi": "10.3390/v18111284",
-     "earliest_public_date": "2026-11-18",
-     "openalex": "W7236116605",
-     "pmcid": null,
-     "pmid": null,
-     "title": "Reading the Host from the Virus: A Systematic Review of Sequence-Based Prediction of Host-Related Properties for Eukaryote-Infecting Viruses",
-     "url": "https://doi.org/10.3390/v18111284",
-     "venue": "Viruses"
-    },
-    "publication_kind": "review",
-    "retrieved_by": [
-     "lexical",
-     "semantic",
-     "source_query"
-    ],
-    "signals_matched": {
-     "phylodynamics": [
-      "transmission"
-     ],
-     "urban_virome": [
-      "viral metagenomics"
-     ]
-    },
-    "similarity": 0.577792,
-    "sources": [
-     "openalex"
-    ],
-    "versions": []
-   },
-   "flags": [
-    "novelty_insufficient_history"
-   ]
-  },
-  {
-   "rank": 22,
    "paper_id": "cp_8c79a8f364fa8fc0",
-   "score": 0.445251,
-   "mmr": 0.120105,
+   "score": 0.448937,
+   "mmr": 0.122685,
    "components": {
     "method_match": 0.666667,
     "novelty": 0.5,
-    "relevance": 0.446257
+    "relevance": 0.451259
    },
    "details": {
-    "bm25": 20.536208,
-    "bm25_norm": 0.428895,
+    "bm25": 21.11547,
+    "bm25_norm": 0.441399,
     "earliest_public_date": "2026-10-09",
     "explanation": {
      "reasons": [
       {
        "kind": "relevance",
-       "share": 0.573,
+       "share": 0.574,
        "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile 0.46; found by the search of PubMed."
       },
       {
@@ -2238,7 +2081,7 @@
       },
       {
        "kind": "method_match",
-       "share": 0.214,
+       "share": 0.212,
        "text": "Uses the radar's methods: metagenomics, benchmark."
       },
       {
@@ -2265,7 +2108,7 @@
      "history_size": 0,
      "nearest": []
     },
-    "novelty_gate": 0.665064,
+    "novelty_gate": 0.670856,
     "novelty_raw": null,
     "paper": {
      "arxiv": null,
@@ -2311,92 +2154,99 @@
    ]
   },
   {
-   "rank": 23,
-   "paper_id": "cp_f9c98cb0ca292ed1",
-   "score": 0.33276,
-   "mmr": 0.11166,
+   "rank": 21,
+   "paper_id": "cp_289a793279ec7789",
+   "score": 0.468035,
+   "mmr": 0.121596,
    "components": {
-    "method_match": 0.333333,
+    "method_match": 0.666667,
     "novelty": 0.5,
-    "relevance": 0.363546
+    "relevance": 0.475625
    },
    "details": {
-    "bm25": 23.854919,
-    "bm25_norm": 0.498206,
-    "earliest_public_date": "2026-11-12",
+    "bm25": 15.725811,
+    "bm25_norm": 0.328734,
+    "earliest_public_date": "2026-11-18",
     "explanation": {
      "reasons": [
       {
        "kind": "relevance",
-       "share": 0.624,
-       "text": "Matches the radar's terms positive selection, HyPhy (keyword score 0.50 of this run's best); meaning similarity to the radar's profile 0.27; found by the search of OpenAlex."
+       "share": 0.581,
+       "text": "Matches the radar's terms viral metagenomics (keyword score 0.33 of this run's best); meaning similarity to the radar's profile 0.57; found by the search of OpenAlex, PubMed."
       },
       {
        "kind": "novelty",
-       "share": 0.233,
+       "share": 0.216,
        "text": "Novelty not judged: too few earlier papers to compare with."
       },
       {
        "kind": "method_match",
-       "share": 0.143,
-       "text": "Uses the radar's methods: HyPhy."
+       "share": 0.203,
+       "text": "Uses the radar's methods: viral metagenomics, metagenomics."
       },
       {
        "kind": "signal",
        "share": null,
-       "text": "Mentions selection codon models: HyPhy, positive selection, diversifying selection."
+       "text": "Mentions phylodynamics: transmission."
+      },
+      {
+       "kind": "signal",
+       "share": null,
+       "text": "Mentions urban virome: viral metagenomics."
       }
      ],
-     "summary": "Matches positive selection, HyPhy; uses HyPhy",
+     "summary": "Matches viral metagenomics; uses viral metagenomics, metagenomics",
      "version": "2"
     },
     "first_seen": "2026-11-23T23:27:08.279100+00:00",
     "matched_terms": [
-     "positive selection",
-     "HyPhy"
+     "viral metagenomics"
     ],
     "methods_matched": [
-     "HyPhy"
+     "viral metagenomics",
+     "metagenomics"
     ],
     "novelty": {
      "history_size": 0,
      "nearest": []
     },
-    "novelty_gate": 0.541799,
+    "novelty_gate": 0.707079,
     "novelty_raw": null,
     "paper": {
      "arxiv": null,
      "authors": [
-      "Jie Wei",
-      "Zhenpeng Yu",
-      "Yuting Ni",
+      "Julia Galeeva",
+      "Polina Kuzmichenko",
+      "Nikolay Popov",
       "et al."
      ],
-     "doi": "10.1186/s12864-026-13552-7",
-     "earliest_public_date": "2026-11-12",
-     "openalex": "W7225906869",
+     "doi": "10.3390/v18111284",
+     "earliest_public_date": "2026-11-18",
+     "openalex": "W7236116605",
      "pmcid": null,
-     "pmid": null,
-     "title": "Comparative genomic and seasonal expression analyses highlight HSPA12A as a candidate gene associated with winter physiology in the Chinese alligator (Alligator sinensis)",
-     "url": "https://doi.org/10.1186/s12864-026-13552-7",
-     "venue": "BMC Genomics"
+     "pmid": "43093899",
+     "title": "Reading the Host from the Virus: A Systematic Review of Sequence-Based Prediction of Host-Related Properties for Eukaryote-Infecting Viruses.",
+     "url": "https://pubmed.ncbi.nlm.nih.gov/43093899/",
+     "venue": "Viruses"
     },
-    "publication_kind": "article",
+    "publication_kind": "review",
     "retrieved_by": [
      "lexical",
      "semantic",
      "source_query"
     ],
     "signals_matched": {
-     "selection_codon_models": [
-      "HyPhy",
-      "positive selection",
-      "diversifying selection"
+     "phylodynamics": [
+      "transmission"
+     ],
+     "urban_virome": [
+      "viral metagenomics"
      ]
     },
-    "similarity": 0.273773,
+    "similarity": 0.573553,
     "sources": [
-     "openalex"
+     "openalex",
+     "pubmed"
     ],
     "versions": []
    },
@@ -2405,71 +2255,67 @@
    ]
   },
   {
-   "rank": 24,
-   "paper_id": "cp_c2c977e236f91d96",
-   "score": 0.343439,
-   "mmr": 0.10852,
+   "rank": 22,
+   "paper_id": "cp_1c50e01dba5053fd",
+   "score": 0.431828,
+   "mmr": 0.121062,
    "components": {
-    "method_match": 0.333333,
+    "method_match": 0.0,
     "novelty": 0.5,
-    "relevance": 0.377162
+    "relevance": 0.550939
    },
    "details": {
-    "bm25": 23.359697,
-    "bm25_norm": 0.487863,
-    "earliest_public_date": "2026-11-18",
+    "bm25": 26.70471,
+    "bm25_norm": 0.558237,
+    "earliest_public_date": "2026-11-19",
     "explanation": {
      "reasons": [
       {
        "kind": "relevance",
-       "share": 0.628,
-       "text": "Matches the radar's terms somatic evolution (keyword score 0.49 of this run's best); meaning similarity to the radar's profile 0.30; found by the search of OpenAlex."
+       "share": 0.729,
+       "text": "Matches the radar's terms wastewater surveillance (keyword score 0.56 of this run's best); meaning similarity to the radar's profile 0.55; found by the search of OpenAlex."
       },
       {
        "kind": "novelty",
-       "share": 0.234,
+       "share": 0.271,
        "text": "Novelty not judged: too few earlier papers to compare with."
-      },
-      {
-       "kind": "method_match",
-       "share": 0.139,
-       "text": "Uses the radar's methods: single-cell."
       },
       {
        "kind": "signal",
        "share": null,
-       "text": "Mentions cancer evolution: somatic evolution, clonal selection."
+       "text": "Mentions wastewater: wastewater, wastewater surveillance."
       }
      ],
-     "summary": "Matches somatic evolution; uses single-cell",
+     "summary": "Matches wastewater surveillance",
      "version": "2"
     },
     "first_seen": "2026-11-23T23:27:08.279100+00:00",
     "matched_terms": [
-     "somatic evolution"
+     "wastewater surveillance"
     ],
-    "methods_matched": [
-     "single-cell"
-    ],
+    "methods_matched": [],
     "novelty": {
      "history_size": 0,
      "nearest": []
     },
-    "novelty_gate": 0.56209,
+    "novelty_gate": 0.819043,
     "novelty_raw": null,
     "paper": {
      "arxiv": null,
      "authors": [
-      "Sarayut Eng-chawadechasil"
+      "Jenna Webb",
+      "Megan E. Gerdes",
+      "Heather E. Reese",
+      "et al."
      ],
-     "doi": "10.5281/zenodo.24344853",
-     "earliest_public_date": "2026-11-18",
-     "openalex": "W7236117137",
+     "doi": "10.21203/rs.3.rs-11625409/v1",
+     "earliest_public_date": "2026-11-19",
+     "openalex": "W7236683247",
      "pmcid": null,
      "pmid": null,
-     "title": "Early Systemic Acceptance Hypothesis of Cellular Transformation: Mitigating Somatic Clonal Selection Through Initial Microenvironmental Coherence",
-     "url": "https://doi.org/10.5281/zenodo.24344853",
-     "venue": "Zenodo (CERN European Organization for Nuclear Research)"
+     "title": "Validation of Centers for Disease Control and Prevention National Wastewater Surveillance System’s Wastewater Viral Activity Level for Respiratory Viruses, 2025 –2026 Respiratory Season",
+     "url": "https://doi.org/10.21203/rs.3.rs-11625409/v1",
+     "venue": "Research Square"
     },
     "publication_kind": "preprint",
     "retrieved_by": [
@@ -2478,12 +2324,12 @@
      "source_query"
     ],
     "signals_matched": {
-     "cancer_evolution": [
-      "somatic evolution",
-      "clonal selection"
+     "wastewater": [
+      "wastewater",
+      "wastewater surveillance"
      ]
     },
-    "similarity": 0.303361,
+    "similarity": 0.546073,
     "sources": [
      "openalex"
     ],
@@ -2494,25 +2340,130 @@
    ]
   },
   {
-   "rank": 25,
+   "rank": 23,
+   "paper_id": "cp_612a69f185885c85",
+   "score": 0.359531,
+   "mmr": 0.11678,
+   "components": {
+    "method_match": 0.666667,
+    "novelty": 0.833333,
+    "relevance": 0.285602
+   },
+   "details": {
+    "bm25": 12.464077,
+    "bm25_norm": 0.26055,
+    "earliest_public_date": "2026-11-23",
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "share": 0.454,
+       "text": "Matches the radar's terms protein language model (keyword score 0.26 of this run's best); meaning similarity to the radar's profile 0.30; found by the search of OpenAlex."
+      },
+      {
+       "kind": "novelty",
+       "share": 0.281,
+       "text": "Novelty 0.83 against 261 papers seen before it (credited at 0.42 of its value, in proportion to relevance)."
+      },
+      {
+       "kind": "method_match",
+       "share": 0.265,
+       "text": "Uses the radar's methods: benchmark, protein language model."
+      },
+      {
+       "kind": "signal",
+       "share": null,
+       "text": "Mentions metagenomics pipelines: benchmark."
+      },
+      {
+       "kind": "signal",
+       "share": null,
+       "text": "Mentions ml evolution: protein language model."
+      }
+     ],
+     "summary": "Matches protein language model; unlike earlier papers; uses benchmark, protein language model",
+     "version": "2"
+    },
+    "first_seen": "2026-11-24T22:56:20.651132+00:00",
+    "matched_terms": [
+     "protein language model"
+    ],
+    "methods_matched": [
+     "benchmark",
+     "protein language model"
+    ],
+    "novelty": {
+     "history_size": 261,
+     "nearest": [
+      "cp_e382e88abcfb472a",
+      "cp_2fd81dca821d94ac",
+      "cp_d2031aa9a3919152",
+      "cp_be02509a16f40188",
+      "cp_b0559ee29b6b5b00"
+     ],
+     "normalization": "percentile_within:preprint"
+    },
+    "novelty_gate": 0.424585,
+    "novelty_raw": 0.435786,
+    "paper": {
+     "arxiv": null,
+     "authors": [
+      "Dongwoo Kim",
+      "Haelyn Kim",
+      "sim jaemin",
+      "et al."
+     ],
+     "doi": "10.64898/2026.11.20.768033",
+     "earliest_public_date": "2026-11-23",
+     "openalex": "W7238736658",
+     "pmcid": null,
+     "pmid": null,
+     "title": "A2Holo: Dual-Stream Flow Matching of 3D Structure and a Protein Language Model for Conformational Transition Prediction",
+     "url": "https://doi.org/10.64898/2026.11.20.768033",
+     "venue": "bioRxiv (Cold Spring Harbor Laboratory)"
+    },
+    "publication_kind": "preprint",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "metagenomics_pipelines": [
+      "benchmark"
+     ],
+     "ml_evolution": [
+      "protein language model"
+     ]
+    },
+    "similarity": 0.302303,
+    "sources": [
+     "openalex"
+    ],
+    "versions": []
+   },
+   "flags": []
+  },
+  {
+   "rank": 24,
    "paper_id": "cp_c07e96737752d56c",
-   "score": 0.417816,
-   "mmr": 0.107199,
+   "score": 0.423762,
+   "mmr": 0.111361,
    "components": {
     "method_match": 0.333333,
     "novelty": 0.5,
-    "relevance": 0.471991
+    "relevance": 0.479894
    },
    "details": {
-    "bm25": 29.370717,
-    "bm25_norm": 0.613403,
+    "bm25": 30.288749,
+    "bm25_norm": 0.633158,
     "earliest_public_date": "2026-11-19",
     "explanation": {
      "reasons": [
       {
        "kind": "relevance",
-       "share": 0.646,
-       "text": "Matches the radar's terms phylodynamics (keyword score 0.61 of this run's best); meaning similarity to the radar's profile 0.38; found by the search of OpenAlex, PubMed."
+       "share": 0.647,
+       "text": "Matches the radar's terms phylodynamics (keyword score 0.63 of this run's best); meaning similarity to the radar's profile 0.38; found by the search of OpenAlex, PubMed."
       },
       {
        "kind": "novelty",
@@ -2521,7 +2472,7 @@
       },
       {
        "kind": "method_match",
-       "share": 0.114,
+       "share": 0.112,
        "text": "Uses the radar's methods: phylodynamics."
       },
       {
@@ -2544,7 +2495,7 @@
      "history_size": 0,
      "nearest": []
     },
-    "novelty_gate": 0.703416,
+    "novelty_gate": 0.713425,
     "novelty_raw": null,
     "paper": {
      "arxiv": null,
@@ -2586,6 +2537,85 @@
    "flags": [
     "novelty_insufficient_history"
    ]
+  },
+  {
+   "rank": 25,
+   "paper_id": "cp_f0c8f0e83a11485f",
+   "score": 0.36438,
+   "mmr": 0.111322,
+   "components": {
+    "method_match": 0.0,
+    "novelty": 0.5,
+    "relevance": 0.464887
+   },
+   "details": {
+    "bm25": 22.94344,
+    "bm25_norm": 0.479611,
+    "earliest_public_date": "2026-11-19",
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "share": 0.729,
+       "text": "Matches the radar's terms positive selection (keyword score 0.48 of this run's best); meaning similarity to the radar's profile 0.46; found by the search of OpenAlex."
+      },
+      {
+       "kind": "novelty",
+       "share": 0.271,
+       "text": "Novelty not judged: too few earlier papers to compare with."
+      },
+      {
+       "kind": "signal",
+       "share": null,
+       "text": "Mentions selection codon models: positive selection."
+      }
+     ],
+     "summary": "Matches positive selection",
+     "version": "2"
+    },
+    "first_seen": "2026-11-23T23:27:08.279100+00:00",
+    "matched_terms": [
+     "positive selection"
+    ],
+    "methods_matched": [],
+    "novelty": {
+     "history_size": 0,
+     "nearest": []
+    },
+    "novelty_gate": 0.691115,
+    "novelty_raw": null,
+    "paper": {
+     "arxiv": null,
+     "authors": [],
+     "doi": "10.24072/pci.evolbiol.100858",
+     "earliest_public_date": "2026-11-19",
+     "openalex": "W7236806983",
+     "pmcid": null,
+     "pmid": null,
+     "title": "Recommendation of: Experimentally mimicking long term infections of Magallana gigas with the OsHV-1 virus reveals evolution through positive selection. Round#3",
+     "url": "https://doi.org/10.24072/pci.evolbiol.100858",
+     "venue": "Peer Community in Evolutionary Biology"
+    },
+    "publication_kind": "article",
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "source_query"
+    ],
+    "signals_matched": {
+     "selection_codon_models": [
+      "positive selection"
+     ]
+    },
+    "similarity": 0.455071,
+    "sources": [
+     "openalex"
+    ],
+    "versions": []
+   },
+   "flags": [
+    "novelty_insufficient_history"
+   ]
   }
  ],
  "observations": [
@@ -2593,37 +2623,31 @@
    "openalex",
    "W4412100951",
    "cp_b4e7d7e332e6a202",
-   "new_source"
+   "unchanged"
   ],
   [
    "openalex",
    "W4414768782",
    "cp_97b7c8569d2e1aef",
-   "new_paper"
+   "updated"
   ],
   [
    "openalex",
    "W4415602483",
    "cp_8a65af33c946b274",
-   "new_paper"
+   "updated"
   ],
   [
    "openalex",
    "W4416182836",
    "cp_82b0b8f5ed4679a5",
-   "updated"
+   "unchanged"
   ],
   [
    "openalex",
    "W7152731817",
    "cp_db52ba34694e4b25",
-   "updated"
-  ],
-  [
-   "openalex",
-   "W7165527239",
-   "cp_5b9a39957b4c00e1",
-   "updated"
+   "unchanged"
   ],
   [
    "openalex",
@@ -2647,85 +2671,25 @@
    "openalex",
    "W7224020142",
    "cp_8a4f6614b800dd78",
-   "new_paper"
+   "updated"
   ],
   [
    "openalex",
    "W7225304918",
    "cp_b7ea4db41773dcee",
-   "updated"
-  ],
-  [
-   "openalex",
-   "W7225821357",
-   "cp_1fb50379e9abae4f",
-   "unchanged"
-  ],
-  [
-   "openalex",
-   "W7225847905",
-   "cp_6d9a0fcffc637dd4",
-   "unchanged"
-  ],
-  [
-   "openalex",
-   "W7225858332",
-   "cp_8a4706e4a6f00bd0",
-   "unchanged"
-  ],
-  [
-   "openalex",
-   "W7225860864",
-   "cp_55720069dc4c1b56",
-   "unchanged"
-  ],
-  [
-   "openalex",
-   "W7225879015",
-   "cp_9e3fa70fb5bade47",
    "unchanged"
   ],
   [
    "openalex",
    "W7225893680",
    "cp_cbb487e66adbf2cd",
-   "new_paper"
+   "unchanged"
   ],
   [
    "openalex",
    "W7225904506",
    "cp_edce1573318ebf15",
-   "new_paper"
-  ],
-  [
-   "openalex",
-   "W7225906869",
-   "cp_f9c98cb0ca292ed1",
    "updated"
-  ],
-  [
-   "openalex",
-   "W7225916296",
-   "cp_1ef2da2b64dfa756",
-   "unchanged"
-  ],
-  [
-   "openalex",
-   "W7225918029",
-   "cp_8a3e881a3e5042d0",
-   "unchanged"
-  ],
-  [
-   "openalex",
-   "W7225918147",
-   "cp_5b7a9761dc7d11ee",
-   "unchanged"
-  ],
-  [
-   "openalex",
-   "W7225919319",
-   "cp_94e438f1fac7cc9c",
-   "unchanged"
   ],
   [
    "openalex",
@@ -2767,7 +2731,7 @@
    "openalex",
    "W7226009064",
    "cp_2d27f7bfd92a6d4e",
-   "updated"
+   "unchanged"
   ],
   [
    "openalex",
@@ -2779,13 +2743,13 @@
    "openalex",
    "W7226016148",
    "cp_fd1b56396d3ff4d1",
-   "unchanged"
+   "updated"
   ],
   [
    "openalex",
    "W7226018715",
    "cp_37768ac94eb3b54a",
-   "new_paper"
+   "unchanged"
   ],
   [
    "openalex",
@@ -2797,7 +2761,7 @@
    "openalex",
    "W7226024217",
    "cp_e382e88abcfb472a",
-   "updated"
+   "unchanged"
   ],
   [
    "openalex",
@@ -2809,7 +2773,7 @@
    "openalex",
    "W7226029281",
    "cp_de361acdc8f90bc4",
-   "unchanged"
+   "updated"
   ],
   [
    "openalex",
@@ -2819,9 +2783,15 @@
   ],
   [
    "openalex",
+   "W7229991062",
+   "cp_7fbba104f3666c57",
+   "new_paper"
+  ],
+  [
+   "openalex",
    "W7230943499",
    "cp_97deabe8a80b43ea",
-   "unchanged"
+   "updated"
   ],
   [
    "openalex",
@@ -2863,7 +2833,7 @@
    "openalex",
    "W7233735948",
    "cp_b10c8e7943303353",
-   "updated"
+   "unchanged"
   ],
   [
    "openalex",
@@ -2923,7 +2893,7 @@
    "openalex",
    "W7235068510",
    "cp_d8ef860e42a03436",
-   "updated"
+   "unchanged"
   ],
   [
    "openalex",
@@ -2936,6 +2906,12 @@
    "W7235154483",
    "cp_1aa2dea67c131710",
    "updated"
+  ],
+  [
+   "openalex",
+   "W7235205316",
+   "cp_41ce4763e22cb604",
+   "new_paper"
   ],
   [
    "openalex",
@@ -2959,7 +2935,7 @@
    "openalex",
    "W7235467392",
    "cp_aeec2749ec2899ed",
-   "unchanged"
+   "updated"
   ],
   [
    "openalex",
@@ -2977,13 +2953,13 @@
    "openalex",
    "W7235891558",
    "cp_a3aabfbe5119e200",
-   "unchanged"
+   "updated"
   ],
   [
    "openalex",
    "W7235904433",
    "cp_cc372343ea487571",
-   "updated"
+   "unchanged"
   ],
   [
    "openalex",
@@ -3001,7 +2977,7 @@
    "openalex",
    "W7236116605",
    "cp_289a793279ec7789",
-   "unchanged"
+   "updated"
   ],
   [
    "openalex",
@@ -3025,7 +3001,7 @@
    "openalex",
    "W7236593123",
    "cp_4b0bebcdb82a5f38",
-   "new_paper"
+   "updated"
   ],
   [
    "openalex",
@@ -3073,7 +3049,7 @@
    "openalex",
    "W7237016641",
    "cp_44669e998d0d29d5",
-   "unchanged"
+   "updated"
   ],
   [
    "openalex",
@@ -3101,6 +3077,12 @@
   ],
   [
    "openalex",
+   "W7237344406",
+   "cp_b845e57cb5fc239d",
+   "new_paper"
+  ],
+  [
+   "openalex",
    "W7237354605",
    "cp_c6152644b512a8dd",
    "updated"
@@ -3109,7 +3091,7 @@
    "openalex",
    "W7237367687",
    "cp_870cbc14985cc3a8",
-   "unchanged"
+   "updated"
   ],
   [
    "openalex",
@@ -3143,6 +3125,12 @@
   ],
   [
    "openalex",
+   "W7238774192",
+   "cp_f2950dcac5ecbc45",
+   "new_paper"
+  ],
+  [
+   "openalex",
    "W7238798774",
    "cp_095b3154b01b7d6a",
    "updated"
@@ -3169,24 +3157,66 @@
    "openalex",
    "W7239346586",
    "cp_75dc3da67e4dc822",
-   "new_paper"
+   "updated"
   ],
   [
    "openalex",
    "W7239398085",
    "cp_794c0ef7fca5ffc3",
-   "new_paper"
+   "updated"
   ],
   [
    "openalex",
    "W7239422279",
    "cp_2c2819a7b22351f1",
-   "new_paper"
+   "updated"
   ],
   [
    "openalex",
    "W7239437553",
    "cp_01cee06d9b283955",
+   "updated"
+  ],
+  [
+   "openalex",
+   "W7239751468",
+   "cp_7b9c9dcf3c7aaa96",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7239837118",
+   "cp_69c60c1b75c066a7",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7239849133",
+   "cp_0e2cfe2cb01f305d",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7239855644",
+   "cp_2845be1794c48094",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7239888283",
+   "cp_d353bc9f4439db67",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7239899259",
+   "cp_882e984aa5284335",
+   "new_paper"
+  ],
+  [
+   "openalex",
+   "W7239899890",
+   "cp_39787deb9b73aee7",
    "new_paper"
   ],
   [
@@ -3194,6 +3224,12 @@
    "42166990",
    "cp_33c55c50cca6b1fa",
    "unchanged"
+  ],
+  [
+   "pubmed",
+   "42361793",
+   "cp_dea1afc10d57d8b0",
+   "new_paper"
   ],
   [
    "pubmed",
@@ -3367,7 +3403,7 @@
    "pubmed",
    "42937545",
    "cp_8791bc0cc5347523",
-   "updated"
+   "unchanged"
   ],
   [
    "pubmed",
@@ -3407,80 +3443,14 @@
   ],
   [
    "pubmed",
-   "43000701",
-   "cp_799d4f2187a2f8e6",
-   "unchanged"
-  ],
-  [
-   "pubmed",
    "43007011",
    "cp_b0fe120ea9a7981c",
    "unchanged"
   ],
   [
    "pubmed",
-   "43010692",
-   "cp_be02509a16f40188",
-   "unchanged"
-  ],
-  [
-   "pubmed",
    "43013850",
    "cp_d23b86ca10437cc8",
-   "updated"
-  ],
-  [
-   "pubmed",
-   "43015262",
-   "cp_4e89d607429e97bb",
-   "unchanged"
-  ],
-  [
-   "pubmed",
-   "43015444",
-   "cp_2b15dff1f6d89459",
-   "unchanged"
-  ],
-  [
-   "pubmed",
-   "43018675",
-   "cp_5fa916572bfbbd89",
-   "unchanged"
-  ],
-  [
-   "pubmed",
-   "43019353",
-   "cp_207e64af202c73fb",
-   "unchanged"
-  ],
-  [
-   "pubmed",
-   "43019461",
-   "cp_c2c1c90dc94ce500",
-   "unchanged"
-  ],
-  [
-   "pubmed",
-   "43019535",
-   "cp_593d52e6e9f7897e",
-   "unchanged"
-  ],
-  [
-   "pubmed",
-   "43020024",
-   "cp_421f6eaf7250941e",
-   "unchanged"
-  ],
-  [
-   "pubmed",
-   "43020769",
-   "cp_452f84f281a0ee00",
-   "unchanged"
-  ],
-  [
-   "pubmed",
-   "43021171",
-   "cp_bc97b5cd05cbd778",
    "unchanged"
   ],
   [
@@ -3517,12 +3487,6 @@
    "pubmed",
    "43024942",
    "cp_9727b336e2dd4646",
-   "unchanged"
-  ],
-  [
-   "pubmed",
-   "43025408",
-   "cp_0736770f222060c3",
    "unchanged"
   ],
   [
@@ -3607,7 +3571,7 @@
    "pubmed",
    "43038458",
    "cp_d4716180a1055a1b",
-   "unchanged"
+   "updated"
   ],
   [
    "pubmed",
@@ -3713,12 +3677,6 @@
   ],
   [
    "pubmed",
-   "43051098",
-   "cp_5e7b785ed02b4177",
-   "unchanged"
-  ],
-  [
-   "pubmed",
    "43052216",
    "cp_193c4b48149de4a4",
    "unchanged"
@@ -3787,13 +3745,7 @@
    "pubmed",
    "43056402",
    "cp_0ace62c676de7663",
-   "unchanged"
-  ],
-  [
-   "pubmed",
-   "43056965",
-   "cp_612619a0ddb9ebf1",
-   "unchanged"
+   "updated"
   ],
   [
    "pubmed",
@@ -3835,7 +3787,7 @@
    "pubmed",
    "43060073",
    "cp_5c4d69dd65973b22",
-   "unchanged"
+   "updated"
   ],
   [
    "pubmed",
@@ -3937,13 +3889,13 @@
    "pubmed",
    "43070934",
    "cp_0c394351836681d8",
-   "unchanged"
+   "updated"
   ],
   [
    "pubmed",
    "43070947",
    "cp_9709c941880f9617",
-   "unchanged"
+   "updated"
   ],
   [
    "pubmed",
@@ -3967,7 +3919,7 @@
    "pubmed",
    "43071669",
    "cp_3778d44ee5a5f320",
-   "unchanged"
+   "updated"
   ],
   [
    "pubmed",
@@ -4009,7 +3961,7 @@
    "pubmed",
    "43074718",
    "cp_4f0014561bfcc4fb",
-   "updated"
+   "unchanged"
   ],
   [
    "pubmed",
@@ -4039,7 +3991,7 @@
    "pubmed",
    "43076971",
    "cp_d276d93395526d71",
-   "unchanged"
+   "updated"
   ],
   [
    "pubmed",
@@ -4051,157 +4003,285 @@
    "pubmed",
    "43078221",
    "cp_88ff69a39ba45a19",
-   "new_paper"
+   "unchanged"
   ],
   [
    "pubmed",
    "43078294",
    "cp_af022c9eaa20cb3f",
-   "new_paper"
+   "unchanged"
   ],
   [
    "pubmed",
    "43078306",
    "cp_0ca9dd6060eb4fcf",
-   "new_paper"
+   "unchanged"
   ],
   [
    "pubmed",
    "43079229",
    "cp_c5f63ade60e1ce6b",
-   "new_paper"
+   "updated"
   ],
   [
    "pubmed",
    "43080454",
    "cp_20c2830fbbfa24a6",
-   "new_paper"
+   "unchanged"
   ],
   [
    "pubmed",
    "43081926",
    "cp_ea77a54a9bea2520",
-   "new_paper"
+   "unchanged"
   ],
   [
    "pubmed",
    "43081974",
    "cp_2fe4c5e0322331b8",
+   "unchanged"
+  ],
+  [
+   "pubmed",
+   "43084021",
+   "cp_ef36c21d3d56054c",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43084595",
+   "cp_8cc64a416edbd962",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43084697",
+   "cp_81ff7c4d2900d93f",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43085079",
+   "cp_79242af26ece4e95",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43085562",
+   "cp_18943109ddd8b448",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43085680",
+   "cp_2b8b03e6cfbb5573",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43088553",
+   "cp_af5ec1e99f758904",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43088745",
+   "cp_a31079a514fa4a76",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43090181",
+   "cp_d8784be3844dead3",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43090555",
+   "cp_1a5f057b73e50fdd",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43090779",
+   "cp_3e952e5da9e41be9",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43091085",
+   "cp_f1860aaee867ec6b",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43091245",
+   "cp_72f01d80474a06b7",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43091825",
+   "cp_49dc5875ead52f3d",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43092639",
+   "cp_676c5b680be0e2dd",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43092677",
+   "cp_c5ce55652a3109ae",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43092761",
+   "cp_7c6c455e1616bfe6",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43093103",
+   "cp_bc04f3f2ba33da78",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43093118",
+   "cp_309f970fcb980a7f",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43093879",
+   "cp_5ad48241446b30e4",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43093890",
+   "cp_296efb0a5cb3745e",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43093898",
+   "cp_142447f3431476d7",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43093899",
+   "cp_289a793279ec7789",
+   "new_source"
+  ],
+  [
+   "pubmed",
+   "43094363",
+   "cp_60497ad026098538",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43095125",
+   "cp_9e8c7e1697d48f7a",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43095582",
+   "cp_a1a11899c994e251",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43095769",
+   "cp_41fcd3670580377b",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43095962",
+   "cp_e20e4619fa63f9ba",
+   "new_paper"
+  ],
+  [
+   "pubmed",
+   "43096923",
+   "cp_bda3554a12164c6c",
    "new_paper"
   ]
  ],
  "delta": {
-  "previous_run_id": "run_7adeade0f92d0c2d",
+  "previous_run_id": "run_05f0c8fec2f0b96f",
   "entered": [
-   "cp_37768ac94eb3b54a",
-   "cp_c07e96737752d56c"
+   "cp_2c2819a7b22351f1",
+   "cp_142447f3431476d7",
+   "cp_9e7fab24c15ad714",
+   "cp_846746b4bbdd2378",
+   "cp_69c60c1b75c066a7",
+   "cp_612a69f185885c85"
   ],
   "left": [
-   "cp_534267106b848dff",
-   "cp_c257c452008ca28c"
+   "cp_9c9f7a9fd5646d60",
+   "cp_8a4706e4a6f00bd0",
+   "cp_5b9a39957b4c00e1",
+   "cp_452f84f281a0ee00",
+   "cp_f9c98cb0ca292ed1",
+   "cp_c2c977e236f91d96"
   ],
   "moved": [
    {
-    "paper_id": "cp_eadec2c8322d675d",
-    "rank": 3,
-    "previous_rank": 2,
-    "change": -1
-   },
-   {
-    "paper_id": "cp_a0cc806d24ab1ffc",
-    "rank": 4,
-    "previous_rank": 3,
-    "change": -1
-   },
-   {
-    "paper_id": "cp_6bd78effdd5cb181",
-    "rank": 5,
-    "previous_rank": 4,
-    "change": -1
-   },
-   {
     "paper_id": "cp_c6937ea9e5732818",
-    "rank": 6,
-    "previous_rank": 5,
-    "change": -1
-   },
-   {
-    "paper_id": "cp_277069dadb1616be",
     "rank": 7,
     "previous_rank": 6,
     "change": -1
    },
    {
-    "paper_id": "cp_9c9f7a9fd5646d60",
+    "paper_id": "cp_277069dadb1616be",
     "rank": 8,
     "previous_rank": 7,
     "change": -1
    },
    {
-    "paper_id": "cp_0f6dc687645dbb74",
-    "rank": 9,
-    "previous_rank": 8,
-    "change": -1
-   },
-   {
-    "paper_id": "cp_0861513a7f1c4020",
-    "rank": 10,
-    "previous_rank": 9,
-    "change": -1
-   },
-   {
-    "paper_id": "cp_8a4706e4a6f00bd0",
+    "paper_id": "cp_5c4d69dd65973b22",
     "rank": 11,
-    "previous_rank": 10,
-    "change": -1
+    "previous_rank": 14,
+    "change": 3
    },
    {
     "paper_id": "cp_c5a6d1b8001ecc3c",
-    "rank": 12,
-    "previous_rank": 11,
-    "change": -1
-   },
-   {
-    "paper_id": "cp_1c50e01dba5053fd",
     "rank": 13,
     "previous_rank": 12,
     "change": -1
    },
    {
-    "paper_id": "cp_5c4d69dd65973b22",
-    "rank": 14,
+    "paper_id": "cp_8c79a8f364fa8fc0",
+    "rank": 20,
+    "previous_rank": 22,
+    "change": 2
+   },
+   {
+    "paper_id": "cp_1c50e01dba5053fd",
+    "rank": 22,
     "previous_rank": 13,
-    "change": -1
+    "change": -9
    },
    {
-    "paper_id": "cp_5b9a39957b4c00e1",
-    "rank": 15,
-    "previous_rank": 16,
-    "change": 1
-   },
-   {
-    "paper_id": "cp_9aee5d82a57b91fb",
-    "rank": 16,
-    "previous_rank": 14,
-    "change": -2
-   },
-   {
-    "paper_id": "cp_56e431fbcbefc687",
-    "rank": 18,
-    "previous_rank": 15,
-    "change": -3
-   },
-   {
-    "paper_id": "cp_f9c98cb0ca292ed1",
-    "rank": 23,
-    "previous_rank": 24,
-    "change": 1
-   },
-   {
-    "paper_id": "cp_c2c977e236f91d96",
+    "paper_id": "cp_c07e96737752d56c",
     "rank": 24,
     "previous_rank": 25,
     "change": 1
+   },
+   {
+    "paper_id": "cp_f0c8f0e83a11485f",
+    "rank": 25,
+    "previous_rank": 20,
+    "change": -5
    }
   ]
  },

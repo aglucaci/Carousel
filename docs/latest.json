@@ -1,12 +1,12 @@
 {
  "schema": "carousel.site/1",
- "generated_at_utc": "2026-11-25T22:10:42Z",
+ "generated_at_utc": "2026-11-26T22:09:06Z",
  "radars": [
   {
    "radar_id": "lab-default",
    "radar_name": "Evolution & Surveillance (lab default)",
-   "run_id": "run_05f0c8fec2f0b96f",
-   "started_at": "2026-11-25T22:09:52.586339Z",
+   "run_id": "run_f44981e4904a54e7",
+   "started_at": "2026-11-26T22:08:28.401005Z",
    "ranking_version": "0.2.0",
    "n_items": 25,
    "path": "radars/lab-default/latest.json"
