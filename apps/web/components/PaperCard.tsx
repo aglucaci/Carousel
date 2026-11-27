@@ -34,6 +34,7 @@ export function PaperMeta({ paper }: { paper: PaperSummary }) {
 }
 
 export function PaperCard({
+  paperId,
   rank,
   paper,
   features,
@@ -47,6 +48,7 @@ export function PaperCard({
   onDismiss,
   onWhy,
 }: {
+  paperId?: string;
   rank: number;
   paper: PaperSummary;
   features: Features;
@@ -62,7 +64,7 @@ export function PaperCard({
 }) {
   if (dismissed) {
     return (
-      <li data-testid="paper-card" data-dismissed="true" className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-border px-4 py-2 text-sm text-muted">
+      <li data-testid="paper-card" data-paper={paperId} data-dismissed="true" className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-border px-4 py-2 text-sm text-muted">
         <span className="min-w-0 truncate">
           Dismissed: <span className="italic">{paper.title}</span>. It won&apos;t be recommended again.
         </span>
@@ -73,7 +75,7 @@ export function PaperCard({
     );
   }
   return (
-    <li data-testid="paper-card" className="rounded-lg border border-border bg-surface p-4">
+    <li data-testid="paper-card" data-paper={paperId} className="rounded-lg border border-border bg-surface p-4">
       <div className="flex gap-3">
         <span className="w-6 shrink-0 pt-0.5 text-right font-mono text-sm text-muted" aria-label={`Rank ${rank}`}>
           {rank}

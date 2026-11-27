@@ -35,7 +35,9 @@ from carousel import feedback as fb
 from carousel.ranking import rank
 from carousel.ranking.explain import EXPLANATION_VERSION, explain
 from carousel.search import Embedder, HashingEmbedder, candidates_for_radar
+from carousel.ranking.transfer import transfer_context
 from carousel.search.citations import gather_citations, graph_features, read_candidate_references
+from carousel.search.lexical import matched_terms
 from carousel.search.candidates import CANDIDATES_VERSION
 
 DEFAULT_STORE = "carousel.db"
@@ -442,13 +444,19 @@ class Radar:
                     p = st.get(pid)
                     if p is not None:
                         pool[pid] = p
+            # ---- Method Transfer (task 35): the shared topic map as known now; pool papers naming a radar method ----
+            transfer, transfer_reason = transfer_context(st, self.radar_id, cfg.research_question or "", started)
+            method_hits: Set[str] = set()
+            if transfer is not None and cfg.method_terms():
+                method_hits = {pid for pid, p in pool.items() if matched_terms(p, cfg.method_terms())}
             cands = candidates_for_radar(cfg, [pool[k] for k in sorted(pool)], as_of=as_of, store=st,
-                                         embedder=emb, source_hits=hits, citation_hits=cite_hits)
+                                         embedder=emb, source_hits=hits, citation_hits=cite_hits, method_hits=method_hits)
             graph = None
             if citations is not None and citations["anchors"]:
                 read_candidate_references(st, oa, cands.ids(), started, citations["coverage"])
                 graph = graph_features(st, citations["anchors"], cands.ids(), started)
-            ranking = rank(cands, cfg, store=st, embedder=emb, top_n=top_n, feedback=feedback, graph=graph)
+            ranking = rank(cands, cfg, store=st, embedder=emb, top_n=top_n, feedback=feedback, graph=graph,
+                           transfer=transfer, transfer_reason=transfer_reason)
 
             # ---- enrich what was recommended: licensed full texts and annotations (Europe PMC) ----
             epmc = conns.get("europepmc")

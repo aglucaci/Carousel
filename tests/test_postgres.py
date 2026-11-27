@@ -166,7 +166,7 @@ class StoreImportTests(PostgresTestCase):
             orcid = c.execute(select(m.Author).where(m.Author.orcid == "0000-0002-1825-0097")).scalar_one()
             self.assertEqual((orcid.name, orcid.identity), ("Sara Lindqvist", "orcid"))
             run = c.execute(select(m.RecommendationRun).order_by(m.RecommendationRun.executed_at)).scalars().first()
-            self.assertEqual((run.radar_id, run.ranking_version), ("escape", "0.2.0"))
+            self.assertEqual((run.radar_id, run.ranking_version), ("escape", "0.3.0"))
             self.assertIsNotNone(run.radar_version_id)
             item = c.execute(select(m.RecommendationItem).where(m.RecommendationItem.run_id == run.id,
                                                                 m.RecommendationItem.rank == 1)).scalar_one()

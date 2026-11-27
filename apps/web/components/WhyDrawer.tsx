@@ -19,6 +19,7 @@ const CHANNELS: Record<string, string> = {
   semantic: "meaning match (embeddings)",
   source_query: "a source's own search",
   citation: "cites your seed or saved papers (OpenAlex)",
+  method: "names one of the radar's methods (Method Transfer)",
 };
 
 function channel(c: string) {
@@ -200,6 +201,20 @@ function Body({ e }: { e: Explanation }) {
         </p>
         {d.graph && <GraphLine g={d.graph} />}
       </Section>
+
+      {d.transfer?.status === "transfer" && (
+        <Section title="Method transfer: a hypothesis">
+          <p data-testid="transfer">
+            It uses <strong>{d.transfer.method}</strong>, one of this radar&apos;s methods, in {d.transfer.field}, a field far from
+            this radar&apos;s own papers (field distance <strong>{num(d.transfer.distance)}</strong>). It may apply to{" "}
+            {d.transfer.question ? <>your question “{d.transfer.question}”</> : "this radar's work"}: an idea to consider, not a
+            finding.
+          </p>
+          <blockquote className="mt-2 border-l-2 border-border pl-2 text-muted" data-testid="transfer-quote">
+            &ldquo;{d.transfer.quote}&rdquo; ({d.transfer.section ?? "abstract"}; quote checked against the paper&apos;s text)
+          </blockquote>
+        </Section>
+      )}
 
       <Section title="Novelty">
         {d.novelty_raw == null ? (

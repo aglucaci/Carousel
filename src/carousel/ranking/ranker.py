@@ -1,4 +1,4 @@
-"""Stages B-E of the recommendation engine (CAROUSEL_PLAN.md §4), ``ranking_version`` 0.2.0.
+"""Stages B-E of the recommendation engine (CAROUSEL_PLAN.md §4), ``ranking_version`` 0.3.0.
 
 Input: a :class:`~carousel.search.candidates.CandidateSet` and the radar.
 Output: a :class:`Ranking` whose every item carries the features that put it
@@ -33,9 +33,15 @@ Signals (each in [0, 1]):
 
 Version history: ``0.1.0`` relevance, novelty, method match, MMR, modes;
 ``0.2.0`` adds the graph term (task 32) and is otherwise identical: a radar
-without anchors with citation data ranks exactly as under 0.1.0.
+without anchors with citation data ranks exactly as under 0.1.0;
+``0.3.0`` adds ``discovery``, Method Transfer (task 35,
+:mod:`carousel.ranking.transfer`): a paper using a radar method from a
+distant field of the shared topic map, with a grounded quote, offered as a
+hypothesis (flag ``method_transfer_hypothesis``). Such a paper joins the
+selection pool whatever its relevance. Without a shared map fitted before the
+scan, ``discovery`` is inactive and ranking is as under 0.2.0.
 
-Momentum, discovery, and evidence are reported inactive with a reason, and
+Momentum and evidence are reported inactive with a reason, and
 the remaining weights are rescaled. Integrity problems are flags (retracted
 papers are already excluded upstream; ``corrected`` and
 ``expression_of_concern`` come from update notices, e.g. Crossref), never
@@ -64,17 +70,21 @@ from carousel.ingestion.dedup import is_notice, is_preprint
 from carousel.search.candidates import Candidate, CandidateSet, profile_text
 from carousel.search.embeddings import Embedder, Vector, _normalize, cosine, ensure_embeddings
 from carousel.search.lexical import matched_terms, paper_text
+from carousel.ranking.transfer import HYPOTHESIS_FLAG
+from carousel.ranking.transfer import discovery as transfer_discovery
 
 if TYPE_CHECKING:  # pragma: no cover
+    from carousel.ranking.transfer import TransferContext
     from carousel.core.config import RadarConfig
     from carousel.database.local import PaperStore
 
-RANKING_VERSION = "0.2.0"
+RANKING_VERSION = "0.3.0"
 
 MODES: Dict[str, Dict[str, Any]] = {
-    "focused": {"lambda": 0.85, "multipliers": {"relevance": 1.5, "novelty": 0.5, "method_match": 1.0}},
-    "balanced": {"lambda": 0.70, "multipliers": {"relevance": 1.0, "novelty": 1.0, "method_match": 1.0}},
-    "exploratory": {"lambda": 0.50, "multipliers": {"relevance": 0.75, "novelty": 1.75, "method_match": 1.25}},
+    "focused": {"lambda": 0.85, "multipliers": {"relevance": 1.5, "novelty": 0.5, "method_match": 1.0, "discovery": 0.5}},
+    "balanced": {"lambda": 0.70, "multipliers": {"relevance": 1.0, "novelty": 1.0, "method_match": 1.0, "discovery": 1.0}},
+    "exploratory": {"lambda": 0.50, "multipliers": {"relevance": 0.75, "novelty": 1.75, "method_match": 1.25,
+                                                     "discovery": 2.0}},
 }
 """Mode presets: MMR λ (higher = less diversity pressure) and weight multipliers."""
 
@@ -91,7 +101,7 @@ MIN_SELECTION_GATE = 0.25
 
 INACTIVE_REASONS = {
     "momentum": "needs run history and trend models (Phase 3)",
-    "discovery": "needs Method Transfer (Phase 4, task 35)",
+    "discovery": "needs the shared topic map (carousel topicmap fit) and the radar's methods_profile",
     "evidence": "needs evidence-grounded extraction (Phase 2)",
 }
 
@@ -254,6 +264,8 @@ def rank(
     mode: Optional[str] = None,
     feedback: Optional[Feedback] = None,
     graph: Optional[Dict[str, Dict[str, Any]]] = None,
+    transfer: Optional["TransferContext"] = None,
+    transfer_reason: Optional[str] = None,
 ) -> Ranking:
     """Score and select. ``history`` defaults to every paper in ``store``.
 
@@ -263,6 +275,8 @@ def rank(
 
     ``graph`` (from :func:`carousel.search.citations.graph_features`) adds the
     graph term to relevance; ``None`` leaves relevance as in 0.1.0.
+    ``transfer`` (from :func:`carousel.ranking.transfer.transfer_context`)
+    turns on ``discovery``; ``transfer_reason`` says why it is off otherwise.
     """
     mode = mode or radar.mode.value
     if mode not in MODES:
@@ -384,6 +398,20 @@ def rank(
         denom = min(METHOD_SATURATION, len(method_terms)) or 1
         methods[c.paper_id] = (min(1.0, len(hit) / denom), hit)
 
+    # ---- discovery: Method Transfer (task 35) ----
+    disc: Dict[str, Tuple[float, Dict[str, Any]]] = {}
+    if transfer is not None and method_terms:
+        same_space = embedder is not None and embedder.model_version == transfer.shared.embedder
+        for c in cands:
+            pid = c.paper_id
+            updates = {u.type for u in c.paper.updates}
+            pre = [f for f, hit in (("correction_or_notice", kinds[pid] == "notice"), ("retracted", bool(c.paper.is_retracted)),
+                                    ("corrected", bool(updates & CORRECTING_UPDATES)),
+                                    ("expression_of_concern", "expression_of_concern" in updates)) if hit]
+            prox = (graph.get(pid) or {}).get("value") if graph is not None else None
+            disc[pid] = transfer_discovery(transfer, c.paper, vectors.get(pid) if same_space else None, methods[pid][1],
+                                           prox, pre)
+
     # ---- active signals and weights ----
     inactive = dict(INACTIVE_REASONS)
     active = ["relevance"]
@@ -396,6 +424,13 @@ def rank(
         active.append("method_match")
     else:
         inactive["method_match"] = "radar has no methods_profile (or signal_profile.methods)"
+    if disc:
+        active.append("discovery")
+        inactive.pop("discovery", None)
+    elif transfer is not None:
+        inactive["discovery"] = "radar has no methods_profile (or signal_profile.methods)"
+    elif transfer_reason:
+        inactive["discovery"] = transfer_reason
     weights = effective_weights(radar, mode, active)
 
     # ---- score ----
@@ -427,6 +462,10 @@ def rank(
                     flags.append("novelty_insufficient_history")
             if "method_match" in active:
                 comp["method_match"] = methods[pid][0]
+            if "discovery" in active:
+                comp["discovery"] = disc[pid][0]
+                if disc[pid][0] > 0:
+                    flags.append(HYPOTHESIS_FLAG)
             if kinds[pid] == "notice":
                 flags.append("correction_or_notice")
             if c.paper.is_retracted:
@@ -454,8 +493,10 @@ def rank(
     def select(scores: Dict[str, Tuple[float, Any, Any]], gates: Dict[str, float]) -> Tuple[List[Tuple[str, float, float]], List[str]]:
         # MMR runs over the relevance-qualified pool first, so diversity pressure can't pull an off-topic paper
         # above relevant ones; the rest follow, in the same way, only if top_n isn't filled.
-        qualified = sorted(pid for pid in scores if gates[pid] >= MIN_SELECTION_GATE)
-        low = sorted(pid for pid in scores if gates[pid] < MIN_SELECTION_GATE)
+        # A method transfer is a deliberate reason to show a paper from another field: it qualifies whatever its relevance.
+        ok = {pid for pid in scores if gates[pid] >= MIN_SELECTION_GATE or (disc.get(pid) or (0.0,))[0] > 0}
+        qualified = sorted(ok)
+        low = sorted(pid for pid in scores if pid not in ok)
         low_ids = list(low)
         chosen: List[Tuple[str, float, float]] = []
         remaining = qualified
@@ -509,6 +550,7 @@ def rank(
                 "bm25_norm": _r(c.bm25 / max_bm25 if max_bm25 > 0 else 0.0),
                 "matched_terms": list(c.matched_terms),
                 **({"graph": graph.get(pid, {"status": "not_computed", "value": 0.0})} if graph is not None else {}),
+                **({"transfer": disc[pid][1]} if pid in disc else {}),
                 "novelty_raw": _r(nov_raw.get(pid)),
                 "novelty_gate": _r(gate[pid]),
                 "novelty": nov_detail.get(pid, {}),
@@ -541,6 +583,8 @@ def rank(
         "feedback_effect": feedback_effect,
         "relevance_formula": (f"({base_formula} + {GAMMA}*graph) / {1 + GAMMA}" if graph is not None else base_formula),
         "graph": _graph_stats(graph) if graph is not None else None,
+        "transfer": ({**transfer.describe(), "candidates": sum(1 for v in disc.values() if v[0] > 0)}
+                     if disc and transfer is not None else None),
         "candidate_stats": candidates.stats,
     }
     return Ranking(

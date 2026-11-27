@@ -68,10 +68,15 @@ def _check(c: Any, index: Mapping[str, Passage]) -> str:
     return ""
 
 
+def check_claim(claim: Any, passages: Sequence[Passage]) -> str:
+    """The same check for one claim outside an extraction: "" when it holds, else why it fails."""
+    return _check(claim, by_id(passages))
+
+
 def cited(fields: Mapping[str, FieldResult], passages: Sequence[Passage]) -> List[Passage]:
     """Only the passages some claim cites, in input order."""
     used = {e.passage_id for f in fields.values() for c in f.claims for e in c.evidence}
     return [p for p in passages if p.id in used]
 
 
-__all__ = ["MIN_QUOTE_CHARS", "cited", "ground"]
+__all__ = ["MIN_QUOTE_CHARS", "check_claim", "cited", "ground"]

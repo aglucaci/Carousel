@@ -1,0 +1,4678 @@
+{
+ "radars": [
+  {
+   "radar_id": "escape",
+   "title": "Flu escape",
+   "description": "",
+   "state": "active",
+   "schedule": null,
+   "owner_id": null,
+   "created_at": "2026-11-25 13:39:01.695318+00:00",
+   "updated_at": "2026-11-25 13:39:01.835530+00:00",
+   "config": {
+    "schema_version": 2,
+    "radar_id": "escape",
+    "radar_name": "Flu escape",
+    "description": "",
+    "sources": [
+     "pubmed"
+    ],
+    "queries": [
+     "influenza",
+     "hemagglutinin"
+    ],
+    "exclude": [],
+    "filters": {
+     "date_range": "last_7_days",
+     "language": "english"
+    },
+    "signal_profile": {},
+    "ranking": {
+     "relevance": 0.4,
+     "novelty": 0.2,
+     "method_match": 0.1,
+     "momentum": 0.15,
+     "discovery": 0.1,
+     "evidence": 0.15
+    },
+    "scoring": null,
+    "outputs": [
+     "dashboard"
+    ],
+    "mode": "balanced",
+    "research_question": "Which hemagglutinin mutations let influenza escape neutralizing antibodies?",
+    "methods_profile": [
+     "deep mutational scanning"
+    ],
+    "seed_papers": [],
+    "publication_types": [],
+    "source_queries": {}
+   },
+   "n_runs": 2,
+   "latest_run": {
+    "run_id": "run_eb84c6d1ad2731dd",
+    "radar_id": "escape",
+    "executed_at": "2026-11-26 06:00:00+00:00",
+    "finished_at": "2026-11-25 13:39:00.884077+00:00",
+    "as_of": "2026-11-26",
+    "status": "partial",
+    "ranking_version": "0.3.0",
+    "model_version": "carousel/hashing-v1-d256",
+    "mode": "balanced",
+    "config_hash": "86704dc684a2",
+    "n_observed": 0,
+    "n_candidates": 16,
+    "n_items": 16,
+    "coverage": [
+     {
+      "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+      "source": "pubmed",
+      "status": "no_connector"
+     }
+    ],
+    "notes": [],
+    "trigger": null,
+    "explanation_version": "3",
+    "feedback_effect": null,
+    "profile": {
+     "seeds_used": [],
+     "seeds_missing": [],
+     "feedback_negative": 0,
+     "feedback_positive": 0,
+     "feedback_unresolved": []
+    }
+   },
+   "next_scan_at": null,
+   "digest_emails": []
+  },
+  {
+   "radar_id": "soil",
+   "title": "soil",
+   "description": "",
+   "state": "active",
+   "schedule": null,
+   "owner_id": null,
+   "created_at": "2026-11-25 13:39:01.695318+00:00",
+   "updated_at": "2026-11-25 13:39:01.695318+00:00",
+   "config": null,
+   "n_runs": 1,
+   "latest_run": {
+    "run_id": "run_soil_0",
+    "radar_id": "soil",
+    "executed_at": "2026-11-24 00:00:00+00:00",
+    "finished_at": "2026-11-24 00:00:00+00:00",
+    "as_of": "2026-11-24",
+    "status": "ok",
+    "ranking_version": "0",
+    "model_version": null,
+    "mode": "balanced",
+    "config_hash": "x",
+    "n_observed": 40,
+    "n_candidates": 0,
+    "n_items": 0,
+    "coverage": [],
+    "notes": [],
+    "trigger": null,
+    "explanation_version": null,
+    "feedback_effect": null,
+    "profile": null
+   },
+   "next_scan_at": null,
+   "digest_emails": []
+  }
+ ],
+ "papers": {
+  "run": {
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "executed_at": "2026-11-26 06:00:00+00:00",
+   "finished_at": "2026-11-25 13:39:00.884077+00:00",
+   "as_of": "2026-11-26",
+   "status": "partial",
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "config_hash": "86704dc684a2",
+   "n_observed": 0,
+   "n_candidates": 16,
+   "n_items": 16,
+   "coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "notes": [],
+   "trigger": null,
+   "explanation_version": "3",
+   "feedback_effect": null,
+   "profile": {
+    "seeds_used": [],
+    "seeds_missing": [],
+    "feedback_negative": 0,
+    "feedback_positive": 0,
+    "feedback_unresolved": []
+   }
+  },
+  "items": [
+   {
+    "rank": 1,
+    "paper_id": "cp_1a40ec6ecdfc91a7",
+    "score": 0.564816,
+    "features": {
+     "novelty": 0.866667,
+     "discovery": 0.0,
+     "relevance": 0.509039,
+     "method_match": 1.0
+    },
+    "flags": [],
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "serology drift clade antigenic influenza vaccine",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "dismissed": false,
+    "saved": false,
+    "feedback": [],
+    "arrival": "newly_observed",
+    "why": "Matches influenza, hemagglutinin; unlike earlier papers; uses deep mutational scanning"
+   },
+   {
+    "rank": 2,
+    "paper_id": "cp_cd3eedd789ce6a80",
+    "score": 0.541353,
+    "features": {
+     "novelty": 0.666667,
+     "discovery": 0.0,
+     "relevance": 0.53378,
+     "method_match": 1.0
+    },
+    "flags": [],
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "clade antibody drift neutralizing influenza antigenic",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "dismissed": false,
+    "saved": false,
+    "feedback": [],
+    "arrival": "newly_observed",
+    "why": "Matches influenza, hemagglutinin; uses deep mutational scanning"
+   },
+   {
+    "rank": 3,
+    "paper_id": "cp_179c2302e91778b9",
+    "score": 0.25,
+    "features": {
+     "novelty": 1.0,
+     "discovery": 1.0,
+     "relevance": 0.0,
+     "method_match": 1.0
+    },
+    "flags": [
+     "method_transfer_hypothesis"
+    ],
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "network fungal carbon fixation exudate rhizosphere",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "dismissed": false,
+    "saved": false,
+    "feedback": [],
+    "arrival": "newly_observed",
+    "why": "Method transfer (a hypothesis): deep mutational scanning from fungal · microbiome · exudate; unlike earlier papers; uses deep mutational scanning"
+   },
+   {
+    "rank": 4,
+    "paper_id": "cp_8fba359bb23cc408",
+    "score": 0.476899,
+    "features": {
+     "novelty": 0.466667,
+     "discovery": 0.0,
+     "relevance": 0.505597,
+     "method_match": 1.0
+    },
+    "flags": [],
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "influenza strain clade antibody drift serology",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "dismissed": false,
+    "saved": false,
+    "feedback": [],
+    "arrival": "newly_observed",
+    "why": "Matches influenza, hemagglutinin; uses deep mutational scanning"
+   },
+   {
+    "rank": 5,
+    "paper_id": "cp_4cb9f712d035bea8",
+    "score": 0.341314,
+    "features": {
+     "novelty": 0.4,
+     "discovery": 0.0,
+     "relevance": 0.510945,
+     "method_match": 0.0
+    },
+    "flags": [],
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "influenza ferret antigenic antibody drift strain",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "dismissed": false,
+    "saved": false,
+    "feedback": [],
+    "arrival": "newly_observed",
+    "why": "Matches influenza, hemagglutinin"
+   },
+   {
+    "rank": 6,
+    "paper_id": "cp_cc413ef5e50c0f0f",
+    "score": 0.359303,
+    "features": {
+     "novelty": 0.6,
+     "discovery": 0.0,
+     "relevance": 0.477791,
+     "method_match": 0.0
+    },
+    "flags": [],
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "ferret serology neutralizing vaccine clade antigenic",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "dismissed": false,
+    "saved": false,
+    "feedback": [],
+    "arrival": "newly_observed",
+    "why": "Matches influenza, hemagglutinin"
+   },
+   {
+    "rank": 7,
+    "paper_id": "cp_6077eed9a7936fd7",
+    "score": 0.320605,
+    "features": {
+     "novelty": 0.2,
+     "discovery": 0.0,
+     "relevance": 0.54898,
+     "method_match": 0.0
+    },
+    "flags": [],
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "serology ferret vaccine clade neutralizing hemagglutinin",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "dismissed": false,
+    "saved": false,
+    "feedback": [],
+    "arrival": "newly_observed",
+    "why": "Matches influenza, hemagglutinin"
+   },
+   {
+    "rank": 8,
+    "paper_id": "cp_8710884918f9b5ef",
+    "score": 0.25,
+    "features": {
+     "novelty": 0.8,
+     "discovery": 1.0,
+     "relevance": 0.0,
+     "method_match": 1.0
+    },
+    "flags": [
+     "method_transfer_hypothesis"
+    ],
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "rhizosphere fixation fungal network nitrogen microbiome",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "dismissed": false,
+    "saved": false,
+    "feedback": [],
+    "arrival": "newly_observed",
+    "why": "Method transfer (a hypothesis): deep mutational scanning from fungal · microbiome · exudate; unlike earlier papers; uses deep mutational scanning"
+   },
+   {
+    "rank": 9,
+    "paper_id": "cp_8ec58304bdff1321",
+    "score": 0.330943,
+    "features": {
+     "novelty": 0.133333,
+     "discovery": 0.0,
+     "relevance": 0.59522,
+     "method_match": 0.0
+    },
+    "flags": [],
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "clade drift hemagglutinin antibody neutralizing influenza",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "dismissed": false,
+    "saved": false,
+    "feedback": [],
+    "arrival": "newly_observed",
+    "why": "Matches influenza, hemagglutinin"
+   },
+   {
+    "rank": 10,
+    "paper_id": "cp_82b6e280b1fe45ac",
+    "score": 0.25463,
+    "features": {
+     "novelty": 0.066667,
+     "discovery": 0.0,
+     "relevance": 0.482254,
+     "method_match": 0.0
+    },
+    "flags": [],
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "drift strain antigenic antibody influenza ferret",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "dismissed": false,
+    "saved": false,
+    "feedback": [],
+    "arrival": "newly_observed",
+    "why": "Matches influenza, hemagglutinin"
+   },
+   {
+    "rank": 11,
+    "paper_id": "cp_e04039bb42ea78d9",
+    "score": 0.198551,
+    "features": {
+     "novelty": 0.733333,
+     "discovery": 0.0,
+     "relevance": 0.245728,
+     "method_match": 0.0
+    },
+    "flags": [],
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "serology clade strain neutralizing antibody vaccine",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "dismissed": false,
+    "saved": false,
+    "feedback": [],
+    "arrival": "newly_observed",
+    "why": "Matches influenza"
+   },
+   {
+    "rank": 12,
+    "paper_id": "cp_57f3b9e4ddd560c8",
+    "score": 0.125,
+    "features": {
+     "novelty": 0.933333,
+     "discovery": 0.0,
+     "relevance": 0.0,
+     "method_match": 1.0
+    },
+    "flags": [
+     "corrected",
+     "low_relevance"
+    ],
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "rhizosphere network carbon nitrogen soil fixation",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "dismissed": false,
+    "saved": false,
+    "feedback": [],
+    "arrival": "newly_observed",
+    "why": "Unlike earlier papers; uses deep mutational scanning"
+   },
+   {
+    "rank": 13,
+    "paper_id": "cp_2416a3c4d5619de0",
+    "score": 0.013748,
+    "features": {
+     "novelty": 0.333333,
+     "discovery": 0.0,
+     "relevance": 0.021481,
+     "method_match": 0.0
+    },
+    "flags": [
+     "low_relevance"
+    ],
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "microbiome exudate rhizosphere network soil nitrogen",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "dismissed": false,
+    "saved": false,
+    "feedback": [],
+    "arrival": "newly_observed",
+    "why": "Ranked on relevance to the radar's profile"
+   },
+   {
+    "rank": 14,
+    "paper_id": "cp_a30abb018e09b3f3",
+    "score": 0.0,
+    "features": {
+     "novelty": 0.266667,
+     "discovery": 0.0,
+     "relevance": 0.0,
+     "method_match": 0.0
+    },
+    "flags": [
+     "low_relevance"
+    ],
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "exudate carbon fungal rhizosphere network root",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "dismissed": false,
+    "saved": false,
+    "feedback": [],
+    "arrival": "newly_observed",
+    "why": "Ranked on relevance to the radar's profile"
+   },
+   {
+    "rank": 15,
+    "paper_id": "cp_885f263f3b6dfa56",
+    "score": 0.0,
+    "features": {
+     "novelty": 0.533333,
+     "discovery": 0.0,
+     "relevance": 0.0,
+     "method_match": 0.0
+    },
+    "flags": [
+     "low_relevance"
+    ],
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "soil root rhizosphere network fungal exudate",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "dismissed": false,
+    "saved": false,
+    "feedback": [],
+    "arrival": "newly_observed",
+    "why": "Ranked on relevance to the radar's profile"
+   },
+   {
+    "rank": 16,
+    "paper_id": "cp_75b09143567a2d74",
+    "score": 0.012888,
+    "features": {
+     "novelty": 0.0,
+     "discovery": 0.0,
+     "relevance": 0.025777,
+     "method_match": 0.0
+    },
+    "flags": [
+     "low_relevance"
+    ],
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "network microbiome soil rhizosphere fixation carbon",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "dismissed": false,
+    "saved": false,
+    "feedback": [],
+    "arrival": "newly_observed",
+    "why": "Ranked on relevance to the radar's profile"
+   }
+  ],
+  "previous_run_id": "run_escape_0",
+  "arrivals": {
+   "newly_published": 0,
+   "newly_observed": 16,
+   "seen_before": 0
+  },
+  "events": {
+   "new_publication": 16
+  }
+ },
+ "paper": {
+  "cp_1a40ec6ecdfc91a7": {
+   "paper_id": "cp_1a40ec6ecdfc91a7",
+   "requested_id": "cp_1a40ec6ecdfc91a7",
+   "title": "serology drift clade antigenic influenza vaccine",
+   "abstract": "We used deep mutational scanning of hemagglutinin. hemagglutinin hemagglutinin drift antigenic serology influenza ferret serology vaccine drift antibody serology clade serology strain ferret antibody drift drift influenza antigenic hemagglutinin clade antigenic antibody hemagglutinin influenza clade vaccine drift.",
+   "venue": null,
+   "language": null,
+   "url": null,
+   "publication_types": [],
+   "is_retracted": false,
+   "dates": {
+    "published": "2026-11-20",
+    "first_online": null,
+    "preprint_posted": null,
+    "version": null,
+    "source_updated": null,
+    "earliest_public_date": "2026-11-20"
+   },
+   "first_seen": "2026-11-25 00:00:00+00:00",
+   "last_verified": "2026-11-25 00:00:00+00:00",
+   "identifiers": {},
+   "authors": [],
+   "sources": [
+    {
+     "provider": "pubmed",
+     "provider_id": "flu_dms_1",
+     "first_seen": "2026-11-25 00:00:00+00:00",
+     "last_checked": "2026-11-25 00:00:00+00:00"
+    }
+   ],
+   "provenance": {
+    "title": {
+     "source": "pubmed",
+     "source_id": "flu_dms_1",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "abstract": {
+     "source": "pubmed",
+     "source_id": "flu_dms_1",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "dates.published": {
+     "source": "pubmed",
+     "source_id": "flu_dms_1",
+     "observed_at": "2026-11-25T00:00:00Z"
+    }
+   },
+   "updates": [],
+   "relations": [],
+   "license": null,
+   "open_access": null,
+   "texts": [],
+   "versions": [],
+   "extractions": [
+    {
+     "provider": "rules",
+     "model_version": "rules-1",
+     "schema_version": "1",
+     "location": "local",
+     "coverage": {
+      "scope": "abstract_only",
+      "sources": [
+       {
+        "kind": "abstract"
+       }
+      ],
+      "passages": 2,
+      "statement": "Extracted from the title and abstract only; no full text is available under a reusable licence. Methods, limitations, and data availability are often reported only in the full text, so “not reported” here means not reported in the abstract."
+     },
+     "fields": {
+      "methods": {
+       "claims": [
+        {
+         "text": "deep mutational scanning",
+         "evidence": [
+          {
+           "quote": "deep mutational scanning",
+           "passage_id": "abstract:1"
+          }
+         ]
+        }
+       ],
+       "status": "reported"
+      },
+      "findings": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "objective": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "population": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "limitations": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "sample_size": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "study_design": {
+       "claims": [
+        {
+         "text": "Deep mutational scanning",
+         "evidence": [
+          {
+           "quote": "deep mutational scanning",
+           "passage_id": "abstract:1"
+          }
+         ]
+        }
+       ],
+       "status": "reported"
+      },
+      "data_availability": {
+       "claims": [],
+       "status": "not_reported"
+      }
+     },
+     "passages": [
+      {
+       "id": "abstract:1",
+       "text": "We used deep mutational scanning of hemagglutinin. hemagglutinin hemagglutinin drift antigenic serology influenza ferret serology vaccine drift antibody serology clade serology strain ferret antibody drift drift influenza antigenic hemagglutinin clade antigenic antibody hemagglutinin influenza clade vaccine drift.",
+       "section": "Abstract",
+       "text_class": "public"
+      }
+     ],
+     "rejected": 0,
+     "created_at": "2026-11-26 06:00:00+00:00"
+    }
+   ],
+   "annotations": []
+  },
+  "cp_cd3eedd789ce6a80": {
+   "paper_id": "cp_cd3eedd789ce6a80",
+   "requested_id": "cp_cd3eedd789ce6a80",
+   "title": "clade antibody drift neutralizing influenza antigenic",
+   "abstract": "We used deep mutational scanning of hemagglutinin. neutralizing vaccine neutralizing ferret hemagglutinin drift influenza neutralizing antibody clade ferret strain hemagglutinin antibody vaccine antibody vaccine vaccine influenza serology ferret hemagglutinin drift drift strain influenza clade drift neutralizing vaccine.",
+   "venue": null,
+   "language": null,
+   "url": null,
+   "publication_types": [],
+   "is_retracted": false,
+   "dates": {
+    "published": "2026-11-20",
+    "first_online": null,
+    "preprint_posted": null,
+    "version": null,
+    "source_updated": null,
+    "earliest_public_date": "2026-11-20"
+   },
+   "first_seen": "2026-11-25 00:00:00+00:00",
+   "last_verified": "2026-11-25 00:00:00+00:00",
+   "identifiers": {},
+   "authors": [],
+   "sources": [
+    {
+     "provider": "pubmed",
+     "provider_id": "flu_dms_2",
+     "first_seen": "2026-11-25 00:00:00+00:00",
+     "last_checked": "2026-11-25 00:00:00+00:00"
+    }
+   ],
+   "provenance": {
+    "title": {
+     "source": "pubmed",
+     "source_id": "flu_dms_2",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "abstract": {
+     "source": "pubmed",
+     "source_id": "flu_dms_2",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "dates.published": {
+     "source": "pubmed",
+     "source_id": "flu_dms_2",
+     "observed_at": "2026-11-25T00:00:00Z"
+    }
+   },
+   "updates": [],
+   "relations": [],
+   "license": null,
+   "open_access": null,
+   "texts": [],
+   "versions": [],
+   "extractions": [
+    {
+     "provider": "rules",
+     "model_version": "rules-1",
+     "schema_version": "1",
+     "location": "local",
+     "coverage": {
+      "scope": "abstract_only",
+      "sources": [
+       {
+        "kind": "abstract"
+       }
+      ],
+      "passages": 2,
+      "statement": "Extracted from the title and abstract only; no full text is available under a reusable licence. Methods, limitations, and data availability are often reported only in the full text, so “not reported” here means not reported in the abstract."
+     },
+     "fields": {
+      "methods": {
+       "claims": [
+        {
+         "text": "deep mutational scanning",
+         "evidence": [
+          {
+           "quote": "deep mutational scanning",
+           "passage_id": "abstract:1"
+          }
+         ]
+        }
+       ],
+       "status": "reported"
+      },
+      "findings": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "objective": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "population": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "limitations": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "sample_size": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "study_design": {
+       "claims": [
+        {
+         "text": "Deep mutational scanning",
+         "evidence": [
+          {
+           "quote": "deep mutational scanning",
+           "passage_id": "abstract:1"
+          }
+         ]
+        }
+       ],
+       "status": "reported"
+      },
+      "data_availability": {
+       "claims": [],
+       "status": "not_reported"
+      }
+     },
+     "passages": [
+      {
+       "id": "abstract:1",
+       "text": "We used deep mutational scanning of hemagglutinin. neutralizing vaccine neutralizing ferret hemagglutinin drift influenza neutralizing antibody clade ferret strain hemagglutinin antibody vaccine antibody vaccine vaccine influenza serology ferret hemagglutinin drift drift strain influenza clade drift neutralizing vaccine.",
+       "section": "Abstract",
+       "text_class": "public"
+      }
+     ],
+     "rejected": 0,
+     "created_at": "2026-11-26 06:00:00+00:00"
+    }
+   ],
+   "annotations": []
+  },
+  "cp_179c2302e91778b9": {
+   "paper_id": "cp_179c2302e91778b9",
+   "requested_id": "cp_179c2302e91778b9",
+   "title": "network fungal carbon fixation exudate rhizosphere",
+   "abstract": "We applied deep mutational scanning to a rhizosphere nitrogenase. root network fungal soil network rhizosphere fungal microbiome fixation microbiome nitrogen fixation microbiome fungal microbiome root microbiome nitrogen microbiome rhizosphere nitrogen soil rhizosphere nitrogen nitrogen carbon carbon nitrogen carbon exudate.",
+   "venue": null,
+   "language": null,
+   "url": null,
+   "publication_types": [],
+   "is_retracted": false,
+   "dates": {
+    "published": "2026-11-20",
+    "first_online": null,
+    "preprint_posted": null,
+    "version": null,
+    "source_updated": null,
+    "earliest_public_date": "2026-11-20"
+   },
+   "first_seen": "2026-11-25 00:00:00+00:00",
+   "last_verified": "2026-11-25 00:00:00+00:00",
+   "identifiers": {},
+   "authors": [],
+   "sources": [
+    {
+     "provider": "pubmed",
+     "provider_id": "soil_dms_1",
+     "first_seen": "2026-11-25 00:00:00+00:00",
+     "last_checked": "2026-11-25 00:00:00+00:00"
+    }
+   ],
+   "provenance": {
+    "title": {
+     "source": "pubmed",
+     "source_id": "soil_dms_1",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "abstract": {
+     "source": "pubmed",
+     "source_id": "soil_dms_1",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "dates.published": {
+     "source": "pubmed",
+     "source_id": "soil_dms_1",
+     "observed_at": "2026-11-25T00:00:00Z"
+    }
+   },
+   "updates": [],
+   "relations": [],
+   "license": null,
+   "open_access": null,
+   "texts": [],
+   "versions": [],
+   "extractions": [
+    {
+     "provider": "rules",
+     "model_version": "rules-1",
+     "schema_version": "1",
+     "location": "local",
+     "coverage": {
+      "scope": "abstract_only",
+      "sources": [
+       {
+        "kind": "abstract"
+       }
+      ],
+      "passages": 2,
+      "statement": "Extracted from the title and abstract only; no full text is available under a reusable licence. Methods, limitations, and data availability are often reported only in the full text, so “not reported” here means not reported in the abstract."
+     },
+     "fields": {
+      "methods": {
+       "claims": [
+        {
+         "text": "deep mutational scanning",
+         "evidence": [
+          {
+           "quote": "deep mutational scanning",
+           "passage_id": "abstract:1"
+          }
+         ]
+        }
+       ],
+       "status": "reported"
+      },
+      "findings": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "objective": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "population": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "limitations": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "sample_size": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "study_design": {
+       "claims": [
+        {
+         "text": "Deep mutational scanning",
+         "evidence": [
+          {
+           "quote": "deep mutational scanning",
+           "passage_id": "abstract:1"
+          }
+         ]
+        }
+       ],
+       "status": "reported"
+      },
+      "data_availability": {
+       "claims": [],
+       "status": "not_reported"
+      }
+     },
+     "passages": [
+      {
+       "id": "abstract:1",
+       "text": "We applied deep mutational scanning to a rhizosphere nitrogenase. root network fungal soil network rhizosphere fungal microbiome fixation microbiome nitrogen fixation microbiome fungal microbiome root microbiome nitrogen microbiome rhizosphere nitrogen soil rhizosphere nitrogen nitrogen carbon carbon nitrogen carbon exudate.",
+       "section": "Abstract",
+       "text_class": "public"
+      }
+     ],
+     "rejected": 0,
+     "created_at": "2026-11-26 06:00:00+00:00"
+    }
+   ],
+   "annotations": []
+  },
+  "cp_8fba359bb23cc408": {
+   "paper_id": "cp_8fba359bb23cc408",
+   "requested_id": "cp_8fba359bb23cc408",
+   "title": "influenza strain clade antibody drift serology",
+   "abstract": "We used deep mutational scanning of hemagglutinin. drift antibody antibody strain antigenic hemagglutinin neutralizing clade vaccine drift neutralizing serology antigenic drift antigenic clade hemagglutinin influenza antigenic influenza neutralizing antigenic serology ferret neutralizing antigenic antibody serology antigenic drift.",
+   "venue": null,
+   "language": null,
+   "url": null,
+   "publication_types": [],
+   "is_retracted": false,
+   "dates": {
+    "published": "2026-11-20",
+    "first_online": null,
+    "preprint_posted": null,
+    "version": null,
+    "source_updated": null,
+    "earliest_public_date": "2026-11-20"
+   },
+   "first_seen": "2026-11-25 00:00:00+00:00",
+   "last_verified": "2026-11-25 00:00:00+00:00",
+   "identifiers": {},
+   "authors": [],
+   "sources": [
+    {
+     "provider": "pubmed",
+     "provider_id": "flu_dms_0",
+     "first_seen": "2026-11-25 00:00:00+00:00",
+     "last_checked": "2026-11-25 00:00:00+00:00"
+    }
+   ],
+   "provenance": {
+    "title": {
+     "source": "pubmed",
+     "source_id": "flu_dms_0",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "abstract": {
+     "source": "pubmed",
+     "source_id": "flu_dms_0",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "dates.published": {
+     "source": "pubmed",
+     "source_id": "flu_dms_0",
+     "observed_at": "2026-11-25T00:00:00Z"
+    }
+   },
+   "updates": [],
+   "relations": [],
+   "license": null,
+   "open_access": null,
+   "texts": [],
+   "versions": [],
+   "extractions": [
+    {
+     "provider": "rules",
+     "model_version": "rules-1",
+     "schema_version": "1",
+     "location": "local",
+     "coverage": {
+      "scope": "abstract_only",
+      "sources": [
+       {
+        "kind": "abstract"
+       }
+      ],
+      "passages": 2,
+      "statement": "Extracted from the title and abstract only; no full text is available under a reusable licence. Methods, limitations, and data availability are often reported only in the full text, so “not reported” here means not reported in the abstract."
+     },
+     "fields": {
+      "methods": {
+       "claims": [
+        {
+         "text": "deep mutational scanning",
+         "evidence": [
+          {
+           "quote": "deep mutational scanning",
+           "passage_id": "abstract:1"
+          }
+         ]
+        }
+       ],
+       "status": "reported"
+      },
+      "findings": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "objective": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "population": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "limitations": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "sample_size": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "study_design": {
+       "claims": [
+        {
+         "text": "Deep mutational scanning",
+         "evidence": [
+          {
+           "quote": "deep mutational scanning",
+           "passage_id": "abstract:1"
+          }
+         ]
+        }
+       ],
+       "status": "reported"
+      },
+      "data_availability": {
+       "claims": [],
+       "status": "not_reported"
+      }
+     },
+     "passages": [
+      {
+       "id": "abstract:1",
+       "text": "We used deep mutational scanning of hemagglutinin. drift antibody antibody strain antigenic hemagglutinin neutralizing clade vaccine drift neutralizing serology antigenic drift antigenic clade hemagglutinin influenza antigenic influenza neutralizing antigenic serology ferret neutralizing antigenic antibody serology antigenic drift.",
+       "section": "Abstract",
+       "text_class": "public"
+      }
+     ],
+     "rejected": 0,
+     "created_at": "2026-11-26 06:00:00+00:00"
+    }
+   ],
+   "annotations": []
+  },
+  "cp_4cb9f712d035bea8": {
+   "paper_id": "cp_4cb9f712d035bea8",
+   "requested_id": "cp_4cb9f712d035bea8",
+   "title": "influenza ferret antigenic antibody drift strain",
+   "abstract": "antibody hemagglutinin serology antibody neutralizing serology serology antibody hemagglutinin clade drift strain serology influenza serology antigenic strain clade antibody drift hemagglutinin antibody antigenic neutralizing clade strain antigenic influenza clade antibody.",
+   "venue": null,
+   "language": null,
+   "url": null,
+   "publication_types": [],
+   "is_retracted": false,
+   "dates": {
+    "published": "2026-11-20",
+    "first_online": null,
+    "preprint_posted": null,
+    "version": null,
+    "source_updated": null,
+    "earliest_public_date": "2026-11-20"
+   },
+   "first_seen": "2026-11-25 00:00:00+00:00",
+   "last_verified": "2026-11-25 00:00:00+00:00",
+   "identifiers": {},
+   "authors": [],
+   "sources": [
+    {
+     "provider": "pubmed",
+     "provider_id": "flu_new_3",
+     "first_seen": "2026-11-25 00:00:00+00:00",
+     "last_checked": "2026-11-25 00:00:00+00:00"
+    }
+   ],
+   "provenance": {
+    "title": {
+     "source": "pubmed",
+     "source_id": "flu_new_3",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "abstract": {
+     "source": "pubmed",
+     "source_id": "flu_new_3",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "dates.published": {
+     "source": "pubmed",
+     "source_id": "flu_new_3",
+     "observed_at": "2026-11-25T00:00:00Z"
+    }
+   },
+   "updates": [],
+   "relations": [],
+   "license": null,
+   "open_access": null,
+   "texts": [],
+   "versions": [],
+   "extractions": [
+    {
+     "provider": "rules",
+     "model_version": "rules-1",
+     "schema_version": "1",
+     "location": "local",
+     "coverage": {
+      "scope": "abstract_only",
+      "sources": [
+       {
+        "kind": "abstract"
+       }
+      ],
+      "passages": 2,
+      "statement": "Extracted from the title and abstract only; no full text is available under a reusable licence. Methods, limitations, and data availability are often reported only in the full text, so “not reported” here means not reported in the abstract."
+     },
+     "fields": {
+      "methods": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "findings": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "objective": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "population": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "limitations": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "sample_size": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "study_design": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "data_availability": {
+       "claims": [],
+       "status": "not_reported"
+      }
+     },
+     "passages": [],
+     "rejected": 0,
+     "created_at": "2026-11-26 06:00:00+00:00"
+    }
+   ],
+   "annotations": []
+  },
+  "cp_cc413ef5e50c0f0f": {
+   "paper_id": "cp_cc413ef5e50c0f0f",
+   "requested_id": "cp_cc413ef5e50c0f0f",
+   "title": "ferret serology neutralizing vaccine clade antigenic",
+   "abstract": "antibody influenza ferret drift influenza antibody drift neutralizing influenza drift influenza clade antibody vaccine influenza neutralizing neutralizing vaccine vaccine neutralizing drift drift hemagglutinin ferret drift vaccine ferret clade serology serology.",
+   "venue": null,
+   "language": null,
+   "url": null,
+   "publication_types": [],
+   "is_retracted": false,
+   "dates": {
+    "published": "2026-11-20",
+    "first_online": null,
+    "preprint_posted": null,
+    "version": null,
+    "source_updated": null,
+    "earliest_public_date": "2026-11-20"
+   },
+   "first_seen": "2026-11-25 00:00:00+00:00",
+   "last_verified": "2026-11-25 00:00:00+00:00",
+   "identifiers": {},
+   "authors": [],
+   "sources": [
+    {
+     "provider": "pubmed",
+     "provider_id": "flu_new_2",
+     "first_seen": "2026-11-25 00:00:00+00:00",
+     "last_checked": "2026-11-25 00:00:00+00:00"
+    }
+   ],
+   "provenance": {
+    "title": {
+     "source": "pubmed",
+     "source_id": "flu_new_2",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "abstract": {
+     "source": "pubmed",
+     "source_id": "flu_new_2",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "dates.published": {
+     "source": "pubmed",
+     "source_id": "flu_new_2",
+     "observed_at": "2026-11-25T00:00:00Z"
+    }
+   },
+   "updates": [],
+   "relations": [],
+   "license": null,
+   "open_access": null,
+   "texts": [],
+   "versions": [],
+   "extractions": [
+    {
+     "provider": "rules",
+     "model_version": "rules-1",
+     "schema_version": "1",
+     "location": "local",
+     "coverage": {
+      "scope": "abstract_only",
+      "sources": [
+       {
+        "kind": "abstract"
+       }
+      ],
+      "passages": 2,
+      "statement": "Extracted from the title and abstract only; no full text is available under a reusable licence. Methods, limitations, and data availability are often reported only in the full text, so “not reported” here means not reported in the abstract."
+     },
+     "fields": {
+      "methods": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "findings": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "objective": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "population": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "limitations": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "sample_size": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "study_design": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "data_availability": {
+       "claims": [],
+       "status": "not_reported"
+      }
+     },
+     "passages": [],
+     "rejected": 0,
+     "created_at": "2026-11-26 06:00:00+00:00"
+    }
+   ],
+   "annotations": []
+  },
+  "cp_6077eed9a7936fd7": {
+   "paper_id": "cp_6077eed9a7936fd7",
+   "requested_id": "cp_6077eed9a7936fd7",
+   "title": "serology ferret vaccine clade neutralizing hemagglutinin",
+   "abstract": "ferret strain drift influenza antibody serology clade antibody hemagglutinin strain vaccine ferret ferret influenza strain hemagglutinin vaccine antibody strain influenza serology drift ferret antigenic hemagglutinin drift antigenic neutralizing antibody clade.",
+   "venue": null,
+   "language": null,
+   "url": null,
+   "publication_types": [],
+   "is_retracted": false,
+   "dates": {
+    "published": "2026-11-20",
+    "first_online": null,
+    "preprint_posted": null,
+    "version": null,
+    "source_updated": null,
+    "earliest_public_date": "2026-11-20"
+   },
+   "first_seen": "2026-11-25 00:00:00+00:00",
+   "last_verified": "2026-11-25 00:00:00+00:00",
+   "identifiers": {},
+   "authors": [],
+   "sources": [
+    {
+     "provider": "pubmed",
+     "provider_id": "flu_new_4",
+     "first_seen": "2026-11-25 00:00:00+00:00",
+     "last_checked": "2026-11-25 00:00:00+00:00"
+    }
+   ],
+   "provenance": {
+    "title": {
+     "source": "pubmed",
+     "source_id": "flu_new_4",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "abstract": {
+     "source": "pubmed",
+     "source_id": "flu_new_4",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "dates.published": {
+     "source": "pubmed",
+     "source_id": "flu_new_4",
+     "observed_at": "2026-11-25T00:00:00Z"
+    }
+   },
+   "updates": [],
+   "relations": [],
+   "license": null,
+   "open_access": null,
+   "texts": [],
+   "versions": [],
+   "extractions": [
+    {
+     "provider": "rules",
+     "model_version": "rules-1",
+     "schema_version": "1",
+     "location": "local",
+     "coverage": {
+      "scope": "abstract_only",
+      "sources": [
+       {
+        "kind": "abstract"
+       }
+      ],
+      "passages": 2,
+      "statement": "Extracted from the title and abstract only; no full text is available under a reusable licence. Methods, limitations, and data availability are often reported only in the full text, so “not reported” here means not reported in the abstract."
+     },
+     "fields": {
+      "methods": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "findings": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "objective": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "population": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "limitations": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "sample_size": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "study_design": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "data_availability": {
+       "claims": [],
+       "status": "not_reported"
+      }
+     },
+     "passages": [],
+     "rejected": 0,
+     "created_at": "2026-11-26 06:00:00+00:00"
+    }
+   ],
+   "annotations": []
+  },
+  "cp_8710884918f9b5ef": {
+   "paper_id": "cp_8710884918f9b5ef",
+   "requested_id": "cp_8710884918f9b5ef",
+   "title": "rhizosphere fixation fungal network nitrogen microbiome",
+   "abstract": "Deep mutational scanning of a fungal network enzyme mapped tolerance. exudate root network fixation fungal exudate fixation root soil microbiome network fungal root carbon carbon exudate root rhizosphere exudate carbon root rhizosphere fixation microbiome network fungal rhizosphere carbon exudate root.",
+   "venue": null,
+   "language": null,
+   "url": null,
+   "publication_types": [],
+   "is_retracted": false,
+   "dates": {
+    "published": "2026-11-20",
+    "first_online": null,
+    "preprint_posted": null,
+    "version": null,
+    "source_updated": null,
+    "earliest_public_date": "2026-11-20"
+   },
+   "first_seen": "2026-11-25 00:00:00+00:00",
+   "last_verified": "2026-11-25 00:00:00+00:00",
+   "identifiers": {},
+   "authors": [],
+   "sources": [
+    {
+     "provider": "pubmed",
+     "provider_id": "soil_dms_2",
+     "first_seen": "2026-11-25 00:00:00+00:00",
+     "last_checked": "2026-11-25 00:00:00+00:00"
+    }
+   ],
+   "provenance": {
+    "title": {
+     "source": "pubmed",
+     "source_id": "soil_dms_2",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "abstract": {
+     "source": "pubmed",
+     "source_id": "soil_dms_2",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "dates.published": {
+     "source": "pubmed",
+     "source_id": "soil_dms_2",
+     "observed_at": "2026-11-25T00:00:00Z"
+    }
+   },
+   "updates": [],
+   "relations": [],
+   "license": null,
+   "open_access": null,
+   "texts": [],
+   "versions": [],
+   "extractions": [
+    {
+     "provider": "rules",
+     "model_version": "rules-1",
+     "schema_version": "1",
+     "location": "local",
+     "coverage": {
+      "scope": "abstract_only",
+      "sources": [
+       {
+        "kind": "abstract"
+       }
+      ],
+      "passages": 2,
+      "statement": "Extracted from the title and abstract only; no full text is available under a reusable licence. Methods, limitations, and data availability are often reported only in the full text, so “not reported” here means not reported in the abstract."
+     },
+     "fields": {
+      "methods": {
+       "claims": [
+        {
+         "text": "Deep mutational scanning",
+         "evidence": [
+          {
+           "quote": "Deep mutational scanning",
+           "passage_id": "abstract:1"
+          }
+         ]
+        }
+       ],
+       "status": "reported"
+      },
+      "findings": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "objective": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "population": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "limitations": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "sample_size": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "study_design": {
+       "claims": [
+        {
+         "text": "Deep mutational scanning",
+         "evidence": [
+          {
+           "quote": "Deep mutational scanning",
+           "passage_id": "abstract:1"
+          }
+         ]
+        }
+       ],
+       "status": "reported"
+      },
+      "data_availability": {
+       "claims": [],
+       "status": "not_reported"
+      }
+     },
+     "passages": [
+      {
+       "id": "abstract:1",
+       "text": "Deep mutational scanning of a fungal network enzyme mapped tolerance. exudate root network fixation fungal exudate fixation root soil microbiome network fungal root carbon carbon exudate root rhizosphere exudate carbon root rhizosphere fixation microbiome network fungal rhizosphere carbon exudate root.",
+       "section": "Abstract",
+       "text_class": "public"
+      }
+     ],
+     "rejected": 0,
+     "created_at": "2026-11-26 06:00:00+00:00"
+    }
+   ],
+   "annotations": []
+  },
+  "cp_8ec58304bdff1321": {
+   "paper_id": "cp_8ec58304bdff1321",
+   "requested_id": "cp_8ec58304bdff1321",
+   "title": "clade drift hemagglutinin antibody neutralizing influenza",
+   "abstract": "antibody vaccine hemagglutinin drift antigenic serology vaccine vaccine hemagglutinin serology clade vaccine strain influenza antigenic hemagglutinin strain antigenic antibody hemagglutinin influenza clade serology neutralizing serology ferret drift antibody clade antigenic.",
+   "venue": null,
+   "language": null,
+   "url": null,
+   "publication_types": [],
+   "is_retracted": false,
+   "dates": {
+    "published": "2026-11-20",
+    "first_online": null,
+    "preprint_posted": null,
+    "version": null,
+    "source_updated": null,
+    "earliest_public_date": "2026-11-20"
+   },
+   "first_seen": "2026-11-25 00:00:00+00:00",
+   "last_verified": "2026-11-25 00:00:00+00:00",
+   "identifiers": {},
+   "authors": [],
+   "sources": [
+    {
+     "provider": "pubmed",
+     "provider_id": "flu_new_0",
+     "first_seen": "2026-11-25 00:00:00+00:00",
+     "last_checked": "2026-11-25 00:00:00+00:00"
+    }
+   ],
+   "provenance": {
+    "title": {
+     "source": "pubmed",
+     "source_id": "flu_new_0",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "abstract": {
+     "source": "pubmed",
+     "source_id": "flu_new_0",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "dates.published": {
+     "source": "pubmed",
+     "source_id": "flu_new_0",
+     "observed_at": "2026-11-25T00:00:00Z"
+    }
+   },
+   "updates": [],
+   "relations": [],
+   "license": null,
+   "open_access": null,
+   "texts": [],
+   "versions": [],
+   "extractions": [
+    {
+     "provider": "rules",
+     "model_version": "rules-1",
+     "schema_version": "1",
+     "location": "local",
+     "coverage": {
+      "scope": "abstract_only",
+      "sources": [
+       {
+        "kind": "abstract"
+       }
+      ],
+      "passages": 2,
+      "statement": "Extracted from the title and abstract only; no full text is available under a reusable licence. Methods, limitations, and data availability are often reported only in the full text, so “not reported” here means not reported in the abstract."
+     },
+     "fields": {
+      "methods": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "findings": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "objective": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "population": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "limitations": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "sample_size": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "study_design": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "data_availability": {
+       "claims": [],
+       "status": "not_reported"
+      }
+     },
+     "passages": [],
+     "rejected": 0,
+     "created_at": "2026-11-26 06:00:00+00:00"
+    }
+   ],
+   "annotations": []
+  },
+  "cp_82b6e280b1fe45ac": {
+   "paper_id": "cp_82b6e280b1fe45ac",
+   "requested_id": "cp_82b6e280b1fe45ac",
+   "title": "drift strain antigenic antibody influenza ferret",
+   "abstract": "influenza serology clade strain antibody ferret serology influenza vaccine neutralizing hemagglutinin clade serology serology serology vaccine antigenic clade vaccine drift antigenic drift hemagglutinin serology drift vaccine vaccine ferret antibody antigenic.",
+   "venue": null,
+   "language": null,
+   "url": null,
+   "publication_types": [],
+   "is_retracted": false,
+   "dates": {
+    "published": "2026-11-20",
+    "first_online": null,
+    "preprint_posted": null,
+    "version": null,
+    "source_updated": null,
+    "earliest_public_date": "2026-11-20"
+   },
+   "first_seen": "2026-11-25 00:00:00+00:00",
+   "last_verified": "2026-11-25 00:00:00+00:00",
+   "identifiers": {},
+   "authors": [],
+   "sources": [
+    {
+     "provider": "pubmed",
+     "provider_id": "flu_new_1",
+     "first_seen": "2026-11-25 00:00:00+00:00",
+     "last_checked": "2026-11-25 00:00:00+00:00"
+    }
+   ],
+   "provenance": {
+    "title": {
+     "source": "pubmed",
+     "source_id": "flu_new_1",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "abstract": {
+     "source": "pubmed",
+     "source_id": "flu_new_1",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "dates.published": {
+     "source": "pubmed",
+     "source_id": "flu_new_1",
+     "observed_at": "2026-11-25T00:00:00Z"
+    }
+   },
+   "updates": [],
+   "relations": [],
+   "license": null,
+   "open_access": null,
+   "texts": [],
+   "versions": [],
+   "extractions": [
+    {
+     "provider": "rules",
+     "model_version": "rules-1",
+     "schema_version": "1",
+     "location": "local",
+     "coverage": {
+      "scope": "abstract_only",
+      "sources": [
+       {
+        "kind": "abstract"
+       }
+      ],
+      "passages": 2,
+      "statement": "Extracted from the title and abstract only; no full text is available under a reusable licence. Methods, limitations, and data availability are often reported only in the full text, so “not reported” here means not reported in the abstract."
+     },
+     "fields": {
+      "methods": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "findings": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "objective": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "population": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "limitations": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "sample_size": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "study_design": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "data_availability": {
+       "claims": [],
+       "status": "not_reported"
+      }
+     },
+     "passages": [],
+     "rejected": 0,
+     "created_at": "2026-11-26 06:00:00+00:00"
+    }
+   ],
+   "annotations": []
+  },
+  "cp_e04039bb42ea78d9": {
+   "paper_id": "cp_e04039bb42ea78d9",
+   "requested_id": "cp_e04039bb42ea78d9",
+   "title": "serology clade strain neutralizing antibody vaccine",
+   "abstract": "strain influenza antibody antibody clade drift serology serology vaccine influenza vaccine ferret clade vaccine clade ferret serology drift clade antibody neutralizing vaccine ferret serology ferret strain strain clade vaccine neutralizing.",
+   "venue": null,
+   "language": null,
+   "url": null,
+   "publication_types": [],
+   "is_retracted": false,
+   "dates": {
+    "published": "2026-11-20",
+    "first_online": null,
+    "preprint_posted": null,
+    "version": null,
+    "source_updated": null,
+    "earliest_public_date": "2026-11-20"
+   },
+   "first_seen": "2026-11-25 00:00:00+00:00",
+   "last_verified": "2026-11-25 00:00:00+00:00",
+   "identifiers": {},
+   "authors": [],
+   "sources": [
+    {
+     "provider": "pubmed",
+     "provider_id": "flu_new_5",
+     "first_seen": "2026-11-25 00:00:00+00:00",
+     "last_checked": "2026-11-25 00:00:00+00:00"
+    }
+   ],
+   "provenance": {
+    "title": {
+     "source": "pubmed",
+     "source_id": "flu_new_5",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "abstract": {
+     "source": "pubmed",
+     "source_id": "flu_new_5",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "dates.published": {
+     "source": "pubmed",
+     "source_id": "flu_new_5",
+     "observed_at": "2026-11-25T00:00:00Z"
+    }
+   },
+   "updates": [],
+   "relations": [],
+   "license": null,
+   "open_access": null,
+   "texts": [],
+   "versions": [],
+   "extractions": [
+    {
+     "provider": "rules",
+     "model_version": "rules-1",
+     "schema_version": "1",
+     "location": "local",
+     "coverage": {
+      "scope": "abstract_only",
+      "sources": [
+       {
+        "kind": "abstract"
+       }
+      ],
+      "passages": 2,
+      "statement": "Extracted from the title and abstract only; no full text is available under a reusable licence. Methods, limitations, and data availability are often reported only in the full text, so “not reported” here means not reported in the abstract."
+     },
+     "fields": {
+      "methods": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "findings": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "objective": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "population": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "limitations": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "sample_size": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "study_design": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "data_availability": {
+       "claims": [],
+       "status": "not_reported"
+      }
+     },
+     "passages": [],
+     "rejected": 0,
+     "created_at": "2026-11-26 06:00:00+00:00"
+    }
+   ],
+   "annotations": []
+  },
+  "cp_57f3b9e4ddd560c8": {
+   "paper_id": "cp_57f3b9e4ddd560c8",
+   "requested_id": "cp_57f3b9e4ddd560c8",
+   "title": "rhizosphere network carbon nitrogen soil fixation",
+   "abstract": "Deep mutational scanning of root exudate transporters. fixation carbon fixation fungal exudate root rhizosphere fixation network carbon rhizosphere fungal fixation root network fixation rhizosphere rhizosphere network rhizosphere fungal root carbon soil nitrogen soil exudate network rhizosphere fungal.",
+   "venue": null,
+   "language": null,
+   "url": null,
+   "publication_types": [],
+   "is_retracted": false,
+   "dates": {
+    "published": "2026-11-20",
+    "first_online": null,
+    "preprint_posted": null,
+    "version": null,
+    "source_updated": null,
+    "earliest_public_date": "2026-11-20"
+   },
+   "first_seen": "2026-11-25 00:00:00+00:00",
+   "last_verified": "2026-11-25 00:00:00+00:00",
+   "identifiers": {},
+   "authors": [],
+   "sources": [
+    {
+     "provider": "pubmed",
+     "provider_id": "soil_dms_corr",
+     "first_seen": "2026-11-25 00:00:00+00:00",
+     "last_checked": "2026-11-25 00:00:00+00:00"
+    }
+   ],
+   "provenance": {
+    "title": {
+     "source": "pubmed",
+     "source_id": "soil_dms_corr",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "abstract": {
+     "source": "pubmed",
+     "source_id": "soil_dms_corr",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "dates.published": {
+     "source": "pubmed",
+     "source_id": "soil_dms_corr",
+     "observed_at": "2026-11-25T00:00:00Z"
+    }
+   },
+   "updates": [
+    {
+     "via": "pubmed",
+     "date": null,
+     "type": "correction",
+     "label": null,
+     "notice_doi": "10.1000/carousel.correction",
+     "asserted_by": null
+    }
+   ],
+   "relations": [],
+   "license": null,
+   "open_access": null,
+   "texts": [],
+   "versions": [],
+   "extractions": [
+    {
+     "provider": "rules",
+     "model_version": "rules-1",
+     "schema_version": "1",
+     "location": "local",
+     "coverage": {
+      "scope": "abstract_only",
+      "sources": [
+       {
+        "kind": "abstract"
+       }
+      ],
+      "passages": 2,
+      "statement": "Extracted from the title and abstract only; no full text is available under a reusable licence. Methods, limitations, and data availability are often reported only in the full text, so “not reported” here means not reported in the abstract."
+     },
+     "fields": {
+      "methods": {
+       "claims": [
+        {
+         "text": "Deep mutational scanning",
+         "evidence": [
+          {
+           "quote": "Deep mutational scanning",
+           "passage_id": "abstract:1"
+          }
+         ]
+        }
+       ],
+       "status": "reported"
+      },
+      "findings": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "objective": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "population": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "limitations": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "sample_size": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "study_design": {
+       "claims": [
+        {
+         "text": "Deep mutational scanning",
+         "evidence": [
+          {
+           "quote": "Deep mutational scanning",
+           "passage_id": "abstract:1"
+          }
+         ]
+        }
+       ],
+       "status": "reported"
+      },
+      "data_availability": {
+       "claims": [],
+       "status": "not_reported"
+      }
+     },
+     "passages": [
+      {
+       "id": "abstract:1",
+       "text": "Deep mutational scanning of root exudate transporters. fixation carbon fixation fungal exudate root rhizosphere fixation network carbon rhizosphere fungal fixation root network fixation rhizosphere rhizosphere network rhizosphere fungal root carbon soil nitrogen soil exudate network rhizosphere fungal.",
+       "section": "Abstract",
+       "text_class": "public"
+      }
+     ],
+     "rejected": 0,
+     "created_at": "2026-11-26 06:00:00+00:00"
+    }
+   ],
+   "annotations": []
+  },
+  "cp_2416a3c4d5619de0": {
+   "paper_id": "cp_2416a3c4d5619de0",
+   "requested_id": "cp_2416a3c4d5619de0",
+   "title": "microbiome exudate rhizosphere network soil nitrogen",
+   "abstract": "exudate soil exudate fixation network fungal rhizosphere microbiome soil rhizosphere exudate nitrogen fungal fungal microbiome fixation soil soil fungal soil exudate exudate exudate nitrogen microbiome soil nitrogen carbon exudate nitrogen.",
+   "venue": null,
+   "language": null,
+   "url": null,
+   "publication_types": [],
+   "is_retracted": false,
+   "dates": {
+    "published": "2026-11-20",
+    "first_online": null,
+    "preprint_posted": null,
+    "version": null,
+    "source_updated": null,
+    "earliest_public_date": "2026-11-20"
+   },
+   "first_seen": "2026-11-25 00:00:00+00:00",
+   "last_verified": "2026-11-25 00:00:00+00:00",
+   "identifiers": {},
+   "authors": [],
+   "sources": [
+    {
+     "provider": "pubmed",
+     "provider_id": "soil_new_1",
+     "first_seen": "2026-11-25 00:00:00+00:00",
+     "last_checked": "2026-11-25 00:00:00+00:00"
+    }
+   ],
+   "provenance": {
+    "title": {
+     "source": "pubmed",
+     "source_id": "soil_new_1",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "abstract": {
+     "source": "pubmed",
+     "source_id": "soil_new_1",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "dates.published": {
+     "source": "pubmed",
+     "source_id": "soil_new_1",
+     "observed_at": "2026-11-25T00:00:00Z"
+    }
+   },
+   "updates": [],
+   "relations": [],
+   "license": null,
+   "open_access": null,
+   "texts": [],
+   "versions": [],
+   "extractions": [
+    {
+     "provider": "rules",
+     "model_version": "rules-1",
+     "schema_version": "1",
+     "location": "local",
+     "coverage": {
+      "scope": "abstract_only",
+      "sources": [
+       {
+        "kind": "abstract"
+       }
+      ],
+      "passages": 2,
+      "statement": "Extracted from the title and abstract only; no full text is available under a reusable licence. Methods, limitations, and data availability are often reported only in the full text, so “not reported” here means not reported in the abstract."
+     },
+     "fields": {
+      "methods": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "findings": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "objective": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "population": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "limitations": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "sample_size": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "study_design": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "data_availability": {
+       "claims": [],
+       "status": "not_reported"
+      }
+     },
+     "passages": [],
+     "rejected": 0,
+     "created_at": "2026-11-26 06:00:00+00:00"
+    }
+   ],
+   "annotations": []
+  },
+  "cp_a30abb018e09b3f3": {
+   "paper_id": "cp_a30abb018e09b3f3",
+   "requested_id": "cp_a30abb018e09b3f3",
+   "title": "exudate carbon fungal rhizosphere network root",
+   "abstract": "root root exudate microbiome nitrogen fungal fungal nitrogen soil rhizosphere root fixation root carbon nitrogen carbon network nitrogen carbon nitrogen soil fixation soil exudate rhizosphere exudate network fixation microbiome fungal.",
+   "venue": null,
+   "language": null,
+   "url": null,
+   "publication_types": [],
+   "is_retracted": false,
+   "dates": {
+    "published": "2026-11-20",
+    "first_online": null,
+    "preprint_posted": null,
+    "version": null,
+    "source_updated": null,
+    "earliest_public_date": "2026-11-20"
+   },
+   "first_seen": "2026-11-25 00:00:00+00:00",
+   "last_verified": "2026-11-25 00:00:00+00:00",
+   "identifiers": {},
+   "authors": [],
+   "sources": [
+    {
+     "provider": "pubmed",
+     "provider_id": "soil_new_3",
+     "first_seen": "2026-11-25 00:00:00+00:00",
+     "last_checked": "2026-11-25 00:00:00+00:00"
+    }
+   ],
+   "provenance": {
+    "title": {
+     "source": "pubmed",
+     "source_id": "soil_new_3",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "abstract": {
+     "source": "pubmed",
+     "source_id": "soil_new_3",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "dates.published": {
+     "source": "pubmed",
+     "source_id": "soil_new_3",
+     "observed_at": "2026-11-25T00:00:00Z"
+    }
+   },
+   "updates": [],
+   "relations": [],
+   "license": null,
+   "open_access": null,
+   "texts": [],
+   "versions": [],
+   "extractions": [
+    {
+     "provider": "rules",
+     "model_version": "rules-1",
+     "schema_version": "1",
+     "location": "local",
+     "coverage": {
+      "scope": "abstract_only",
+      "sources": [
+       {
+        "kind": "abstract"
+       }
+      ],
+      "passages": 2,
+      "statement": "Extracted from the title and abstract only; no full text is available under a reusable licence. Methods, limitations, and data availability are often reported only in the full text, so “not reported” here means not reported in the abstract."
+     },
+     "fields": {
+      "methods": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "findings": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "objective": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "population": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "limitations": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "sample_size": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "study_design": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "data_availability": {
+       "claims": [],
+       "status": "not_reported"
+      }
+     },
+     "passages": [],
+     "rejected": 0,
+     "created_at": "2026-11-26 06:00:00+00:00"
+    }
+   ],
+   "annotations": []
+  },
+  "cp_885f263f3b6dfa56": {
+   "paper_id": "cp_885f263f3b6dfa56",
+   "requested_id": "cp_885f263f3b6dfa56",
+   "title": "soil root rhizosphere network fungal exudate",
+   "abstract": "root nitrogen exudate network root soil nitrogen network fixation fixation root fixation network fungal network exudate root root rhizosphere carbon fungal nitrogen microbiome fungal exudate rhizosphere nitrogen rhizosphere network fungal.",
+   "venue": null,
+   "language": null,
+   "url": null,
+   "publication_types": [],
+   "is_retracted": false,
+   "dates": {
+    "published": "2026-11-20",
+    "first_online": null,
+    "preprint_posted": null,
+    "version": null,
+    "source_updated": null,
+    "earliest_public_date": "2026-11-20"
+   },
+   "first_seen": "2026-11-25 00:00:00+00:00",
+   "last_verified": "2026-11-25 00:00:00+00:00",
+   "identifiers": {},
+   "authors": [],
+   "sources": [
+    {
+     "provider": "pubmed",
+     "provider_id": "soil_new_0",
+     "first_seen": "2026-11-25 00:00:00+00:00",
+     "last_checked": "2026-11-25 00:00:00+00:00"
+    }
+   ],
+   "provenance": {
+    "title": {
+     "source": "pubmed",
+     "source_id": "soil_new_0",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "abstract": {
+     "source": "pubmed",
+     "source_id": "soil_new_0",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "dates.published": {
+     "source": "pubmed",
+     "source_id": "soil_new_0",
+     "observed_at": "2026-11-25T00:00:00Z"
+    }
+   },
+   "updates": [],
+   "relations": [],
+   "license": null,
+   "open_access": null,
+   "texts": [],
+   "versions": [],
+   "extractions": [
+    {
+     "provider": "rules",
+     "model_version": "rules-1",
+     "schema_version": "1",
+     "location": "local",
+     "coverage": {
+      "scope": "abstract_only",
+      "sources": [
+       {
+        "kind": "abstract"
+       }
+      ],
+      "passages": 2,
+      "statement": "Extracted from the title and abstract only; no full text is available under a reusable licence. Methods, limitations, and data availability are often reported only in the full text, so “not reported” here means not reported in the abstract."
+     },
+     "fields": {
+      "methods": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "findings": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "objective": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "population": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "limitations": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "sample_size": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "study_design": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "data_availability": {
+       "claims": [],
+       "status": "not_reported"
+      }
+     },
+     "passages": [],
+     "rejected": 0,
+     "created_at": "2026-11-26 06:00:00+00:00"
+    }
+   ],
+   "annotations": []
+  },
+  "cp_75b09143567a2d74": {
+   "paper_id": "cp_75b09143567a2d74",
+   "requested_id": "cp_75b09143567a2d74",
+   "title": "network microbiome soil rhizosphere fixation carbon",
+   "abstract": "soil soil fixation microbiome root microbiome fungal rhizosphere rhizosphere network root exudate nitrogen fixation carbon nitrogen exudate fungal soil network rhizosphere fungal rhizosphere exudate microbiome root network exudate rhizosphere nitrogen.",
+   "venue": null,
+   "language": null,
+   "url": null,
+   "publication_types": [],
+   "is_retracted": false,
+   "dates": {
+    "published": "2026-11-20",
+    "first_online": null,
+    "preprint_posted": null,
+    "version": null,
+    "source_updated": null,
+    "earliest_public_date": "2026-11-20"
+   },
+   "first_seen": "2026-11-25 00:00:00+00:00",
+   "last_verified": "2026-11-25 00:00:00+00:00",
+   "identifiers": {},
+   "authors": [],
+   "sources": [
+    {
+     "provider": "pubmed",
+     "provider_id": "soil_new_2",
+     "first_seen": "2026-11-25 00:00:00+00:00",
+     "last_checked": "2026-11-25 00:00:00+00:00"
+    }
+   ],
+   "provenance": {
+    "title": {
+     "source": "pubmed",
+     "source_id": "soil_new_2",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "abstract": {
+     "source": "pubmed",
+     "source_id": "soil_new_2",
+     "observed_at": "2026-11-25T00:00:00Z"
+    },
+    "dates.published": {
+     "source": "pubmed",
+     "source_id": "soil_new_2",
+     "observed_at": "2026-11-25T00:00:00Z"
+    }
+   },
+   "updates": [],
+   "relations": [],
+   "license": null,
+   "open_access": null,
+   "texts": [],
+   "versions": [],
+   "extractions": [
+    {
+     "provider": "rules",
+     "model_version": "rules-1",
+     "schema_version": "1",
+     "location": "local",
+     "coverage": {
+      "scope": "abstract_only",
+      "sources": [
+       {
+        "kind": "abstract"
+       }
+      ],
+      "passages": 2,
+      "statement": "Extracted from the title and abstract only; no full text is available under a reusable licence. Methods, limitations, and data availability are often reported only in the full text, so “not reported” here means not reported in the abstract."
+     },
+     "fields": {
+      "methods": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "findings": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "objective": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "population": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "limitations": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "sample_size": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "study_design": {
+       "claims": [],
+       "status": "not_reported"
+      },
+      "data_availability": {
+       "claims": [],
+       "status": "not_reported"
+      }
+     },
+     "passages": [],
+     "rejected": 0,
+     "created_at": "2026-11-26 06:00:00+00:00"
+    }
+   ],
+   "annotations": []
+  }
+ },
+ "explanation": {
+  "cp_1a40ec6ecdfc91a7": {
+   "paper_id": "cp_1a40ec6ecdfc91a7",
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "rank": 1,
+   "score": 0.564816,
+   "features": {
+    "novelty": 0.866667,
+    "discovery": 0.0,
+    "relevance": 0.509039,
+    "method_match": 1.0
+   },
+   "details": {
+    "bm25": 2.418498,
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "serology drift clade antigenic influenza vaccine",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "novelty": {
+     "nearest": [
+      "cp_a9479b4a3e6f7f43",
+      "cp_e3852a4452dd49bf",
+      "cp_3ae897e2c494989d",
+      "cp_4e9ccbcafd16217c",
+      "cp_fc552483e751b781"
+     ],
+     "history_size": 60,
+     "normalization": "percentile_within:article"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "transfer": {
+     "field": "influenza · antigenic · drift",
+     "status": "near_field",
+     "distance": 0.0,
+     "position": "nearest",
+     "field_topic": "tp_5e4c4117c5",
+     "citation_proximity": null
+    },
+    "versions": [],
+    "bm25_norm": 0.980006,
+    "first_seen": "2026-11-25T00:00:00+00:00",
+    "similarity": 0.195061,
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "text": "Matches the radar's terms influenza, hemagglutinin (keyword score 0.98 of this run's best); meaning similarity to the radar's profile 0.20.",
+       "share": 0.451
+      },
+      {
+       "kind": "novelty",
+       "text": "Novelty 0.87 against 60 papers seen before it (credited at 0.86 of its value, in proportion to relevance).",
+       "share": 0.328
+      },
+      {
+       "kind": "method_match",
+       "text": "Uses the radar's methods: deep mutational scanning.",
+       "share": 0.221
+      }
+     ],
+     "summary": "Matches influenza, hemagglutinin; unlike earlier papers; uses deep mutational scanning",
+     "version": "3"
+    },
+    "novelty_raw": 0.359537,
+    "novelty_gate": 0.855212,
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "method"
+    ],
+    "matched_terms": [
+     "influenza",
+     "hemagglutinin"
+    ],
+    "methods_matched": [
+     "deep mutational scanning"
+    ],
+    "signals_matched": {},
+    "publication_kind": "article",
+    "earliest_public_date": "2026-11-20"
+   },
+   "flags": [],
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "explanation_version": "3",
+   "explanation": {
+    "reasons": [
+     {
+      "kind": "relevance",
+      "text": "Matches the radar's terms influenza, hemagglutinin (keyword score 0.98 of this run's best); meaning similarity to the radar's profile 0.20.",
+      "share": 0.451
+     },
+     {
+      "kind": "novelty",
+      "text": "Novelty 0.87 against 60 papers seen before it (credited at 0.86 of its value, in proportion to relevance).",
+      "share": 0.328
+     },
+     {
+      "kind": "method_match",
+      "text": "Uses the radar's methods: deep mutational scanning.",
+      "share": 0.221
+     }
+    ],
+    "summary": "Matches influenza, hemagglutinin; unlike earlier papers; uses deep mutational scanning",
+    "version": "3"
+   },
+   "weights": {
+    "novelty": 0.25,
+    "discovery": 0.125,
+    "relevance": 0.5,
+    "method_match": 0.125
+   },
+   "inactive_signals": {
+    "evidence": "needs evidence-grounded extraction (Phase 2)",
+    "momentum": "needs run history and trend models (Phase 3)"
+   },
+   "source_coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "executed_at": "2026-11-26 06:00:00+00:00"
+  },
+  "cp_cd3eedd789ce6a80": {
+   "paper_id": "cp_cd3eedd789ce6a80",
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "rank": 2,
+   "score": 0.541353,
+   "features": {
+    "novelty": 0.666667,
+    "discovery": 0.0,
+    "relevance": 0.53378,
+    "method_match": 1.0
+   },
+   "details": {
+    "bm25": 2.3437,
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "clade antibody drift neutralizing influenza antigenic",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "novelty": {
+     "nearest": [
+      "cp_2eb769ccd68436e2",
+      "cp_9d982ce1b0936c05",
+      "cp_4e9ccbcafd16217c",
+      "cp_03a7c2a0607fa407",
+      "cp_7af6a95a16d5a781"
+     ],
+     "history_size": 60,
+     "normalization": "percentile_within:article"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "transfer": {
+     "field": "influenza · antigenic · drift",
+     "status": "near_field",
+     "distance": 0.0,
+     "position": "nearest",
+     "field_topic": "tp_5e4c4117c5",
+     "citation_proximity": null
+    },
+    "versions": [],
+    "bm25_norm": 0.949697,
+    "first_seen": "2026-11-25T00:00:00+00:00",
+    "similarity": 0.256503,
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "text": "Matches the radar's terms influenza, hemagglutinin (keyword score 0.95 of this run's best); meaning similarity to the radar's profile 0.26.",
+       "share": 0.493
+      },
+      {
+       "kind": "novelty",
+       "text": "Novelty 0.67 against 60 papers seen before it (credited at 0.90 of its value, in proportion to relevance).",
+       "share": 0.276
+      },
+      {
+       "kind": "method_match",
+       "text": "Uses the radar's methods: deep mutational scanning.",
+       "share": 0.231
+      }
+     ],
+     "summary": "Matches influenza, hemagglutinin; uses deep mutational scanning",
+     "version": "3"
+    },
+    "novelty_raw": 0.343297,
+    "novelty_gate": 0.896779,
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "method"
+    ],
+    "matched_terms": [
+     "influenza",
+     "hemagglutinin"
+    ],
+    "methods_matched": [
+     "deep mutational scanning"
+    ],
+    "signals_matched": {},
+    "publication_kind": "article",
+    "earliest_public_date": "2026-11-20"
+   },
+   "flags": [],
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "explanation_version": "3",
+   "explanation": {
+    "reasons": [
+     {
+      "kind": "relevance",
+      "text": "Matches the radar's terms influenza, hemagglutinin (keyword score 0.95 of this run's best); meaning similarity to the radar's profile 0.26.",
+      "share": 0.493
+     },
+     {
+      "kind": "novelty",
+      "text": "Novelty 0.67 against 60 papers seen before it (credited at 0.90 of its value, in proportion to relevance).",
+      "share": 0.276
+     },
+     {
+      "kind": "method_match",
+      "text": "Uses the radar's methods: deep mutational scanning.",
+      "share": 0.231
+     }
+    ],
+    "summary": "Matches influenza, hemagglutinin; uses deep mutational scanning",
+    "version": "3"
+   },
+   "weights": {
+    "novelty": 0.25,
+    "discovery": 0.125,
+    "relevance": 0.5,
+    "method_match": 0.125
+   },
+   "inactive_signals": {
+    "evidence": "needs evidence-grounded extraction (Phase 2)",
+    "momentum": "needs run history and trend models (Phase 3)"
+   },
+   "source_coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "executed_at": "2026-11-26 06:00:00+00:00"
+  },
+  "cp_179c2302e91778b9": {
+   "paper_id": "cp_179c2302e91778b9",
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "rank": 3,
+   "score": 0.25,
+   "features": {
+    "novelty": 1.0,
+    "discovery": 1.0,
+    "relevance": 0.0,
+    "method_match": 1.0
+   },
+   "details": {
+    "bm25": 0.0,
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "network fungal carbon fixation exudate rhizosphere",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "novelty": {
+     "nearest": [
+      "cp_d46a212b6296170f",
+      "cp_582ae32829986a1e",
+      "cp_740e84c3843b8ed1",
+      "cp_0e86a9cf5dd55211",
+      "cp_5cb006975cd8a74f"
+     ],
+     "history_size": 60,
+     "normalization": "percentile_within:article"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "transfer": {
+     "field": "fungal · microbiome · exudate",
+     "quote": "We applied deep mutational scanning to a rhizosphere nitrogenase. root network fungal soil network rhizosphere fungal microbiome fixation microbiome nitrogen fixation microbiome fungal microbiome root microbiome nitrogen microbiome rhizosphere nitrogen soil rhizosphere nitrogen nitrogen carbon carbon nitrogen carbon exudate.",
+     "method": "deep mutational scanning",
+     "status": "transfer",
+     "section": "Abstract",
+     "distance": 1.077003,
+     "position": "nearest",
+     "question": "Which hemagglutinin mutations let influenza escape neutralizing antibodies?",
+     "passage_id": "abstract:1",
+     "field_topic": "tp_4283acaa1f",
+     "citation_proximity": null
+    },
+    "versions": [],
+    "bm25_norm": 0.0,
+    "first_seen": "2026-11-25T00:00:00+00:00",
+    "similarity": -0.00588,
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile -0.01.",
+       "share": 0.0
+      },
+      {
+       "kind": "novelty",
+       "text": "Novelty 1.00 against 60 papers seen before it (credited at 0.00 of its value, in proportion to relevance).",
+       "share": 0.0
+      },
+      {
+       "kind": "method_match",
+       "text": "Uses the radar's methods: deep mutational scanning.",
+       "share": 0.5
+      },
+      {
+       "kind": "method_transfer",
+       "text": "Hypothesis, not a finding: it uses deep mutational scanning, one of this radar's methods, in fungal · microbiome · exudate, a field far from this radar's own papers (field distance 1.08; no citation links to your seed or saved papers). It may apply to your question “Which hemagglutinin mutations let influenza escape neutralizing antibodies?”. The paper says: “We applied deep mutational scanning to a rhizosphere nitrogenase. root network fungal soil network rhizosphere fungal microbiome fixation microbiome nitrogen fixation microbiome fungal microbiome root microbiome nitrogen microbiome rhizosphere nitrogen soil rhizosphere nitrogen nitrogen carbon carbon nitrogen carbon exudate.” (Abstract).",
+       "quote": {
+        "text": "We applied deep mutational scanning to a rhizosphere nitrogenase. root network fungal soil network rhizosphere fungal microbiome fixation microbiome nitrogen fixation microbiome fungal microbiome root microbiome nitrogen microbiome rhizosphere nitrogen soil rhizosphere nitrogen nitrogen carbon carbon nitrogen carbon exudate.",
+        "passage_id": "abstract:1"
+       },
+       "share": 0.5,
+       "hypothesis": true
+      }
+     ],
+     "summary": "Method transfer (a hypothesis): deep mutational scanning from fungal · microbiome · exudate; unlike earlier papers; uses deep mutational scanning",
+     "version": "3"
+    },
+    "novelty_raw": 0.36658,
+    "novelty_gate": 0.0,
+    "retrieved_by": [
+     "method"
+    ],
+    "matched_terms": [],
+    "methods_matched": [
+     "deep mutational scanning"
+    ],
+    "signals_matched": {},
+    "publication_kind": "article",
+    "earliest_public_date": "2026-11-20"
+   },
+   "flags": [
+    "method_transfer_hypothesis"
+   ],
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "explanation_version": "3",
+   "explanation": {
+    "reasons": [
+     {
+      "kind": "relevance",
+      "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile -0.01.",
+      "share": 0.0
+     },
+     {
+      "kind": "novelty",
+      "text": "Novelty 1.00 against 60 papers seen before it (credited at 0.00 of its value, in proportion to relevance).",
+      "share": 0.0
+     },
+     {
+      "kind": "method_match",
+      "text": "Uses the radar's methods: deep mutational scanning.",
+      "share": 0.5
+     },
+     {
+      "kind": "method_transfer",
+      "text": "Hypothesis, not a finding: it uses deep mutational scanning, one of this radar's methods, in fungal · microbiome · exudate, a field far from this radar's own papers (field distance 1.08; no citation links to your seed or saved papers). It may apply to your question “Which hemagglutinin mutations let influenza escape neutralizing antibodies?”. The paper says: “We applied deep mutational scanning to a rhizosphere nitrogenase. root network fungal soil network rhizosphere fungal microbiome fixation microbiome nitrogen fixation microbiome fungal microbiome root microbiome nitrogen microbiome rhizosphere nitrogen soil rhizosphere nitrogen nitrogen carbon carbon nitrogen carbon exudate.” (Abstract).",
+      "quote": {
+       "text": "We applied deep mutational scanning to a rhizosphere nitrogenase. root network fungal soil network rhizosphere fungal microbiome fixation microbiome nitrogen fixation microbiome fungal microbiome root microbiome nitrogen microbiome rhizosphere nitrogen soil rhizosphere nitrogen nitrogen carbon carbon nitrogen carbon exudate.",
+       "passage_id": "abstract:1"
+      },
+      "share": 0.5,
+      "hypothesis": true
+     }
+    ],
+    "summary": "Method transfer (a hypothesis): deep mutational scanning from fungal · microbiome · exudate; unlike earlier papers; uses deep mutational scanning",
+    "version": "3"
+   },
+   "weights": {
+    "novelty": 0.25,
+    "discovery": 0.125,
+    "relevance": 0.5,
+    "method_match": 0.125
+   },
+   "inactive_signals": {
+    "evidence": "needs evidence-grounded extraction (Phase 2)",
+    "momentum": "needs run history and trend models (Phase 3)"
+   },
+   "source_coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "executed_at": "2026-11-26 06:00:00+00:00"
+  },
+  "cp_8fba359bb23cc408": {
+   "paper_id": "cp_8fba359bb23cc408",
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "rank": 4,
+   "score": 0.476899,
+   "features": {
+    "novelty": 0.466667,
+    "discovery": 0.0,
+    "relevance": 0.505597,
+    "method_match": 1.0
+   },
+   "details": {
+    "bm25": 2.173516,
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "influenza strain clade antibody drift serology",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "novelty": {
+     "nearest": [
+      "cp_03a7c2a0607fa407",
+      "cp_3d17878f4c86864e",
+      "cp_2f703b4bfd3a9756",
+      "cp_4e9ccbcafd16217c",
+      "cp_2eb769ccd68436e2"
+     ],
+     "history_size": 60,
+     "normalization": "percentile_within:article"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "transfer": {
+     "field": "influenza · antigenic · drift",
+     "status": "near_field",
+     "distance": 0.0,
+     "position": "nearest",
+     "field_topic": "tp_5e4c4117c5",
+     "citation_proximity": null
+    },
+    "versions": [],
+    "bm25_norm": 0.880736,
+    "first_seen": "2026-11-25T00:00:00+00:00",
+    "similarity": 0.255504,
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "text": "Matches the radar's terms influenza, hemagglutinin (keyword score 0.88 of this run's best); meaning similarity to the radar's profile 0.26.",
+       "share": 0.53
+      },
+      {
+       "kind": "novelty",
+       "text": "Novelty 0.47 against 60 papers seen before it (credited at 0.85 of its value, in proportion to relevance).",
+       "share": 0.208
+      },
+      {
+       "kind": "method_match",
+       "text": "Uses the radar's methods: deep mutational scanning.",
+       "share": 0.262
+      }
+     ],
+     "summary": "Matches influenza, hemagglutinin; uses deep mutational scanning",
+     "version": "3"
+    },
+    "novelty_raw": 0.317106,
+    "novelty_gate": 0.849429,
+    "retrieved_by": [
+     "lexical",
+     "semantic",
+     "method"
+    ],
+    "matched_terms": [
+     "influenza",
+     "hemagglutinin"
+    ],
+    "methods_matched": [
+     "deep mutational scanning"
+    ],
+    "signals_matched": {},
+    "publication_kind": "article",
+    "earliest_public_date": "2026-11-20"
+   },
+   "flags": [],
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "explanation_version": "3",
+   "explanation": {
+    "reasons": [
+     {
+      "kind": "relevance",
+      "text": "Matches the radar's terms influenza, hemagglutinin (keyword score 0.88 of this run's best); meaning similarity to the radar's profile 0.26.",
+      "share": 0.53
+     },
+     {
+      "kind": "novelty",
+      "text": "Novelty 0.47 against 60 papers seen before it (credited at 0.85 of its value, in proportion to relevance).",
+      "share": 0.208
+     },
+     {
+      "kind": "method_match",
+      "text": "Uses the radar's methods: deep mutational scanning.",
+      "share": 0.262
+     }
+    ],
+    "summary": "Matches influenza, hemagglutinin; uses deep mutational scanning",
+    "version": "3"
+   },
+   "weights": {
+    "novelty": 0.25,
+    "discovery": 0.125,
+    "relevance": 0.5,
+    "method_match": 0.125
+   },
+   "inactive_signals": {
+    "evidence": "needs evidence-grounded extraction (Phase 2)",
+    "momentum": "needs run history and trend models (Phase 3)"
+   },
+   "source_coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "executed_at": "2026-11-26 06:00:00+00:00"
+  },
+  "cp_4cb9f712d035bea8": {
+   "paper_id": "cp_4cb9f712d035bea8",
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "rank": 5,
+   "score": 0.341314,
+   "features": {
+    "novelty": 0.4,
+    "discovery": 0.0,
+    "relevance": 0.510945,
+    "method_match": 0.0
+   },
+   "details": {
+    "bm25": 2.241352,
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "influenza ferret antigenic antibody drift strain",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "novelty": {
+     "nearest": [
+      "cp_0dc2fe837e5cc8be",
+      "cp_3d17878f4c86864e",
+      "cp_4e9ccbcafd16217c",
+      "cp_fc552483e751b781",
+      "cp_2f703b4bfd3a9756"
+     ],
+     "history_size": 60,
+     "normalization": "percentile_within:article"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "transfer": {
+     "status": "no_radar_method"
+    },
+    "versions": [],
+    "bm25_norm": 0.908224,
+    "first_seen": "2026-11-25T00:00:00+00:00",
+    "similarity": 0.246092,
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "text": "Matches the radar's terms influenza, hemagglutinin (keyword score 0.91 of this run's best); meaning similarity to the radar's profile 0.25.",
+       "share": 0.748
+      },
+      {
+       "kind": "novelty",
+       "text": "Novelty 0.40 against 60 papers seen before it (credited at 0.86 of its value, in proportion to relevance).",
+       "share": 0.252
+      }
+     ],
+     "summary": "Matches influenza, hemagglutinin",
+     "version": "3"
+    },
+    "novelty_raw": 0.316413,
+    "novelty_gate": 0.858414,
+    "retrieved_by": [
+     "lexical",
+     "semantic"
+    ],
+    "matched_terms": [
+     "influenza",
+     "hemagglutinin"
+    ],
+    "methods_matched": [],
+    "signals_matched": {},
+    "publication_kind": "article",
+    "earliest_public_date": "2026-11-20"
+   },
+   "flags": [],
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "explanation_version": "3",
+   "explanation": {
+    "reasons": [
+     {
+      "kind": "relevance",
+      "text": "Matches the radar's terms influenza, hemagglutinin (keyword score 0.91 of this run's best); meaning similarity to the radar's profile 0.25.",
+      "share": 0.748
+     },
+     {
+      "kind": "novelty",
+      "text": "Novelty 0.40 against 60 papers seen before it (credited at 0.86 of its value, in proportion to relevance).",
+      "share": 0.252
+     }
+    ],
+    "summary": "Matches influenza, hemagglutinin",
+    "version": "3"
+   },
+   "weights": {
+    "novelty": 0.25,
+    "discovery": 0.125,
+    "relevance": 0.5,
+    "method_match": 0.125
+   },
+   "inactive_signals": {
+    "evidence": "needs evidence-grounded extraction (Phase 2)",
+    "momentum": "needs run history and trend models (Phase 3)"
+   },
+   "source_coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "executed_at": "2026-11-26 06:00:00+00:00"
+  },
+  "cp_cc413ef5e50c0f0f": {
+   "paper_id": "cp_cc413ef5e50c0f0f",
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "rank": 6,
+   "score": 0.359303,
+   "features": {
+    "novelty": 0.6,
+    "discovery": 0.0,
+    "relevance": 0.477791,
+    "method_match": 0.0
+   },
+   "details": {
+    "bm25": 1.840495,
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "ferret serology neutralizing vaccine clade antigenic",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "novelty": {
+     "nearest": [
+      "cp_03a7c2a0607fa407",
+      "cp_4e9ccbcafd16217c",
+      "cp_01402edfcb9276e8",
+      "cp_9d982ce1b0936c05",
+      "cp_bc6d50d7e0dab39b"
+     ],
+     "history_size": 60,
+     "normalization": "percentile_within:article"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "transfer": {
+     "status": "no_radar_method"
+    },
+    "versions": [],
+    "bm25_norm": 0.745792,
+    "first_seen": "2026-11-25T00:00:00+00:00",
+    "similarity": 0.299124,
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "text": "Matches the radar's terms influenza, hemagglutinin (keyword score 0.75 of this run's best); meaning similarity to the radar's profile 0.30.",
+       "share": 0.665
+      },
+      {
+       "kind": "novelty",
+       "text": "Novelty 0.60 against 60 papers seen before it (credited at 0.80 of its value, in proportion to relevance).",
+       "share": 0.335
+      }
+     ],
+     "summary": "Matches influenza, hemagglutinin",
+     "version": "3"
+    },
+    "novelty_raw": 0.333624,
+    "novelty_gate": 0.802714,
+    "retrieved_by": [
+     "lexical",
+     "semantic"
+    ],
+    "matched_terms": [
+     "influenza",
+     "hemagglutinin"
+    ],
+    "methods_matched": [],
+    "signals_matched": {},
+    "publication_kind": "article",
+    "earliest_public_date": "2026-11-20"
+   },
+   "flags": [],
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "explanation_version": "3",
+   "explanation": {
+    "reasons": [
+     {
+      "kind": "relevance",
+      "text": "Matches the radar's terms influenza, hemagglutinin (keyword score 0.75 of this run's best); meaning similarity to the radar's profile 0.30.",
+      "share": 0.665
+     },
+     {
+      "kind": "novelty",
+      "text": "Novelty 0.60 against 60 papers seen before it (credited at 0.80 of its value, in proportion to relevance).",
+      "share": 0.335
+     }
+    ],
+    "summary": "Matches influenza, hemagglutinin",
+    "version": "3"
+   },
+   "weights": {
+    "novelty": 0.25,
+    "discovery": 0.125,
+    "relevance": 0.5,
+    "method_match": 0.125
+   },
+   "inactive_signals": {
+    "evidence": "needs evidence-grounded extraction (Phase 2)",
+    "momentum": "needs run history and trend models (Phase 3)"
+   },
+   "source_coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "executed_at": "2026-11-26 06:00:00+00:00"
+  },
+  "cp_6077eed9a7936fd7": {
+   "paper_id": "cp_6077eed9a7936fd7",
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "rank": 7,
+   "score": 0.320605,
+   "features": {
+    "novelty": 0.2,
+    "discovery": 0.0,
+    "relevance": 0.54898,
+    "method_match": 0.0
+   },
+   "details": {
+    "bm25": 2.329106,
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "serology ferret vaccine clade neutralizing hemagglutinin",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "novelty": {
+     "nearest": [
+      "cp_3ae897e2c494989d",
+      "cp_7af6a95a16d5a781",
+      "cp_0bb70b1a43e2a02b",
+      "cp_ee6cd6bb63f5626d",
+      "cp_a9479b4a3e6f7f43"
+     ],
+     "history_size": 60,
+     "normalization": "percentile_within:article"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "transfer": {
+     "status": "no_radar_method"
+    },
+    "versions": [],
+    "bm25_norm": 0.943783,
+    "first_seen": "2026-11-25T00:00:00+00:00",
+    "similarity": 0.285777,
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "text": "Matches the radar's terms influenza, hemagglutinin (keyword score 0.94 of this run's best); meaning similarity to the radar's profile 0.29.",
+       "share": 0.856
+      },
+      {
+       "kind": "novelty",
+       "text": "Novelty 0.20 against 60 papers seen before it (credited at 0.92 of its value, in proportion to relevance).",
+       "share": 0.144
+      }
+     ],
+     "summary": "Matches influenza, hemagglutinin",
+     "version": "3"
+    },
+    "novelty_raw": 0.296848,
+    "novelty_gate": 0.922314,
+    "retrieved_by": [
+     "lexical",
+     "semantic"
+    ],
+    "matched_terms": [
+     "influenza",
+     "hemagglutinin"
+    ],
+    "methods_matched": [],
+    "signals_matched": {},
+    "publication_kind": "article",
+    "earliest_public_date": "2026-11-20"
+   },
+   "flags": [],
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "explanation_version": "3",
+   "explanation": {
+    "reasons": [
+     {
+      "kind": "relevance",
+      "text": "Matches the radar's terms influenza, hemagglutinin (keyword score 0.94 of this run's best); meaning similarity to the radar's profile 0.29.",
+      "share": 0.856
+     },
+     {
+      "kind": "novelty",
+      "text": "Novelty 0.20 against 60 papers seen before it (credited at 0.92 of its value, in proportion to relevance).",
+      "share": 0.144
+     }
+    ],
+    "summary": "Matches influenza, hemagglutinin",
+    "version": "3"
+   },
+   "weights": {
+    "novelty": 0.25,
+    "discovery": 0.125,
+    "relevance": 0.5,
+    "method_match": 0.125
+   },
+   "inactive_signals": {
+    "evidence": "needs evidence-grounded extraction (Phase 2)",
+    "momentum": "needs run history and trend models (Phase 3)"
+   },
+   "source_coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "executed_at": "2026-11-26 06:00:00+00:00"
+  },
+  "cp_8710884918f9b5ef": {
+   "paper_id": "cp_8710884918f9b5ef",
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "rank": 8,
+   "score": 0.25,
+   "features": {
+    "novelty": 0.8,
+    "discovery": 1.0,
+    "relevance": 0.0,
+    "method_match": 1.0
+   },
+   "details": {
+    "bm25": 0.0,
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "rhizosphere fixation fungal network nitrogen microbiome",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "novelty": {
+     "nearest": [
+      "cp_16225e595f18ee89",
+      "cp_5cb006975cd8a74f",
+      "cp_0e0f44c3a357eef3",
+      "cp_740e84c3843b8ed1",
+      "cp_b7f11284da5ca369"
+     ],
+     "history_size": 60,
+     "normalization": "percentile_within:article"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "transfer": {
+     "field": "fungal · microbiome · exudate",
+     "quote": "Deep mutational scanning of a fungal network enzyme mapped tolerance. exudate root network fixation fungal exudate fixation root soil microbiome network fungal root carbon carbon exudate root rhizosphere exudate carbon root rhizosphere fixation microbiome network fungal rhizosphere carbon exudate root.",
+     "method": "deep mutational scanning",
+     "status": "transfer",
+     "section": "Abstract",
+     "distance": 1.077003,
+     "position": "nearest",
+     "question": "Which hemagglutinin mutations let influenza escape neutralizing antibodies?",
+     "passage_id": "abstract:1",
+     "field_topic": "tp_4283acaa1f",
+     "citation_proximity": null
+    },
+    "versions": [],
+    "bm25_norm": 0.0,
+    "first_seen": "2026-11-25T00:00:00+00:00",
+    "similarity": 0.0,
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile 0.00.",
+       "share": 0.0
+      },
+      {
+       "kind": "novelty",
+       "text": "Novelty 0.80 against 60 papers seen before it (credited at 0.00 of its value, in proportion to relevance).",
+       "share": 0.0
+      },
+      {
+       "kind": "method_match",
+       "text": "Uses the radar's methods: deep mutational scanning.",
+       "share": 0.5
+      },
+      {
+       "kind": "method_transfer",
+       "text": "Hypothesis, not a finding: it uses deep mutational scanning, one of this radar's methods, in fungal · microbiome · exudate, a field far from this radar's own papers (field distance 1.08; no citation links to your seed or saved papers). It may apply to your question “Which hemagglutinin mutations let influenza escape neutralizing antibodies?”. The paper says: “Deep mutational scanning of a fungal network enzyme mapped tolerance. exudate root network fixation fungal exudate fixation root soil microbiome network fungal root carbon carbon exudate root rhizosphere exudate carbon root rhizosphere fixation microbiome network fungal rhizosphere carbon exudate root.” (Abstract).",
+       "quote": {
+        "text": "Deep mutational scanning of a fungal network enzyme mapped tolerance. exudate root network fixation fungal exudate fixation root soil microbiome network fungal root carbon carbon exudate root rhizosphere exudate carbon root rhizosphere fixation microbiome network fungal rhizosphere carbon exudate root.",
+        "passage_id": "abstract:1"
+       },
+       "share": 0.5,
+       "hypothesis": true
+      }
+     ],
+     "summary": "Method transfer (a hypothesis): deep mutational scanning from fungal · microbiome · exudate; unlike earlier papers; uses deep mutational scanning",
+     "version": "3"
+    },
+    "novelty_raw": 0.357048,
+    "novelty_gate": 0.0,
+    "retrieved_by": [
+     "semantic",
+     "method"
+    ],
+    "matched_terms": [],
+    "methods_matched": [
+     "deep mutational scanning"
+    ],
+    "signals_matched": {},
+    "publication_kind": "article",
+    "earliest_public_date": "2026-11-20"
+   },
+   "flags": [
+    "method_transfer_hypothesis"
+   ],
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "explanation_version": "3",
+   "explanation": {
+    "reasons": [
+     {
+      "kind": "relevance",
+      "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile 0.00.",
+      "share": 0.0
+     },
+     {
+      "kind": "novelty",
+      "text": "Novelty 0.80 against 60 papers seen before it (credited at 0.00 of its value, in proportion to relevance).",
+      "share": 0.0
+     },
+     {
+      "kind": "method_match",
+      "text": "Uses the radar's methods: deep mutational scanning.",
+      "share": 0.5
+     },
+     {
+      "kind": "method_transfer",
+      "text": "Hypothesis, not a finding: it uses deep mutational scanning, one of this radar's methods, in fungal · microbiome · exudate, a field far from this radar's own papers (field distance 1.08; no citation links to your seed or saved papers). It may apply to your question “Which hemagglutinin mutations let influenza escape neutralizing antibodies?”. The paper says: “Deep mutational scanning of a fungal network enzyme mapped tolerance. exudate root network fixation fungal exudate fixation root soil microbiome network fungal root carbon carbon exudate root rhizosphere exudate carbon root rhizosphere fixation microbiome network fungal rhizosphere carbon exudate root.” (Abstract).",
+      "quote": {
+       "text": "Deep mutational scanning of a fungal network enzyme mapped tolerance. exudate root network fixation fungal exudate fixation root soil microbiome network fungal root carbon carbon exudate root rhizosphere exudate carbon root rhizosphere fixation microbiome network fungal rhizosphere carbon exudate root.",
+       "passage_id": "abstract:1"
+      },
+      "share": 0.5,
+      "hypothesis": true
+     }
+    ],
+    "summary": "Method transfer (a hypothesis): deep mutational scanning from fungal · microbiome · exudate; unlike earlier papers; uses deep mutational scanning",
+    "version": "3"
+   },
+   "weights": {
+    "novelty": 0.25,
+    "discovery": 0.125,
+    "relevance": 0.5,
+    "method_match": 0.125
+   },
+   "inactive_signals": {
+    "evidence": "needs evidence-grounded extraction (Phase 2)",
+    "momentum": "needs run history and trend models (Phase 3)"
+   },
+   "source_coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "executed_at": "2026-11-26 06:00:00+00:00"
+  },
+  "cp_8ec58304bdff1321": {
+   "paper_id": "cp_8ec58304bdff1321",
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "rank": 9,
+   "score": 0.330943,
+   "features": {
+    "novelty": 0.133333,
+    "discovery": 0.0,
+    "relevance": 0.59522,
+    "method_match": 0.0
+   },
+   "details": {
+    "bm25": 2.46784,
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "clade drift hemagglutinin antibody neutralizing influenza",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "novelty": {
+     "nearest": [
+      "cp_0bb70b1a43e2a02b",
+      "cp_a9479b4a3e6f7f43",
+      "cp_3d17878f4c86864e",
+      "cp_7af6a95a16d5a781",
+      "cp_2f703b4bfd3a9756"
+     ],
+     "history_size": 60,
+     "normalization": "percentile_within:article"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "transfer": {
+     "status": "no_radar_method"
+    },
+    "versions": [],
+    "bm25_norm": 1.0,
+    "first_seen": "2026-11-25T00:00:00+00:00",
+    "similarity": 0.325366,
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "text": "Matches the radar's terms influenza, hemagglutinin (keyword score 1.00 of this run's best); meaning similarity to the radar's profile 0.33.",
+       "share": 0.899
+      },
+      {
+       "kind": "novelty",
+       "text": "Novelty 0.13 against 60 papers seen before it (credited at 1.00 of its value, in proportion to relevance).",
+       "share": 0.101
+      }
+     ],
+     "summary": "Matches influenza, hemagglutinin",
+     "version": "3"
+    },
+    "novelty_raw": 0.296384,
+    "novelty_gate": 1.0,
+    "retrieved_by": [
+     "lexical",
+     "semantic"
+    ],
+    "matched_terms": [
+     "influenza",
+     "hemagglutinin"
+    ],
+    "methods_matched": [],
+    "signals_matched": {},
+    "publication_kind": "article",
+    "earliest_public_date": "2026-11-20"
+   },
+   "flags": [],
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "explanation_version": "3",
+   "explanation": {
+    "reasons": [
+     {
+      "kind": "relevance",
+      "text": "Matches the radar's terms influenza, hemagglutinin (keyword score 1.00 of this run's best); meaning similarity to the radar's profile 0.33.",
+      "share": 0.899
+     },
+     {
+      "kind": "novelty",
+      "text": "Novelty 0.13 against 60 papers seen before it (credited at 1.00 of its value, in proportion to relevance).",
+      "share": 0.101
+     }
+    ],
+    "summary": "Matches influenza, hemagglutinin",
+    "version": "3"
+   },
+   "weights": {
+    "novelty": 0.25,
+    "discovery": 0.125,
+    "relevance": 0.5,
+    "method_match": 0.125
+   },
+   "inactive_signals": {
+    "evidence": "needs evidence-grounded extraction (Phase 2)",
+    "momentum": "needs run history and trend models (Phase 3)"
+   },
+   "source_coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "executed_at": "2026-11-26 06:00:00+00:00"
+  },
+  "cp_82b6e280b1fe45ac": {
+   "paper_id": "cp_82b6e280b1fe45ac",
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "rank": 10,
+   "score": 0.25463,
+   "features": {
+    "novelty": 0.066667,
+    "discovery": 0.0,
+    "relevance": 0.482254,
+    "method_match": 0.0
+   },
+   "details": {
+    "bm25": 2.078027,
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "drift strain antigenic antibody influenza ferret",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "novelty": {
+     "nearest": [
+      "cp_3ae897e2c494989d",
+      "cp_142c673c2e61d1fe",
+      "cp_4e9ccbcafd16217c",
+      "cp_7af6a95a16d5a781",
+      "cp_2f703b4bfd3a9756"
+     ],
+     "history_size": 60,
+     "normalization": "percentile_within:article"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "transfer": {
+     "status": "no_radar_method"
+    },
+    "versions": [],
+    "bm25_norm": 0.842043,
+    "first_seen": "2026-11-25T00:00:00+00:00",
+    "similarity": 0.242394,
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "text": "Matches the radar's terms influenza, hemagglutinin (keyword score 0.84 of this run's best); meaning similarity to the radar's profile 0.24.",
+       "share": 0.947
+      },
+      {
+       "kind": "novelty",
+       "text": "Novelty 0.07 against 60 papers seen before it (credited at 0.81 of its value, in proportion to relevance).",
+       "share": 0.053
+      }
+     ],
+     "summary": "Matches influenza, hemagglutinin",
+     "version": "3"
+    },
+    "novelty_raw": 0.278869,
+    "novelty_gate": 0.810211,
+    "retrieved_by": [
+     "lexical",
+     "semantic"
+    ],
+    "matched_terms": [
+     "influenza",
+     "hemagglutinin"
+    ],
+    "methods_matched": [],
+    "signals_matched": {},
+    "publication_kind": "article",
+    "earliest_public_date": "2026-11-20"
+   },
+   "flags": [],
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "explanation_version": "3",
+   "explanation": {
+    "reasons": [
+     {
+      "kind": "relevance",
+      "text": "Matches the radar's terms influenza, hemagglutinin (keyword score 0.84 of this run's best); meaning similarity to the radar's profile 0.24.",
+      "share": 0.947
+     },
+     {
+      "kind": "novelty",
+      "text": "Novelty 0.07 against 60 papers seen before it (credited at 0.81 of its value, in proportion to relevance).",
+      "share": 0.053
+     }
+    ],
+    "summary": "Matches influenza, hemagglutinin",
+    "version": "3"
+   },
+   "weights": {
+    "novelty": 0.25,
+    "discovery": 0.125,
+    "relevance": 0.5,
+    "method_match": 0.125
+   },
+   "inactive_signals": {
+    "evidence": "needs evidence-grounded extraction (Phase 2)",
+    "momentum": "needs run history and trend models (Phase 3)"
+   },
+   "source_coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "executed_at": "2026-11-26 06:00:00+00:00"
+  },
+  "cp_e04039bb42ea78d9": {
+   "paper_id": "cp_e04039bb42ea78d9",
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "rank": 11,
+   "score": 0.198551,
+   "features": {
+    "novelty": 0.733333,
+    "discovery": 0.0,
+    "relevance": 0.245728,
+    "method_match": 0.0
+   },
+   "details": {
+    "bm25": 0.846237,
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "serology clade strain neutralizing antibody vaccine",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "novelty": {
+     "nearest": [
+      "cp_3ae897e2c494989d",
+      "cp_2f703b4bfd3a9756",
+      "cp_4e9ccbcafd16217c",
+      "cp_2eb769ccd68436e2",
+      "cp_ee6cd6bb63f5626d"
+     ],
+     "history_size": 60,
+     "normalization": "percentile_within:article"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "transfer": {
+     "status": "no_radar_method"
+    },
+    "versions": [],
+    "bm25_norm": 0.342906,
+    "first_seen": "2026-11-25T00:00:00+00:00",
+    "similarity": 0.180943,
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "text": "Matches the radar's terms influenza (keyword score 0.34 of this run's best); meaning similarity to the radar's profile 0.18.",
+       "share": 0.619
+      },
+      {
+       "kind": "novelty",
+       "text": "Novelty 0.73 against 60 papers seen before it (credited at 0.41 of its value, in proportion to relevance).",
+       "share": 0.381
+      }
+     ],
+     "summary": "Matches influenza",
+     "version": "3"
+    },
+    "novelty_raw": 0.349385,
+    "novelty_gate": 0.412836,
+    "retrieved_by": [
+     "lexical",
+     "semantic"
+    ],
+    "matched_terms": [
+     "influenza"
+    ],
+    "methods_matched": [],
+    "signals_matched": {},
+    "publication_kind": "article",
+    "earliest_public_date": "2026-11-20"
+   },
+   "flags": [],
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "explanation_version": "3",
+   "explanation": {
+    "reasons": [
+     {
+      "kind": "relevance",
+      "text": "Matches the radar's terms influenza (keyword score 0.34 of this run's best); meaning similarity to the radar's profile 0.18.",
+      "share": 0.619
+     },
+     {
+      "kind": "novelty",
+      "text": "Novelty 0.73 against 60 papers seen before it (credited at 0.41 of its value, in proportion to relevance).",
+      "share": 0.381
+     }
+    ],
+    "summary": "Matches influenza",
+    "version": "3"
+   },
+   "weights": {
+    "novelty": 0.25,
+    "discovery": 0.125,
+    "relevance": 0.5,
+    "method_match": 0.125
+   },
+   "inactive_signals": {
+    "evidence": "needs evidence-grounded extraction (Phase 2)",
+    "momentum": "needs run history and trend models (Phase 3)"
+   },
+   "source_coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "executed_at": "2026-11-26 06:00:00+00:00"
+  },
+  "cp_57f3b9e4ddd560c8": {
+   "paper_id": "cp_57f3b9e4ddd560c8",
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "rank": 12,
+   "score": 0.125,
+   "features": {
+    "novelty": 0.933333,
+    "discovery": 0.0,
+    "relevance": 0.0,
+    "method_match": 1.0
+   },
+   "details": {
+    "bm25": 0.0,
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "rhizosphere network carbon nitrogen soil fixation",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "novelty": {
+     "nearest": [
+      "cp_0e0f44c3a357eef3",
+      "cp_5cb006975cd8a74f",
+      "cp_16225e595f18ee89",
+      "cp_bf4b6c94cc369dda",
+      "cp_b7f11284da5ca369"
+     ],
+     "history_size": 60,
+     "normalization": "percentile_within:article"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "transfer": {
+     "status": "integrity_flag"
+    },
+    "versions": [],
+    "bm25_norm": 0.0,
+    "first_seen": "2026-11-25T00:00:00+00:00",
+    "similarity": -0.070926,
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile -0.07.",
+       "share": 0.0
+      },
+      {
+       "kind": "novelty",
+       "text": "Novelty 0.93 against 60 papers seen before it (credited at 0.00 of its value, in proportion to relevance).",
+       "share": 0.0
+      },
+      {
+       "kind": "method_match",
+       "text": "Uses the radar's methods: deep mutational scanning.",
+       "share": 1.0
+      },
+      {
+       "kind": "integrity",
+       "text": "A correction or erratum has been published for it.",
+       "share": null
+      },
+      {
+       "kind": "selection",
+       "text": "It is well below this run's best relevance; shown only to fill the list.",
+       "share": null
+      }
+     ],
+     "summary": "Unlike earlier papers; uses deep mutational scanning",
+     "version": "3"
+    },
+    "novelty_raw": 0.365085,
+    "novelty_gate": 0.0,
+    "retrieved_by": [
+     "method"
+    ],
+    "matched_terms": [],
+    "methods_matched": [
+     "deep mutational scanning"
+    ],
+    "signals_matched": {},
+    "publication_kind": "article",
+    "earliest_public_date": "2026-11-20"
+   },
+   "flags": [
+    "corrected",
+    "low_relevance"
+   ],
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "explanation_version": "3",
+   "explanation": {
+    "reasons": [
+     {
+      "kind": "relevance",
+      "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile -0.07.",
+      "share": 0.0
+     },
+     {
+      "kind": "novelty",
+      "text": "Novelty 0.93 against 60 papers seen before it (credited at 0.00 of its value, in proportion to relevance).",
+      "share": 0.0
+     },
+     {
+      "kind": "method_match",
+      "text": "Uses the radar's methods: deep mutational scanning.",
+      "share": 1.0
+     },
+     {
+      "kind": "integrity",
+      "text": "A correction or erratum has been published for it.",
+      "share": null
+     },
+     {
+      "kind": "selection",
+      "text": "It is well below this run's best relevance; shown only to fill the list.",
+      "share": null
+     }
+    ],
+    "summary": "Unlike earlier papers; uses deep mutational scanning",
+    "version": "3"
+   },
+   "weights": {
+    "novelty": 0.25,
+    "discovery": 0.125,
+    "relevance": 0.5,
+    "method_match": 0.125
+   },
+   "inactive_signals": {
+    "evidence": "needs evidence-grounded extraction (Phase 2)",
+    "momentum": "needs run history and trend models (Phase 3)"
+   },
+   "source_coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "executed_at": "2026-11-26 06:00:00+00:00"
+  },
+  "cp_2416a3c4d5619de0": {
+   "paper_id": "cp_2416a3c4d5619de0",
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "rank": 13,
+   "score": 0.013748,
+   "features": {
+    "novelty": 0.333333,
+    "discovery": 0.0,
+    "relevance": 0.021481,
+    "method_match": 0.0
+   },
+   "details": {
+    "bm25": 0.0,
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "microbiome exudate rhizosphere network soil nitrogen",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "novelty": {
+     "nearest": [
+      "cp_0e86a9cf5dd55211",
+      "cp_eeea8752421f702b",
+      "cp_1189030aadc3f8b1",
+      "cp_f1a36eec23022116",
+      "cp_740e84c3843b8ed1"
+     ],
+     "history_size": 60,
+     "normalization": "percentile_within:article"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "transfer": {
+     "status": "no_radar_method"
+    },
+    "versions": [],
+    "bm25_norm": 0.0,
+    "first_seen": "2026-11-25T00:00:00+00:00",
+    "similarity": 0.035801,
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile 0.04.",
+       "share": 0.781
+      },
+      {
+       "kind": "novelty",
+       "text": "Novelty 0.33 against 60 papers seen before it (credited at 0.04 of its value, in proportion to relevance).",
+       "share": 0.219
+      },
+      {
+       "kind": "selection",
+       "text": "It is well below this run's best relevance; shown only to fill the list.",
+       "share": null
+      }
+     ],
+     "summary": "Ranked on relevance to the radar's profile",
+     "version": "3"
+    },
+    "novelty_raw": 0.313707,
+    "novelty_gate": 0.036089,
+    "retrieved_by": [
+     "semantic"
+    ],
+    "matched_terms": [],
+    "methods_matched": [],
+    "signals_matched": {},
+    "publication_kind": "article",
+    "earliest_public_date": "2026-11-20"
+   },
+   "flags": [
+    "low_relevance"
+   ],
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "explanation_version": "3",
+   "explanation": {
+    "reasons": [
+     {
+      "kind": "relevance",
+      "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile 0.04.",
+      "share": 0.781
+     },
+     {
+      "kind": "novelty",
+      "text": "Novelty 0.33 against 60 papers seen before it (credited at 0.04 of its value, in proportion to relevance).",
+      "share": 0.219
+     },
+     {
+      "kind": "selection",
+      "text": "It is well below this run's best relevance; shown only to fill the list.",
+      "share": null
+     }
+    ],
+    "summary": "Ranked on relevance to the radar's profile",
+    "version": "3"
+   },
+   "weights": {
+    "novelty": 0.25,
+    "discovery": 0.125,
+    "relevance": 0.5,
+    "method_match": 0.125
+   },
+   "inactive_signals": {
+    "evidence": "needs evidence-grounded extraction (Phase 2)",
+    "momentum": "needs run history and trend models (Phase 3)"
+   },
+   "source_coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "executed_at": "2026-11-26 06:00:00+00:00"
+  },
+  "cp_a30abb018e09b3f3": {
+   "paper_id": "cp_a30abb018e09b3f3",
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "rank": 14,
+   "score": 0.0,
+   "features": {
+    "novelty": 0.266667,
+    "discovery": 0.0,
+    "relevance": 0.0,
+    "method_match": 0.0
+   },
+   "details": {
+    "bm25": 0.0,
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "exudate carbon fungal rhizosphere network root",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "novelty": {
+     "nearest": [
+      "cp_466431785db9291a",
+      "cp_da29b51b0e8cc513",
+      "cp_d46a212b6296170f",
+      "cp_a4f50748290551de",
+      "cp_582ae32829986a1e"
+     ],
+     "history_size": 60,
+     "normalization": "percentile_within:article"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "transfer": {
+     "status": "no_radar_method"
+    },
+    "versions": [],
+    "bm25_norm": 0.0,
+    "first_seen": "2026-11-25T00:00:00+00:00",
+    "similarity": 0.0,
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile 0.00.",
+       "share": null
+      },
+      {
+       "kind": "novelty",
+       "text": "Novelty 0.27 against 60 papers seen before it (credited at 0.00 of its value, in proportion to relevance).",
+       "share": null
+      },
+      {
+       "kind": "selection",
+       "text": "It is well below this run's best relevance; shown only to fill the list.",
+       "share": null
+      }
+     ],
+     "summary": "Ranked on relevance to the radar's profile",
+     "version": "3"
+    },
+    "novelty_raw": 0.310391,
+    "novelty_gate": 0.0,
+    "retrieved_by": [
+     "semantic"
+    ],
+    "matched_terms": [],
+    "methods_matched": [],
+    "signals_matched": {},
+    "publication_kind": "article",
+    "earliest_public_date": "2026-11-20"
+   },
+   "flags": [
+    "low_relevance"
+   ],
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "explanation_version": "3",
+   "explanation": {
+    "reasons": [
+     {
+      "kind": "relevance",
+      "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile 0.00.",
+      "share": null
+     },
+     {
+      "kind": "novelty",
+      "text": "Novelty 0.27 against 60 papers seen before it (credited at 0.00 of its value, in proportion to relevance).",
+      "share": null
+     },
+     {
+      "kind": "selection",
+      "text": "It is well below this run's best relevance; shown only to fill the list.",
+      "share": null
+     }
+    ],
+    "summary": "Ranked on relevance to the radar's profile",
+    "version": "3"
+   },
+   "weights": {
+    "novelty": 0.25,
+    "discovery": 0.125,
+    "relevance": 0.5,
+    "method_match": 0.125
+   },
+   "inactive_signals": {
+    "evidence": "needs evidence-grounded extraction (Phase 2)",
+    "momentum": "needs run history and trend models (Phase 3)"
+   },
+   "source_coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "executed_at": "2026-11-26 06:00:00+00:00"
+  },
+  "cp_885f263f3b6dfa56": {
+   "paper_id": "cp_885f263f3b6dfa56",
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "rank": 15,
+   "score": 0.0,
+   "features": {
+    "novelty": 0.533333,
+    "discovery": 0.0,
+    "relevance": 0.0,
+    "method_match": 0.0
+   },
+   "details": {
+    "bm25": 0.0,
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "soil root rhizosphere network fungal exudate",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "novelty": {
+     "nearest": [
+      "cp_bf4b6c94cc369dda",
+      "cp_466431785db9291a",
+      "cp_5cb006975cd8a74f",
+      "cp_b7f11284da5ca369",
+      "cp_a4f50748290551de"
+     ],
+     "history_size": 60,
+     "normalization": "percentile_within:article"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "transfer": {
+     "status": "no_radar_method"
+    },
+    "versions": [],
+    "bm25_norm": 0.0,
+    "first_seen": "2026-11-25T00:00:00+00:00",
+    "similarity": 0.0,
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile 0.00.",
+       "share": null
+      },
+      {
+       "kind": "novelty",
+       "text": "Novelty 0.53 against 60 papers seen before it (credited at 0.00 of its value, in proportion to relevance).",
+       "share": null
+      },
+      {
+       "kind": "selection",
+       "text": "It is well below this run's best relevance; shown only to fill the list.",
+       "share": null
+      }
+     ],
+     "summary": "Ranked on relevance to the radar's profile",
+     "version": "3"
+    },
+    "novelty_raw": 0.319696,
+    "novelty_gate": 0.0,
+    "retrieved_by": [
+     "semantic"
+    ],
+    "matched_terms": [],
+    "methods_matched": [],
+    "signals_matched": {},
+    "publication_kind": "article",
+    "earliest_public_date": "2026-11-20"
+   },
+   "flags": [
+    "low_relevance"
+   ],
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "explanation_version": "3",
+   "explanation": {
+    "reasons": [
+     {
+      "kind": "relevance",
+      "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile 0.00.",
+      "share": null
+     },
+     {
+      "kind": "novelty",
+      "text": "Novelty 0.53 against 60 papers seen before it (credited at 0.00 of its value, in proportion to relevance).",
+      "share": null
+     },
+     {
+      "kind": "selection",
+      "text": "It is well below this run's best relevance; shown only to fill the list.",
+      "share": null
+     }
+    ],
+    "summary": "Ranked on relevance to the radar's profile",
+    "version": "3"
+   },
+   "weights": {
+    "novelty": 0.25,
+    "discovery": 0.125,
+    "relevance": 0.5,
+    "method_match": 0.125
+   },
+   "inactive_signals": {
+    "evidence": "needs evidence-grounded extraction (Phase 2)",
+    "momentum": "needs run history and trend models (Phase 3)"
+   },
+   "source_coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "executed_at": "2026-11-26 06:00:00+00:00"
+  },
+  "cp_75b09143567a2d74": {
+   "paper_id": "cp_75b09143567a2d74",
+   "run_id": "run_eb84c6d1ad2731dd",
+   "radar_id": "escape",
+   "rank": 16,
+   "score": 0.012888,
+   "features": {
+    "novelty": 0.0,
+    "discovery": 0.0,
+    "relevance": 0.025777,
+    "method_match": 0.0
+   },
+   "details": {
+    "bm25": 0.0,
+    "paper": {
+     "doi": null,
+     "url": null,
+     "pmid": null,
+     "arxiv": null,
+     "pmcid": null,
+     "title": "network microbiome soil rhizosphere fixation carbon",
+     "venue": null,
+     "authors": [],
+     "openalex": null,
+     "earliest_public_date": "2026-11-20"
+    },
+    "novelty": {
+     "nearest": [
+      "cp_e7400aaf57883b69",
+      "cp_9578f5a2675fdb56",
+      "cp_a4f50748290551de",
+      "cp_582ae32829986a1e",
+      "cp_466431785db9291a"
+     ],
+     "history_size": 60,
+     "normalization": "percentile_within:article"
+    },
+    "sources": [
+     "pubmed"
+    ],
+    "transfer": {
+     "status": "no_radar_method"
+    },
+    "versions": [],
+    "bm25_norm": 0.0,
+    "first_seen": "2026-11-25T00:00:00+00:00",
+    "similarity": 0.042962,
+    "explanation": {
+     "reasons": [
+      {
+       "kind": "relevance",
+       "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile 0.04.",
+       "share": 1.0
+      },
+      {
+       "kind": "novelty",
+       "text": "Novelty 0.00 against 60 papers seen before it (credited at 0.04 of its value, in proportion to relevance).",
+       "share": 0.0
+      },
+      {
+       "kind": "selection",
+       "text": "It is well below this run's best relevance; shown only to fill the list.",
+       "share": null
+      }
+     ],
+     "summary": "Ranked on relevance to the radar's profile",
+     "version": "3"
+    },
+    "novelty_raw": 0.277767,
+    "novelty_gate": 0.043307,
+    "retrieved_by": [
+     "semantic"
+    ],
+    "matched_terms": [],
+    "methods_matched": [],
+    "signals_matched": {},
+    "publication_kind": "article",
+    "earliest_public_date": "2026-11-20"
+   },
+   "flags": [
+    "low_relevance"
+   ],
+   "ranking_version": "0.3.0",
+   "model_version": "carousel/hashing-v1-d256",
+   "mode": "balanced",
+   "explanation_version": "3",
+   "explanation": {
+    "reasons": [
+     {
+      "kind": "relevance",
+      "text": "Matches none of the radar's terms by keyword; meaning similarity to the radar's profile 0.04.",
+      "share": 1.0
+     },
+     {
+      "kind": "novelty",
+      "text": "Novelty 0.00 against 60 papers seen before it (credited at 0.04 of its value, in proportion to relevance).",
+      "share": 0.0
+     },
+     {
+      "kind": "selection",
+      "text": "It is well below this run's best relevance; shown only to fill the list.",
+      "share": null
+     }
+    ],
+    "summary": "Ranked on relevance to the radar's profile",
+    "version": "3"
+   },
+   "weights": {
+    "novelty": 0.25,
+    "discovery": 0.125,
+    "relevance": 0.5,
+    "method_match": 0.125
+   },
+   "inactive_signals": {
+    "evidence": "needs evidence-grounded extraction (Phase 2)",
+    "momentum": "needs run history and trend models (Phase 3)"
+   },
+   "source_coverage": [
+    {
+     "note": "no connector for this source yet (bioRxiv and medRxiv preprints come through Europe PMC)",
+     "source": "pubmed",
+     "status": "no_connector"
+    }
+   ],
+   "executed_at": "2026-11-26 06:00:00+00:00"
+  }
+ },
+ "transfers": [
+  "cp_179c2302e91778b9",
+  "cp_8710884918f9b5ef"
+ ],
+ "near": [
+  "cp_8fba359bb23cc408",
+  "cp_1a40ec6ecdfc91a7",
+  "cp_cd3eedd789ce6a80"
+ ]
+}

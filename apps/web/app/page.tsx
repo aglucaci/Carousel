@@ -149,6 +149,7 @@ function Feed({ radarId, runId }: { radarId: string; runId?: string }) {
           {data.items.map((it) => (
             <PaperCard
               key={it.paper_id}
+              paperId={it.paper_id}
               rank={it.rank}
               paper={it.paper}
               features={it.features}

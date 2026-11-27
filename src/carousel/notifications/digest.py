@@ -33,6 +33,7 @@ FLAG_LABELS = {
     "correction_or_notice": "Correction or notice",
     "has_preprint": "Has preprint",
     "published_version": "Since published",
+    "method_transfer_hypothesis": "Method transfer: a hypothesis",
 }
 ARRIVAL_LABELS = {"newly_published": "Newly published", "newly_observed": "Newly observed"}
 SOURCE_NAMES = {"pubmed": "PubMed", "openalex": "OpenAlex", "europepmc": "Europe PMC", "crossref": "Crossref", "arxiv": "arXiv"}

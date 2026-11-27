@@ -23,13 +23,18 @@ Version history:
     Adds citation links (ranking 0.2.0): which of the radar's seed or saved
     papers it cites or is cited by, or how many references it shares with
     them, and that it was found through citations.
+``3``
+    Adds Method Transfer (ranking 0.3.0): stated as a hypothesis, never a
+    finding, with the method, the paper's field on the shared topic map, how
+    far that is from the radar's field, and the grounded quote naming the
+    method; the summary leads with it.
 """
 
 from __future__ import annotations
 
 from typing import Any, Dict, List, Mapping, Optional
 
-EXPLANATION_VERSION = "2"
+EXPLANATION_VERSION = "3"
 
 VERIFYING_SOURCES = frozenset({"crossref"})
 """Sources that check what the searches found but never search, so never "found" a paper."""
@@ -145,6 +150,21 @@ def explain(item: Mapping[str, Any], weights: Mapping[str, float], inactive: Map
     for name, hits in sorted((d.get("signals_matched") or {}).items()):
         reasons.append({"kind": "signal", "text": f"Mentions {name.replace('_', ' ')}: {_list(hits)}.", "share": None})
 
+    # ---- Method Transfer: a hypothesis, with its grounded quote ----
+    tr = d.get("transfer") or {}
+    transfer_summary = None
+    if tr.get("status") == "transfer" and "method_transfer_hypothesis" in (item.get("flags") or []):
+        links = "no citation links to your seed or saved papers" if not tr.get("citation_proximity") else \
+            f"citation proximity {_fmt(tr.get('citation_proximity'))}"
+        q = tr.get("question")
+        text = (f"Hypothesis, not a finding: it uses {tr['method']}, one of this radar's methods, in {tr['field']}, a field "
+                f"far from this radar's own papers (field distance {_fmt(tr.get('distance'))}; {links}). It may apply to "
+                + (f"your question “{q}”" if q else "this radar's work")
+                + f". The paper says: “{tr['quote']}” ({tr.get('section') or 'abstract'}).")
+        reasons.append({"kind": "method_transfer", "text": text, "share": _share(item, weights, "discovery"),
+                        "hypothesis": True, "quote": {"passage_id": tr.get("passage_id"), "text": tr["quote"]}})
+        transfer_summary = f"method transfer (a hypothesis): {tr['method']} from {tr['field']}"
+
     # ---- integrity and versions ----
     for flag in item.get("flags") or []:
         if flag in _FLAG_TEXT:
@@ -160,6 +180,8 @@ def explain(item: Mapping[str, Any], weights: Mapping[str, float], inactive: Map
         else:
             reasons.append({"kind": "version", "text": f"An earlier preprint of it exists (linked by {how}).", "share": None})
 
+    if transfer_summary:
+        summary.insert(0, transfer_summary)
     text = "; ".join(summary) if summary else "Ranked on relevance to the radar's profile"
     return {"version": EXPLANATION_VERSION, "summary": text[:1].upper() + text[1:], "reasons": reasons}
 

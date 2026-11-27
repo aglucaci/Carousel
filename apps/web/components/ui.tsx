@@ -108,6 +108,11 @@ export function Meter({ label, value }: { label: string; value?: number | null }
 }
 
 export const FLAGS: Record<string, { label: string; tone: Tone; help: string }> = {
+  method_transfer_hypothesis: {
+    label: "Method transfer · hypothesis",
+    tone: "accent",
+    help: "Uses one of this radar's methods in a distant field. Offered as an idea to consider, not as a finding.",
+  },
   low_relevance: {
     label: "Low relevance",
     tone: "warn",
